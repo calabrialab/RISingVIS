@@ -16,15 +16,26 @@ Authors@R:
          family = "Pais",
          role = c("aut"),
          email = "giuliapais1@gmail.com"))
-Description: (todo)
+Description: In the field of Gene therapy vector integration sites (IS) are used as molecular barcodes for clonal tracking in vivo. IS analysis is required to assess the safety and efficacy of the treatment, as well for tracking studies in which they are fundamental to make various calculations. These IS studies rely on high-throughput sequencing of DNA fragments and they can be affected by the phenomenon called Index Switching: a molecular “error” during the sequencing process that may cause mis-assignment of a fragment to the wrong sample and thus creating false positives. The R package RISingVIS is developed to (1) identify, (2) analyze, through the use of different functions that compute statistics to assess and quantify their presence, and (3) remove these aberrant events that can be misleading for further analysis. 
 License: CC BY 4.0
 Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.0
 Depends: 
-    R (>= 4.2)
+    R (>= 4.2),
+    magrittr
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    knitr, 
+    rmarkdown, 
+    BiocStyle, 
+    ISAnalytics,
+    dplyr,
+    purrr,
+    tidyr,
+    tibble, 
+    utils
 Config/testthat/edition: 3
 VignetteBuilder: knitr
+biocViews: BiomedicalInformatics, Sequencing, SingleCell

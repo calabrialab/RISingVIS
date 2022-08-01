@@ -1,0 +1,86 @@
+---
+title: "Replicates Count computation with RISingVIS"
+author: 
+  - name: Chiara Pavia
+    affiliation: | 
+     San Raffaele Telethon Institute for Gene Therapy - SR-Tiget, 
+     Via Olgettina 60, 20132 Milano - Italia
+    email: pavia.chiara@hsr.it, giuliapais1@gmail.com, calabria.andrea@hsr.it
+output: 
+  BiocStyle::html_document:
+    self_contained: yes
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    code_folding: show
+date: "`r doc_date()`"
+package: "`r pkg_ver('RISingVIS')`"
+vignette: >
+  %\VignetteIndexEntry{Replicates Count computation with RISingVIS}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+In this vignette we explain how to use the functions dedicated to the 
+computation of the replicates count ratio. 
+
+The **replicates count ratio** is computed as follows: 
+
+$$
+R = \frac{\sum{RepCount[CEMs]}}{\sum{RepCount[Samples]}}
+$$
+
+We assume that the replicates count for an IS really belonging to that sample 
+will be higher (most likely, 3) with respect to the one of a sample 
+for which that IS is an artifact. 
+
+# Load data
+
+First, create an appropriate matrix and association file. 
+These files are designed manually but simulate real research data.
+
+```{r setup}
+library(RISingVIS)
+
+data("association_file")
+data("integration_matrix")
+```
+
+Once we have our data we can start computing ratios. 
+
+# replicates_IS_count()
+
+The function `replicates_IS_count()` counts the number of replicates for
+each sample for each single IS in the matrix. 
+
+```{r}
+replicates_IS_count(association_file, integration_matrix)
+```
+
+# replicates_IS_ratio()
+
+The function `replicates_IS_ratio()` computes the ratio of the replicates count
+for all the shared IS, considering each single sample and all samples together.
+
+```{r}
+replicates_IS_ratio(association_file, integration_matrix)
+```
+
+# replicates_IS_ratio_byIS()
+
+The function `replicates_IS_ratio_byIS()` computes the ratio for all shared 
+integrations considering one IS at a time, again computing it against each 
+sample and against all samples together.
+
+```{r}
+replicates_IS_ratio_byIS(association_file, integration_matrix)
+```
