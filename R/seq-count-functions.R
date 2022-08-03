@@ -30,7 +30,6 @@
 #' R
 
 shared_CEM_known_IS_ratio <- function(af, matrix) {
-    
     # Aggregate matrix and af
     aggreg_matrix <- ISAnalytics::aggregate_values_by_key(
         x = matrix,
@@ -39,48 +38,16 @@ shared_CEM_known_IS_ratio <- function(af, matrix) {
         key = "SubjectID",
         group = ISAnalytics::mandatory_IS_vars()
     )
-    
-    data("known_cem_is")
-    
-    known_cem_is$integration_locus <-
-        as.character(known_cem_is$integration_locus)
-    
-    # Filter shared known CEM IS
-    filter_shared_cem_is <-
-        dplyr::bind_rows(apply(known_cem_is, 1, function(x) {
-            matrix_rows <- aggreg_matrix %>%
-                dplyr::filter(chr == x["chr"] &
-                                  integration_locus == x["integration_locus"] &
-                                  strand == x["strand"])
-            subs <- matrix_rows$SubjectID
-            if ("CEM37" %in% subs) {
-                if (length(subs) > 1) {
-                    return(matrix_rows)
-                }
-            }
-        }))
-    
+    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
+        "value"
+    # Retrieve shared integration sites
+    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix)
     if (nrow(filter_shared_cem_is) == 0) {
         stop("There are no IS shared from CEMs to other samples")
     }
-    
-    counts <- filter_shared_cem_is %>%
-        dplyr::group_by(SubjectID) %>%
-        dplyr::summarise(Sum = sum(Value_sum))
-    
-    tot_cem <- as.integer(counts %>%
-                              dplyr::filter(SubjectID == "CEM37") %>%
-                              dplyr::select(Sum))
-    
-    tot_others <- sum(counts %>%
-                          dplyr::filter(SubjectID != "CEM37") %>%
-                          dplyr::select(Sum))
-    
     # Compute ratio
-    ifelse(tot_others == 0, R <- NA, R <- tot_cem / tot_others)
-    
+    R <- compute_seq_count_ratio_merged(filter_shared_cem_is)
     return(R)
-    
 }
 
 
@@ -112,7 +79,6 @@ shared_CEM_known_IS_ratio <- function(af, matrix) {
 #' R
 
 shared_other_IS_ratio <- function(af, matrix) {
-    
     # Aggregate matrix and af
     aggreg_matrix <- ISAnalytics::aggregate_values_by_key(
         x = matrix,
@@ -121,56 +87,16 @@ shared_other_IS_ratio <- function(af, matrix) {
         key = "SubjectID",
         group = ISAnalytics::mandatory_IS_vars()
     )
-    
-    data("known_cem_is")
-    
-    # Filter shared IS from the samples
-    filter_other_is_full <- aggreg_matrix %>%
-        dplyr::anti_join(known_cem_is,
-                         by = c("chr", "integration_locus", "strand"))
-    
-    filter_other_is_full$integration_locus <-
-        as.character(filter_other_is_full$integration_locus)
-    
-    filter_other_is_full_wide <-
-        tidyr::pivot_wider(filter_other_is_full, names_from = SubjectID,
-                           values_from = Value_sum, values_fill = 0)
-    
-    filter_other_is_wide <- filter_other_is_full_wide %>%
-        dplyr::filter(CEM37 > 0) %>%
-        dplyr::filter(dplyr::if_any(c(-chr, -integration_locus, 
-                                      -strand, -CEM37),
-                                    ~ . > 0))
-    
-    filter_other_is_long <-
-        tidyr::pivot_longer(filter_other_is_wide,
-                            cols = c(-chr, -integration_locus, -strand),
-                            names_to = "SubjectID")
-    
-    filter_other_is <- filter_other_is_long %>%
-        dplyr::filter(value != 0)
-    
-    `%notin%` <- Negate(`%in%`)
-    if ("CEM37" %notin% filter_other_is$SubjectID) {
+    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
+        "value"
+    # Retrieve shared integration sites
+    filter_other_is <- find_shared_other_IS(aggreg_matrix)
+    if (nrow(filter_other_is) == 0) {
         stop("There are no IS shared from the samples to CEMs")
     }
-    
-    counts <- filter_other_is %>%
-        dplyr::group_by(SubjectID) %>%
-        dplyr::summarise(Sum = sum(value))
-    
-    tot_cem <- as.integer(counts %>%
-                              dplyr::filter(SubjectID == "CEM37") %>%
-                              dplyr::select(Sum))
-    tot_others <- sum(counts %>%
-                          dplyr::filter(SubjectID != "CEM37") %>%
-                          dplyr::select(Sum))
-    
     # Compute ratio
-    ifelse(tot_others == 0, R <- NA, R <- tot_cem / tot_others)
-    
+    R <- compute_seq_count_ratio_merged(filter_other_is)
     return(R)
-    
 }
 
 
@@ -206,9 +132,6 @@ shared_other_IS_ratio <- function(af, matrix) {
 #' head(R)
 
 shared_IS_ratio <- function(af, matrix) {
-    
-    `%notin%` <- Negate(`%in%`)
-    
     # Aggregate matrix and af
     aggreg_matrix <- ISAnalytics::aggregate_values_by_key(
         x = matrix,
@@ -217,158 +140,39 @@ shared_IS_ratio <- function(af, matrix) {
         key = "SubjectID",
         group = ISAnalytics::mandatory_IS_vars()
     )
-    
-    data("known_cem_is")
-    
-    known_cem_is$integration_locus <-
-        as.character(known_cem_is$integration_locus)
-    
-    # Filter shared known CEM IS
-    filter_shared_cem_is <- 
-        dplyr::bind_rows(apply(known_cem_is, 1, function(x) {
-            matrix_rows <- aggreg_matrix %>%
-                dplyr::filter(chr == x["chr"] &
-                                  integration_locus == x["integration_locus"] &
-                                  strand == x["strand"])
-            subs <- matrix_rows$SubjectID
-            if ("CEM37" %in% subs) {
-                if (length(subs) > 1) {
-                    return(matrix_rows)
-                }
-            }
-        }))
-    
-    known_cem_is$integration_locus <- 
-        as.integer(known_cem_is$integration_locus)
-    
-    # Filter shared IS from samples
-    filter_other_is_full <- aggreg_matrix %>%
-        dplyr::anti_join(known_cem_is,
-                         by = c("chr", "integration_locus", "strand"))
-    
-    filter_other_is_full$integration_locus <-
-        as.character(filter_other_is_full$integration_locus)
-    
+    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
+        "value"
+    # Find shared integration sites belonging to controls
+    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix)
+    # Find shared integration sites belonging to samples
+    filter_shared_other_is <- find_shared_other_IS(aggreg_matrix)
     # Error if no IS is shared
-    if (nrow(filter_shared_cem_is) == 0 &
-        "CEM37" %notin% filter_other_is_full$SubjectID) {
-        
+    if (nrow(filter_shared_cem_is) == 0 & nrow(filter_shared_other_is) == 0) {
         stop("There are no IS shared")
-        
     }
-    
+    # Compute ratios
     if (nrow(filter_shared_cem_is) > 0) {
-        
-        counts <- filter_shared_cem_is %>%
-            dplyr::group_by(SubjectID) %>%
-            dplyr::summarise(Sum = sum(Value_sum))
-        
-        row <- data.frame(SubjectID = "All samples",
-                          Sum = sum(counts %>%
-                                        dplyr::filter(SubjectID != "CEM37") %>%
-                                        dplyr::select(Sum)))
-        
-        counts <- counts %>% dplyr::bind_rows(row)
-        
-        cem_count <- as.integer(counts %>%
-                                    dplyr::filter(SubjectID == "CEM37") %>%
-                                    dplyr::select(Sum))
-        
-        other_count <- counts %>% dplyr::filter(SubjectID != "CEM37")
-        
-        # Compute ratio for shared known CEM IS
-        Ratios_known_CEM_IS <- 
-            dplyr::bind_rows(apply(other_count, 1, function(x) {
-                tot <- as.integer(x["Sum"])
-                ifelse(tot == 0, R <- NA, R <- cem_count / tot)
-                sample <- x["SubjectID"]
-                data <- data.frame(sample, R)
-                colnames(data) <- c("Sample", "Ratio")
-                return(data)
-            }))
-        
+        Ratios_known_CEM_IS <- compute_seq_count_ratio(filter_shared_cem_is)
         Ratios_known_CEM_IS$IS_Source <- "CEM"
         rownames(Ratios_known_CEM_IS) <- NULL
-        
     } else {
         warning("There are no IS shared from CEMs to other samples")
     }
-    
-    if ("CEM37" %in% filter_other_is_full$SubjectID) {
-        
-        filter_other_is_full_wide <-
-            tidyr::pivot_wider(filter_other_is_full,
-                               names_from = SubjectID,
-                               values_from = Value_sum, 
-                               values_fill = 0)
-        
-        filter_other_is_wide <- filter_other_is_full_wide %>%
-            dplyr::filter(CEM37 > 0) %>%
-            dplyr::filter(dplyr::if_any(c(-chr, -integration_locus, 
-                                          -strand, -CEM37),
-                                        ~ . > 0))
-        
-        filter_other_is_long <-
-            tidyr::pivot_longer(filter_other_is_wide,
-                                cols = c(-chr, -integration_locus, -strand),
-                                names_to = "SubjectID")
-        
-        filter_other_is <- filter_other_is_long %>%
-            dplyr::filter(value != 0)
-        
-        counts <- filter_other_is %>%
-            dplyr::group_by(SubjectID) %>%
-            dplyr::summarise(Sum = sum(value))
-        
-        row <- data.frame(SubjectID = "All samples",
-                          Sum = sum(counts %>%
-                                        dplyr::filter(SubjectID != "CEM37") %>%
-                                        dplyr::select(Sum)))
-        
-        counts <- counts %>% dplyr::bind_rows(row)
-        
-        cem_count <- counts %>%
-            dplyr::filter(SubjectID == "CEM37") %>%
-            dplyr::select(Sum)
-        
-        other_count <- counts %>%
-            dplyr::filter(SubjectID != "CEM37")
-        
-        # Compute ratio for shared IS from samples
-        Ratios_other_IS <- dplyr::bind_rows(apply(other_count, 1, function(x) {
-            tot <- as.integer(x["Sum"])
-            ifelse(tot == 0, R <- NA, R <- cem_count / tot)
-            sample <- x["SubjectID"]
-            data <- data.frame(sample, R)
-            colnames(data) <- c("Sample", "Ratio")
-            return(data)
-        }))
-        
+    if (nrow(filter_shared_other_is) > 0) {
+        Ratios_other_IS <- compute_seq_count_ratio(filter_shared_other_is)
         Ratios_other_IS$IS_Source <- "Samples"
         rownames(Ratios_other_IS) <- NULL
-        
     } else {
         warning("There are no IS shared from the samples to CEMs")
     }
-    
-    if (nrow(filter_shared_cem_is) > 0 &
-        "CEM37" %in% filter_other_is_full$SubjectID) {
-        
+    if (nrow(filter_shared_cem_is) > 0 & nrow(filter_shared_other_is) > 0) {
         Ratios_shared_IS <- Ratios_known_CEM_IS %>%
             dplyr::bind_rows(Ratios_other_IS)
-        
         return(Ratios_shared_IS)
-        
-    } else if (nrow(filter_shared_cem_is) > 0 &
-               "CEM37" %notin% filter_other_is_full$SubjectID) {
-        
+    } else if (nrow(filter_shared_cem_is) > 0 & nrow(filter_shared_other_is) == 0) {
         return(Ratios_known_CEM_IS)
-        
-    } else if (nrow(filter_shared_cem_is) == 0 &
-               "CEM37" %in% filter_other_is_full$SubjectID) {
-        
+    } else if (nrow(filter_shared_cem_is) == 0 & nrow(filter_shared_other_is) > 0) {
         return(Ratios_other_IS)
-        
     }
 }
 
@@ -406,9 +210,6 @@ shared_IS_ratio <- function(af, matrix) {
 #' head(R)
 
 shared_IS_ratio_byIS <- function(af, matrix) {
-    
-    `%notin%` <- Negate(`%in%`)
-    
     # Aggregate matrix and af
     aggreg_matrix <- ISAnalytics::aggregate_values_by_key(
         x = matrix,
@@ -417,182 +218,42 @@ shared_IS_ratio_byIS <- function(af, matrix) {
         key = "SubjectID",
         group = ISAnalytics::mandatory_IS_vars()
     )
-    
-    data("known_cem_is")
-    
-    known_cem_is$integration_locus <-
-        as.character(known_cem_is$integration_locus)
-    
-    # Filter shared known CEM IS
-    filter_shared_cem_is <- 
-        dplyr::bind_rows(apply(known_cem_is, 1, function(x) {
-            matrix_rows <- aggreg_matrix %>%
-                dplyr::filter(chr == x["chr"] &
-                                  integration_locus == x["integration_locus"] &
-                                  strand == x["strand"])
-            subs <- matrix_rows$SubjectID
-            if ("CEM37" %in% subs) {
-                if (length(subs) > 1) {
-                    return(matrix_rows)
-                }
-            }
-        }))
-    
-    known_cem_is$integration_locus <- 
-        as.integer(known_cem_is$integration_locus)
-    
-    # Filter shared IS from samples
-    filter_other_is_full <- aggreg_matrix %>%
-        dplyr::anti_join(known_cem_is,
-                         by = c("chr", "integration_locus", "strand"))
-    
-    filter_other_is_full$integration_locus <-
-        as.character(filter_other_is_full$integration_locus)
-    
+    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
+        "value"
+    # Find shared integration sites
+    # Belonging to controls
+    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix)
+    # Belonging to samples
+    filter_shared_other_is <- find_shared_other_IS(aggreg_matrix)
     # Error if no IS is shared
-    if (nrow(filter_shared_cem_is) == 0 &
-        "CEM37" %notin% filter_other_is_full$SubjectID) {
-        
+    if (nrow(filter_shared_cem_is) == 0 & nrow(filter_shared_other_is) == 0) {
         stop("There are no IS shared")
-        
     }
-    
+    # Compute ratios
     if (nrow(filter_shared_cem_is) > 0) {
-        
-        counts <- filter_shared_cem_is %>% 
-            dplyr::filter(SubjectID != "CEM37") %>%
-            dplyr::group_by(chr, integration_locus, strand) %>%
-            dplyr::summarise(Value_sum = sum(Value_sum)) %>%
-            dplyr::bind_cols(SubjectID = "All samples")
-        
-        filter_shared_cem_is <- filter_shared_cem_is %>% 
-            dplyr::bind_rows(counts)
-        
-        shared_known_cem_IS_counts <- filter_shared_cem_is %>%
-            tidyr::pivot_wider(names_from = SubjectID,
-                               values_from = Value_sum, values_fill = 0)
-        
-        subs <- filter_shared_cem_is %>%
-            dplyr::filter(SubjectID != "CEM37") %>%
-            dplyr::pull(SubjectID) %>%
-            unique()
-        
         # Compute ratio for known CEM IS
-        known_cem_is_ratios <-
-            dplyr::bind_rows(apply(shared_known_cem_IS_counts, 1, function(x) {
-                row <- as.list(x)
-                row$integration_locus <- as.integer(row$integration_locus)
-                rats <- dplyr::bind_rows(lapply(subs, function(y) {
-                    tot <- row[y]
-                    cem <- row["CEM37"]
-                    ifelse(tot == 0, r <- NA,
-                           r <- as.integer(cem[[1]]) / as.integer(tot[[1]]))
-                    res <- data.frame(y, r)
-                    return(res)
-                }))
-                data <- data.frame(row$chr, row$integration_locus, 
-                                   row$strand, rats)
-                colnames(data) <- c("chr", "integration_locus",
-                                    "strand", "SubjectID", "Ratio")
-                return(data)
-            }))
-        
-        known_cem_is_ratios <- known_cem_is_ratios %>%
-            tidyr::pivot_wider(names_from = SubjectID, values_from = Ratio)
-        
+        known_cem_is_ratios <- 
+            compute_seq_count_ratio_byIS(filter_shared_cem_is)
         known_cem_is_ratios$IS_Source <- "CEM"
-        
     } else {
         warning("There are no IS shared from CEMs to other samples")
     }
-    
-    if ("CEM37" %in% filter_other_is_full$SubjectID) {
-        
-        filter_other_is_full_wide <-
-            tidyr::pivot_wider(filter_other_is_full,
-                               names_from = SubjectID,
-                               values_from = Value_sum, 
-                               values_fill = 0)
-        
-        filter_other_is_wide <- filter_other_is_full_wide %>%
-            dplyr::filter(CEM37 > 0) %>%
-            dplyr::filter(dplyr::if_any(c(-chr, -integration_locus, 
-                                          -strand, -CEM37),
-                                        ~ . > 0))
-        
-        filter_other_is_long <-
-            tidyr::pivot_longer(filter_other_is_wide,
-                                cols = c(-chr, -integration_locus, -strand),
-                                names_to = "SubjectID")
-        
-        filter_other_is <- filter_other_is_long %>%
-            dplyr::filter(value != 0)
-        
-        names(filter_other_is)[names(filter_other_is) == 'value'] <- "Value_sum"
-        
-        counts <- filter_other_is %>% dplyr::filter(SubjectID != "CEM37") %>%
-            dplyr::group_by(chr, integration_locus, strand) %>%
-            dplyr::summarise(Value_sum = sum(Value_sum)) %>%
-            dplyr::bind_cols(SubjectID = "All samples")
-        
-        filter_other_is <- filter_other_is %>% dplyr::bind_rows(counts)
-        
-        shared_other_IS_counts <- filter_other_is %>%
-            tidyr::pivot_wider(names_from = SubjectID,
-                               values_from = Value_sum, values_fill = 0)
-        
-        subs <- filter_other_is %>%
-            dplyr::filter(SubjectID != "CEM37") %>%
-            dplyr::pull(SubjectID) %>%
-            unique()
-        
+    if (nrow(filter_shared_other_is) > 0) {
         # Compute ratio for shared IS from samples
         other_is_ratios <-
-            dplyr::bind_rows(apply(shared_other_IS_counts, 1, function(x) {
-                row <- as.list(x)
-                row$integration_locus <- as.integer(row$integration_locus)
-                rats <- dplyr::bind_rows(lapply(subs, function(y) {
-                    tot <- row[y]
-                    cem <- row["CEM37"]
-                    ifelse(tot == 0, r <- NA,
-                           r <- as.integer(cem[[1]]) / as.integer(tot[[1]]))
-                    res <- data.frame(y, r)
-                    return(res)
-                }))
-                data <- data.frame(row$chr, row$integration_locus, 
-                                   row$strand, rats)
-                colnames(data) <- c("chr", "integration_locus",
-                                    "strand", "SubjectID", "Ratio")
-                return(data)
-            }))
-        
-        other_is_ratios <- other_is_ratios %>%
-            tidyr::pivot_wider(names_from = SubjectID, values_from = Ratio)
-        
+            compute_seq_count_ratio_byIS(filter_shared_other_is)
         other_is_ratios$IS_Source <- "Samples"
-        
     } else {
         warning("There are no IS shared from the samples to CEMs")
     }
-    
-    if (nrow(filter_shared_cem_is) > 0 &
-        "CEM37" %in% filter_other_is_full$SubjectID) {
-        
+    if (nrow(filter_shared_cem_is) > 0 & nrow(filter_shared_other_is) > 0) {
         shared_IS_ratio <- known_cem_is_ratios %>%
             dplyr::bind_rows(other_is_ratios)
-        
         return(shared_IS_ratio)
-        
-    } else if (nrow(filter_shared_cem_is) > 0 &
-               "CEM37" %notin% filter_other_is_full$SubjectID) {
-        
+    } else if (nrow(filter_shared_cem_is) > 0 & nrow(filter_shared_other_is) == 0) {
         return(known_cem_is_ratios)
-        
-    } else if (nrow(filter_shared_cem_is) == 0 &
-               "CEM37" %in% filter_other_is_full$SubjectID) {
-        
+    } else if (nrow(filter_shared_cem_is) == 0 & nrow(filter_shared_other_is) > 0) {
         return(other_is_ratios)
-        
     }
-    
 }
+
