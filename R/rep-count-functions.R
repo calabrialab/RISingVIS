@@ -18,7 +18,6 @@
 #' @return Dataframe of values corresponding to the replicate counts
 #'
 #' @importFrom magrittr `%>%`
-#' @importFrom utils data
 #'
 #' @export
 #' 
@@ -49,7 +48,6 @@ replicates_IS_count <- function(af, matrix) {
     IS_replicate_count <- table %>%
         purrr::reduce(dplyr::full_join,
                       by = c("chr", "integration_locus", "strand"))
-    #IS_replicate_count[is.na(IS_replicate_count)] <- 0
     return(IS_replicate_count)
 }
 
@@ -78,7 +76,6 @@ replicates_IS_count <- function(af, matrix) {
 #' @return Dataframe of values corresponding to the ratios
 #'
 #' @importFrom magrittr `%>%`
-#' @importFrom utils data
 #'
 #' @export
 #' 
@@ -104,22 +101,16 @@ replicates_IS_ratio <- function(af, matrix) {
         stop("There are no IS shared")
     }
     if (nrow(filter_shared_cem_is) > 0) {
-        filter_shared_cem_is <- filter_shared_cem_is %>% 
-            tidyr::pivot_wider(names_from = SubjectID, 
-                               values_from = value, values_fill = 0)
         Ratios_known_CEM_replicate_count <- 
-            compute_rep_count_ratio(filter_shared_cem_is)
+            compute_ratio(filter_shared_cem_is)
         Ratios_known_CEM_replicate_count$IS_Source <- "CEM"
         rownames(Ratios_known_CEM_replicate_count) <- NULL
     } else {
         warning("There are no IS shared from CEMs to other samples")
     }
     if (nrow(filter_shared_other_is) > 0) {
-        filter_shared_other_is <- filter_shared_other_is %>% 
-            tidyr::pivot_wider(names_from = SubjectID, 
-                               values_from = value, values_fill = 0)
         Ratios_other_replicate_count <- 
-            compute_rep_count_ratio(filter_shared_other_is)
+            compute_ratio(filter_shared_other_is)
         Ratios_other_replicate_count$IS_Source <- "Samples"
         rownames(Ratios_other_replicate_count) <- NULL
     } else {
@@ -163,7 +154,6 @@ replicates_IS_ratio <- function(af, matrix) {
 #' @return Dataframe of values corresponding to the ratios
 #'
 #' @importFrom magrittr `%>%`
-#' @importFrom utils data
 #'
 #' @export
 #' 
@@ -189,21 +179,15 @@ replicates_IS_ratio_byIS <- function(af, matrix) {
         stop("There are no IS shared")
     }
     if (nrow(filter_shared_cem_is) > 0) {
-        filter_shared_cem_is <- filter_shared_cem_is %>% 
-            tidyr::pivot_wider(names_from = SubjectID, 
-                               values_from = value, values_fill = 0)
         Ratios_known_CEM_replicate_count <- 
-            compute_rep_count_ratio_byIS(filter_shared_cem_is)
+            compute_ratio_byIS(filter_shared_cem_is)
         Ratios_known_CEM_replicate_count$IS_Source <- "CEM"
     } else {
         warning("There are no IS shared from CEMs to other samples")
     }
     if (nrow(filter_shared_other_is) > 0) {
-        filter_shared_other_is <- filter_shared_other_is %>% 
-            tidyr::pivot_wider(names_from = SubjectID, 
-                               values_from = value, values_fill = 0)
         Ratios_other_replicate_count <- 
-            compute_rep_count_ratio_byIS(filter_shared_other_is)
+            compute_ratio_byIS(filter_shared_other_is)
         Ratios_other_replicate_count$IS_Source <- "Samples"
     } else {
         warning("There are no IS shared from the samples to CEMs")

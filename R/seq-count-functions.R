@@ -19,7 +19,6 @@
 #' @return Single value of the ratio between SeqCounts
 #'
 #' @importFrom magrittr `%>%`
-#' @importFrom utils data
 #'
 #' @export
 #' 
@@ -46,8 +45,11 @@ shared_CEM_known_IS_ratio <- function(af, matrix) {
         stop("There are no IS shared from CEMs to other samples")
     }
     # Compute ratio
-    R <- compute_seq_count_ratio_merged(filter_shared_cem_is)
-    return(R)
+    R <- compute_ratio(filter_shared_cem_is)
+    Ratio <- R %>% 
+        dplyr::filter(.data$Sample == "All samples") %>% 
+        dplyr::pull(.data$Ratio)
+    return(Ratio)
 }
 
 
@@ -68,7 +70,6 @@ shared_CEM_known_IS_ratio <- function(af, matrix) {
 #' @return Single value of the ratio between SeqCounts
 #'
 #' @importFrom magrittr `%>%`
-#' @importFrom utils data
 #'
 #' @export
 #' 
@@ -95,8 +96,11 @@ shared_other_IS_ratio <- function(af, matrix) {
         stop("There are no IS shared from the samples to CEMs")
     }
     # Compute ratio
-    R <- compute_seq_count_ratio_merged(filter_other_is)
-    return(R)
+    R <- compute_ratio(filter_other_is)
+    Ratio <- R %>% 
+        dplyr::filter(.data$Sample == "All samples") %>% 
+        dplyr::pull(.data$Ratio)
+    return(Ratio)
 }
 
 
@@ -121,7 +125,6 @@ shared_other_IS_ratio <- function(af, matrix) {
 #' @return Dataframe of values corresponding to the ratios between SeqCounts
 #'
 #' @importFrom magrittr `%>%`
-#' @importFrom utils data
 #'
 #' @export
 #' 
@@ -152,14 +155,14 @@ shared_IS_ratio <- function(af, matrix) {
     }
     # Compute ratios
     if (nrow(filter_shared_cem_is) > 0) {
-        Ratios_known_CEM_IS <- compute_seq_count_ratio(filter_shared_cem_is)
+        Ratios_known_CEM_IS <- compute_ratio(filter_shared_cem_is)
         Ratios_known_CEM_IS$IS_Source <- "CEM"
         rownames(Ratios_known_CEM_IS) <- NULL
     } else {
         warning("There are no IS shared from CEMs to other samples")
     }
     if (nrow(filter_shared_other_is) > 0) {
-        Ratios_other_IS <- compute_seq_count_ratio(filter_shared_other_is)
+        Ratios_other_IS <- compute_ratio(filter_shared_other_is)
         Ratios_other_IS$IS_Source <- "Samples"
         rownames(Ratios_other_IS) <- NULL
     } else {
@@ -169,9 +172,11 @@ shared_IS_ratio <- function(af, matrix) {
         Ratios_shared_IS <- Ratios_known_CEM_IS %>%
             dplyr::bind_rows(Ratios_other_IS)
         return(Ratios_shared_IS)
-    } else if (nrow(filter_shared_cem_is) > 0 & nrow(filter_shared_other_is) == 0) {
+    } else if (nrow(filter_shared_cem_is) > 0 & 
+               nrow(filter_shared_other_is) == 0) {
         return(Ratios_known_CEM_IS)
-    } else if (nrow(filter_shared_cem_is) == 0 & nrow(filter_shared_other_is) > 0) {
+    } else if (nrow(filter_shared_cem_is) == 0 & 
+               nrow(filter_shared_other_is) > 0) {
         return(Ratios_other_IS)
     }
 }
@@ -199,7 +204,6 @@ shared_IS_ratio <- function(af, matrix) {
 #' @return Dataframe of IS and values corresponding to the ratios of SeqCounts
 #'
 #' @importFrom magrittr `%>%`
-#' @importFrom utils data
 #'
 #' @export
 #' 
@@ -233,7 +237,7 @@ shared_IS_ratio_byIS <- function(af, matrix) {
     if (nrow(filter_shared_cem_is) > 0) {
         # Compute ratio for known CEM IS
         known_cem_is_ratios <- 
-            compute_seq_count_ratio_byIS(filter_shared_cem_is)
+            compute_ratio_byIS(filter_shared_cem_is)
         known_cem_is_ratios$IS_Source <- "CEM"
     } else {
         warning("There are no IS shared from CEMs to other samples")
@@ -241,7 +245,7 @@ shared_IS_ratio_byIS <- function(af, matrix) {
     if (nrow(filter_shared_other_is) > 0) {
         # Compute ratio for shared IS from samples
         other_is_ratios <-
-            compute_seq_count_ratio_byIS(filter_shared_other_is)
+            compute_ratio_byIS(filter_shared_other_is)
         other_is_ratios$IS_Source <- "Samples"
     } else {
         warning("There are no IS shared from the samples to CEMs")
@@ -250,10 +254,11 @@ shared_IS_ratio_byIS <- function(af, matrix) {
         shared_IS_ratio <- known_cem_is_ratios %>%
             dplyr::bind_rows(other_is_ratios)
         return(shared_IS_ratio)
-    } else if (nrow(filter_shared_cem_is) > 0 & nrow(filter_shared_other_is) == 0) {
+    } else if (nrow(filter_shared_cem_is) > 0 & 
+               nrow(filter_shared_other_is) == 0) {
         return(known_cem_is_ratios)
-    } else if (nrow(filter_shared_cem_is) == 0 & nrow(filter_shared_other_is) > 0) {
+    } else if (nrow(filter_shared_cem_is) == 0 & 
+               nrow(filter_shared_other_is) > 0) {
         return(other_is_ratios)
     }
 }
-
