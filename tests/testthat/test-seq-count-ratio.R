@@ -82,8 +82,28 @@ no_share_others_mat <- tibble::tribble(
     "2", 73762398, "-", "B3", 5,
 )
 
+mod_af <- tibble::tibble(ProjectID = "Proj1", PoolID = "Pool1", 
+                         Subject = c("CEM37", "CEM37", "CEM37", 
+                                     "A", "A", "A", "B", "B", "B"),
+                         CompleteAmplificationID = c("CEM1", "CEM2", "CEM3", 
+                                                     "A1", "A2", "A3", 
+                                                     "B1", "B2", "B3"))
 
 # Correct output
+
+test_that("shared_CEM_known_IS_ratio works correctly", {
+    mat <- share_mat
+    af <- association_file
+    r <- shared_CEM_known_IS_ratio(af, mat)
+    expect_equal(r, 138.5, tolerance = 0.0001)
+})
+
+test_that("shared_other_IS_ratio works correctly", {
+    mat <- share_mat
+    af <- association_file
+    r <- shared_other_IS_ratio(af, mat)
+    expect_equal(r, 0.01691729, tolerance = 0.0001)
+})
 
 test_that("shared_IS_ratio works correctly", {
     mat <- share_mat
@@ -98,6 +118,7 @@ test_that("shared_IS_ratio_byIS works correctly", {
     r <- shared_IS_ratio_byIS(af, mat)
     expect_equal(tibble::tibble(r), ratios_byIS_out, tolerance = 0.0001)
 })
+
 
 # Errors and warnings for no sharing
 
@@ -120,4 +141,35 @@ test_that("shared_IS_ratio reports warning for no sharing from samples", {
     af <- association_file
     expect_warning(shared_IS_ratio(af, mat))
     expect_warning(shared_IS_ratio_byIS(af, mat))
+})
+
+
+# Work with different input columns
+
+test_that("shared_CEM_known_IS_ratio works with non-default columns", {
+    mat <- share_mat
+    af <- mod_af
+    r <- shared_CEM_known_IS_ratio(af, mat, subject_col = "Subject")
+    expect_equal(r, 138.5, tolerance = 0.0001)
+})
+
+test_that("shared_other_IS_ratio works with non-default columns", {
+    mat <- share_mat
+    af <- mod_af
+    r <- shared_other_IS_ratio(af, mat, subject_col = "Subject")
+    expect_equal(r, 0.01691729, tolerance = 0.0001)
+})
+
+test_that("shared_IS_ratio works with non-default columns", {
+    mat <- share_mat
+    af <- mod_af
+    r <- shared_IS_ratio(af, mat, subject_col = "Subject")
+    expect_equal(tibble::tibble(r), ratios_out, tolerance = 0.0001)
+})
+
+test_that("shared_IS_ratio_byIS works with non-default columns", {
+    mat <- share_mat
+    af <- mod_af
+    r <- shared_IS_ratio_byIS(af, mat, subject_col = "Subject")
+    expect_equal(tibble::tibble(r), ratios_byIS_out, tolerance = 0.0001)
 })

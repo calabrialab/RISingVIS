@@ -19,6 +19,7 @@
 #' @return Single value of the ratio between SeqCounts
 #'
 #' @importFrom magrittr `%>%`
+#' @importFrom rlang .data
 #'
 #' @export
 #' 
@@ -28,24 +29,34 @@
 #' R <- shared_CEM_known_IS_ratio(association_file, integration_matrix)
 #' R
 
-shared_CEM_known_IS_ratio <- function(af, matrix) {
+shared_CEM_known_IS_ratio <- function(af, matrix, 
+                                      subject_col = "SubjectID", 
+                                      amp_col = "CompleteAmplificationID", 
+                                      value_col = "Value") {
+    # Check input files
+    if (files_check(af, matrix, subject_col, amp_col, value_col) != TRUE) {
+        stop()
+    }
     # Aggregate matrix and af
     aggreg_matrix <- ISAnalytics::aggregate_values_by_key(
         x = matrix,
         association_file = af,
-        value_cols = "Value",
-        key = "SubjectID",
+        value_cols = value_col,
+        key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
     colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
-        "value"
+        value_col
+    # Retrieve IS variables
+    is_vars <- get_is_vars()
     # Retrieve shared integration sites
-    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix)
+    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix, is_vars, 
+                                               subject_col)
     if (nrow(filter_shared_cem_is) == 0) {
         stop("There are no IS shared from CEMs to other samples")
     }
     # Compute ratio
-    R <- compute_ratio(filter_shared_cem_is)
+    R <- compute_ratio(filter_shared_cem_is, is_vars, subject_col, value_col)
     Ratio <- R %>% 
         dplyr::filter(.data$Sample == "All samples") %>% 
         dplyr::pull(.data$Ratio)
@@ -70,6 +81,7 @@ shared_CEM_known_IS_ratio <- function(af, matrix) {
 #' @return Single value of the ratio between SeqCounts
 #'
 #' @importFrom magrittr `%>%`
+#' @importFrom rlang .data
 #'
 #' @export
 #' 
@@ -79,24 +91,34 @@ shared_CEM_known_IS_ratio <- function(af, matrix) {
 #' R <- shared_other_IS_ratio(association_file, integration_matrix)
 #' R
 
-shared_other_IS_ratio <- function(af, matrix) {
+shared_other_IS_ratio <- function(af, matrix, 
+                                  subject_col = "SubjectID",
+                                  amp_col = "CompleteAmplificationID", 
+                                  value_col = "Value") {
+    # Check input files
+    if (files_check(af, matrix, subject_col, amp_col, value_col) != TRUE) {
+        stop()
+    }
     # Aggregate matrix and af
     aggreg_matrix <- ISAnalytics::aggregate_values_by_key(
         x = matrix,
         association_file = af,
-        value_cols = "Value",
-        key = "SubjectID",
+        value_cols = value_col,
+        key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
     colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
-        "value"
+        value_col
+    # Retrieve IS variables
+    is_vars <- get_is_vars()
     # Retrieve shared integration sites
-    filter_other_is <- find_shared_other_IS(aggreg_matrix)
+    filter_other_is <- find_shared_other_IS(aggreg_matrix, is_vars, 
+                                            subject_col, value_col)
     if (nrow(filter_other_is) == 0) {
         stop("There are no IS shared from the samples to CEMs")
     }
     # Compute ratio
-    R <- compute_ratio(filter_other_is)
+    R <- compute_ratio(filter_other_is, is_vars, subject_col, value_col)
     Ratio <- R %>% 
         dplyr::filter(.data$Sample == "All samples") %>% 
         dplyr::pull(.data$Ratio)
@@ -134,35 +156,48 @@ shared_other_IS_ratio <- function(af, matrix) {
 #' R <- shared_IS_ratio(association_file, integration_matrix)
 #' head(R)
 
-shared_IS_ratio <- function(af, matrix) {
+shared_IS_ratio <- function(af, matrix, 
+                            subject_col = "SubjectID", 
+                            amp_col = "CompleteAmplificationID", 
+                            value_col = "Value") {
+    # Check input files
+    if (files_check(af, matrix, subject_col, amp_col, value_col) != TRUE) {
+        stop()
+    }
     # Aggregate matrix and af
     aggreg_matrix <- ISAnalytics::aggregate_values_by_key(
         x = matrix,
         association_file = af,
-        value_cols = "Value",
-        key = "SubjectID",
+        value_cols = value_col,
+        key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
     colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
-        "value"
+        value_col
+    # Retrieve IS variables
+    is_vars <- get_is_vars()
     # Find shared integration sites belonging to controls
-    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix)
+    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix, is_vars,
+                                               subject_col)
     # Find shared integration sites belonging to samples
-    filter_shared_other_is <- find_shared_other_IS(aggreg_matrix)
+    filter_shared_other_is <- find_shared_other_IS(aggreg_matrix, is_vars,
+                                                   subject_col, value_col)
     # Error if no IS is shared
     if (nrow(filter_shared_cem_is) == 0 & nrow(filter_shared_other_is) == 0) {
         stop("There are no IS shared")
     }
     # Compute ratios
     if (nrow(filter_shared_cem_is) > 0) {
-        Ratios_known_CEM_IS <- compute_ratio(filter_shared_cem_is)
+        Ratios_known_CEM_IS <- compute_ratio(filter_shared_cem_is, is_vars,
+                                             subject_col, value_col)
         Ratios_known_CEM_IS$IS_Source <- "CEM"
         rownames(Ratios_known_CEM_IS) <- NULL
     } else {
         warning("There are no IS shared from CEMs to other samples")
     }
     if (nrow(filter_shared_other_is) > 0) {
-        Ratios_other_IS <- compute_ratio(filter_shared_other_is)
+        Ratios_other_IS <- compute_ratio(filter_shared_other_is, is_vars,
+                                         subject_col, value_col)
         Ratios_other_IS$IS_Source <- "Samples"
         rownames(Ratios_other_IS) <- NULL
     } else {
@@ -213,22 +248,33 @@ shared_IS_ratio <- function(af, matrix) {
 #' R <- shared_IS_ratio_byIS(association_file, integration_matrix)
 #' head(R)
 
-shared_IS_ratio_byIS <- function(af, matrix) {
+shared_IS_ratio_byIS <- function(af, matrix, 
+                                 subject_col = "SubjectID", 
+                                 amp_col = "CompleteAmplificationID", 
+                                 value_col = "Value") {
+    # Check input files
+    if (files_check(af, matrix, subject_col, amp_col, value_col) != TRUE) {
+        stop()
+    }
     # Aggregate matrix and af
     aggreg_matrix <- ISAnalytics::aggregate_values_by_key(
         x = matrix,
         association_file = af,
-        value_cols = "Value",
-        key = "SubjectID",
+        value_cols = value_col,
+        key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
     colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
-        "value"
+        value_col
+    # Retrieve IS variables
+    is_vars <- get_is_vars()
     # Find shared integration sites
     # Belonging to controls
-    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix)
+    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix, is_vars,
+                                               subject_col)
     # Belonging to samples
-    filter_shared_other_is <- find_shared_other_IS(aggreg_matrix)
+    filter_shared_other_is <- find_shared_other_IS(aggreg_matrix, is_vars,
+                                                   subject_col, value_col)
     # Error if no IS is shared
     if (nrow(filter_shared_cem_is) == 0 & nrow(filter_shared_other_is) == 0) {
         stop("There are no IS shared")
@@ -237,7 +283,8 @@ shared_IS_ratio_byIS <- function(af, matrix) {
     if (nrow(filter_shared_cem_is) > 0) {
         # Compute ratio for known CEM IS
         known_cem_is_ratios <- 
-            compute_ratio_byIS(filter_shared_cem_is)
+            compute_ratio_byIS(filter_shared_cem_is, is_vars, 
+                               subject_col, value_col)
         known_cem_is_ratios$IS_Source <- "CEM"
     } else {
         warning("There are no IS shared from CEMs to other samples")
@@ -245,7 +292,8 @@ shared_IS_ratio_byIS <- function(af, matrix) {
     if (nrow(filter_shared_other_is) > 0) {
         # Compute ratio for shared IS from samples
         other_is_ratios <-
-            compute_ratio_byIS(filter_shared_other_is)
+            compute_ratio_byIS(filter_shared_other_is, is_vars,
+                               subject_col, value_col)
         other_is_ratios$IS_Source <- "Samples"
     } else {
         warning("There are no IS shared from the samples to CEMs")
