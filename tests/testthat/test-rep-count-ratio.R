@@ -2,11 +2,11 @@ library(RISingVIS)
 
 # Test tables
 
-dummy_af <- tibble::tibble(ProjectID = "Proj1", PoolID = "Pool1", 
-             SubjectID = c("CEM37", "CEM37", "CEM37", 
+dummy_af <- tibble::tibble(ProjectID = "Proj1", PoolID = "Pool1",
+             SubjectID = c("CEM37", "CEM37", "CEM37",
                            "A", "A", "A", "B", "B", "B"),
-             CompleteAmplificationID = c("CEM1", "CEM2", "CEM3", 
-                                         "A1", "A2", "A3", 
+             CompleteAmplificationID = c("CEM1", "CEM2", "CEM3",
+                                         "A1", "A2", "A3",
                                          "B1", "B2", "B3"))
 
 share_mat <- tibble::tribble(
@@ -29,7 +29,7 @@ share_mat <- tibble::tribble(
 ratios_out <- tibble::tribble(
   ~Sample, ~Ratio, ~IS_Source,
   "A", 2, "CEM",
-  "B", 2, "CEM", 
+  "B", 2, "CEM",
   "All samples", 1, "CEM",
   "A", 2, "Samples",
   "B", 2, "Samples",
@@ -39,9 +39,9 @@ ratios_out <- tibble::tribble(
 ratios_byIS_out <- tibble::tribble(
   ~chr, ~integration_locus, ~strand, ~A, ~B, ~`All samples`, ~IS_Source,
   "11", 64537168, "-", 1, NA, 1, "CEM",
-  "2", 73762398, "-", NA, 1, 1, "CEM", 
-  "17", 1632982, "-", 1, NA, 1, "Samples", 
-  "5", 83626283, "+", NA, 1, 1, "Samples", 
+  "2", 73762398, "-", NA, 1, 1, "CEM",
+  "17", 1632982, "-", 1, NA, 1, "Samples",
+  "5", 83626283, "+", NA, 1, 1, "Samples",
 )
 
 no_share_mat <- tibble::tribble(
@@ -94,19 +94,19 @@ test_that("replicates_IS_count works well", {
   mat <- share_mat
   af <- dummy_af
   counts <- replicates_IS_count(af, mat)
-  row <- tibble::tibble_row(counts %>% 
-                              dplyr::filter(chr == "2" & 
-                                              integration_locus == 73762398 & 
+  row <- tibble::tibble_row(counts %>%
+                              dplyr::filter(chr == "2" &
+                                              integration_locus == 73762398 &
                                               strand == "-"))
-  row2 <- tibble::tibble_row(counts %>% 
-                               dplyr::filter(chr == "19" & 
-                                               integration_locus == 8621028 & 
+  row2 <- tibble::tibble_row(counts %>%
+                               dplyr::filter(chr == "19" &
+                                               integration_locus == 8621028 &
                                                strand == "-"))
   expect_true(row$CEM37 == 1 &
                 row$A == 0 &
                 row$B == 1)
   expect_true(row2$CEM37 == 0 &
-                row2$A == 1 & 
+                row2$A == 1 &
                 row2$B == 0)
 })
 

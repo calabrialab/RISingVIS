@@ -21,21 +21,39 @@ License: CC BY 4.0
 Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Depends: 
     R (>= 4.2),
-    magrittr
+    magrittr,
+    shiny
 Suggests: 
     testthat (>= 3.0.0),
     knitr, 
     rmarkdown, 
-    BiocStyle, 
+    BiocStyle
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+biocViews: BiomedicalInformatics, Sequencing, SingleCell
+Imports: 
     ISAnalytics,
+    bslib,
+    shinyWidgets,
+    shinyFiles,
+    fs,
+    magrittr,
+    sass,
+    shinyjs,
+    dplyr,
+    htmlwidgets,
+    progressr,
+    purrr,
+    reactable,
+    rlang,
+    withr,
+    shinyvalidate,
     dplyr,
     purrr,
     tidyr,
     tibble, 
     utils
-Config/testthat/edition: 3
-VignetteBuilder: knitr
-biocViews: BiomedicalInformatics, Sequencing, SingleCell
+StagedInstall: no

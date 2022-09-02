@@ -1,0 +1,1365 @@
+# Utilities and internal functions ---------------------------------------------
+
+## Utils and vars --------------------------------------------------------------
+id_list <- function() {
+  list(
+    side_graph = "svg-graph-mini",
+    data_import = list(
+      section_id = "data-import-section",
+      inputs = list(
+        next_btn = "next-btn"
+      ),
+      isa_opt_section = list(
+        section_id = "isa-opt-subsection",
+        inputs = list(
+          toggle1 = "toggle-default-import",
+          json_file_input = "js-filepath",
+          upload_config_btn = "upload-config-btn"
+        ),
+        outputs = list(
+          import_status = "import-status",
+          confirm_choice = "confirm-choice",
+          status_container = "status-container"
+        )
+      ),
+      metadata_section = list(
+        section_id = "metadata-subsection",
+        inputs = list(
+          file_input = "metadata-file",
+          switch = "switch-fs-align",
+          root_container = "root-container",
+          root_dir = "root-dir-btn",
+          project = "proj-text-in",
+          separator = "sep-select",
+          dates_format = "dates-format-select",
+          sample_id = "sample-id-select",
+          control_line = "control-cell-line-select",
+          import_btn = "import-btn",
+          import_spinner = "import-btn-spinner",
+          details_btn = "details-btn",
+          details_collapse = "details-collapse"
+        ),
+        outputs = list(
+          root_display = "root-display",
+          import_status = "import-status",
+          status_container = "status-container",
+          details_content = "details-content",
+          checks_tbl_1 = "fs-align-tbl",
+          checks_tbl_2 = "iss-summary-tbl",
+          checks_tbl_3 = "iss-missing-tbl",
+          checks_tbl_4 = "control-cl-tbl"
+        )
+      ),
+      data_section = list(
+        section_id = "data-subsection",
+        inputs = list(
+          import_mode = "import-mode-switch",
+          annotation = "matrix-annot-check",
+          separator = "sep-select",
+          workers = "max-workers",
+          adv_op_btn = "adv-op-btn",
+          adv_op_collapse = "adv-op-collapse",
+          file_patterns = "patterns-select",
+          matching_op = "match-op-select",
+          tidy_switch = "tidy-switch",
+          files = "data-files",
+          import_btn = "import-btn",
+          spinner_btn = "spinner-btn",
+          details_btn = "details-btn",
+          details_collapse = "details-collapse"
+        ),
+        outputs = list(
+          import_status_cont = "import-status-container",
+          import_status = "import-status",
+          details_content = "details-content",
+          checks_tbl_1 = "files-found-tbl",
+          checks_tbl_2 = "files-imp-tbl",
+          checks_tbl_3 = "missing-data-tbl"
+        )
+      )
+    ),
+    recalibration = list(
+      section_id = "recalibr-section",
+      inputs = list(
+        threshold = "threshold",
+        is_tags = "is-tags",
+        criteria = "criteria",
+        workers = "workers",
+        rec_map_switch = "rec-map-switch",
+        rec_map_container = "rec-map-container",
+        rec_map_path = "rec-map-path",
+        rec_btn = "recalibrate-btn",
+        skip_btn = "skip-btn",
+        next_btn = "next-btn"
+      ),
+      outputs = list(
+        rec_map_display = "rec-map-display",
+        info_panel = "info-panel"
+      )
+    )
+  )
+}
+
+.svg_graph_mini <- function() {
+  paste0(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72.022 402.5"',
+    'preserveAspectRatio="xMinYMin meet" class="svg-content-mini">',
+    '<g id="Layer_2" data-name="Layer 2" transform="translate(-237.236)">',
+    '<g id="step1" class="mini-node" transform="translate(246.145 2.5)">',
+    '<circle id="mini-node-1-main" class="mini-node-main" ',
+    'data-name="mini-node-1-main" cx="27.561" cy="27.561" r="27.561" ',
+    'transform="translate(0 4.146)"/><path id="mini-node-1-arc" ',
+    'data-name="mini-node-1-arc" class="mini-node-arc" d="M374,2.5a31.708,',
+    '31.708,0,1,1,0,63.416" transform="translate(-346.458 -2.5)"/>',
+    '</g><g id="step2" class="mini-node" transform="translate(237.236 108.956)">',
+    '<circle id="mini-node-2-main" data-name="mini-node-2-main" ',
+    'class="mini-node-main" cx="27.561" cy="27.561" r="27.561" ',
+    'transform="translate(0 21.094) rotate(-22.5)"/>',
+    '<path id="mini-node-2-arc" data-name="mini-node-2-arc" ',
+    'class="mini-node-arc" d="M340.068,229.23a31.708,31.708,0,0,0,0,63.416" ',
+    'transform="translate(-303.929 -225.084)"/>',
+    '</g><g id="step4" class="mini-node" transform="translate(237.236 330.479)">',
+    '<circle id="mini-node-4-main" data-name="mini-node-4-main" ',
+    'class="mini-node-main" cx="27.561" cy="27.561" r="27.561" ',
+    'transform="translate(0 21.094) rotate(-22.5)"/>',
+    '<path id="mini-node-4-arc" data-name="mini-node-4-arc" ',
+    'd="M341.2,683.24a31.708,31.708,0,0,0,0,63.416" ',
+    'transform="translate(-304.508 -679.144)" class="mini-node-arc"/>',
+    '</g><g id="path1" transform="translate(273.706 73.004)">',
+    '<line id="Line_11" data-name="Line 11" y2="33.171" fill="none" ',
+    'stroke="#727272" stroke-miterlimit="10" stroke-width="3"/></g>',
+    '<g id="step3" class="mini-node"  transform="translate(246.145 223.938)">',
+    '<circle id="mini-node-3-main" data-name="mini-node-3-main" cx="27.561" ',
+    'cy="27.561" r="27.561" transform="translate(0 4.229)" ',
+    'class="mini-node-main"/><path id="mini-node-3-arc" ',
+    'data-name="mini-node-3-arc" d="M373.1,456.44a31.708,31.708,0,1,1,0,63.416" ',
+    'transform="translate(-345.997 -456.44)" class="mini-node-arc"/>',
+    '</g><g id="path3" transform="translate(273.706 294.525)">',
+    '<line id="Line_13" data-name="Line 13" y2="33.171" fill="none" ',
+    'stroke="#727272" stroke-width="3"/></g><g id="path2" ',
+    'transform="translate(273.706 183.762)"><line id="Line_14" ',
+    'data-name="Line 14" y2="33.171" fill="none" stroke="#727272" ',
+    'stroke-width="3"/></g></g></svg>'
+  )
+}
+
+## For generating components ---------------------------------------------------
+.generate_status_banner <- function(type = c(
+                                      "success", "warning",
+                                      "danger", "info",
+                                      "primary", "secondary",
+                                      "light", "dark"
+                                    ),
+                                    content = NULL,
+                                    ...) {
+  type <- rlang::arg_match(type)
+  class <- switch(type,
+    "success" = "alert alert-success",
+    "warning" = "alert alert-warning",
+    "danger" = "alert alert-danger",
+    "info" = "alert alert-info",
+    "primary" = "alert alert-primary",
+    "secondary" = "alert alert-secondary",
+    "light" = "alert alert-light",
+    "dark" = "alert alert-dark"
+  )
+  banner <- div(
+    class = class,
+    !!!content,
+    ...
+  )
+  return(banner)
+}
+
+## For server processing -------------------------------------------------------
+
+#### ISAnalytics options
+.global_required_af_tags <- function() {
+  c("project_id", "pool_id", "subject", "pcr_repl_id", "vispa_concatenate")
+}
+
+.load_isa_opts <- function(file_path) {
+  withr::local_options(list("ISAnalytics.verbose" = FALSE))
+  to_return <- tryCatch(
+    {
+      catched <- purrr::quietly(
+        ISAnalytics::import_ISA_settings
+      )(file_path)$warnings
+      if (!is.null(catched) && !purrr::is_empty(catched)) {
+        if (!all(.global_required_af_tags() %in%
+          ISAnalytics::association_file_columns(TRUE)$tag)) {
+          err_miss_tags <- paste0(
+            .global_required_af_tags()[
+              !.global_required_af_tags() %in%
+                ISAnalytics::association_file_columns(TRUE)$tag
+            ],
+            collapse = ", "
+          )
+          ISAnalytics::reset_dyn_vars_config()
+          rlang::abort(err_miss_tags,
+            class = "missing_req_tags_opts"
+          )
+        } else {
+          status_banner <- .generate_status_banner(
+            type = "warning",
+            content = list(
+              strong("Warning"),
+              div(catched)
+            )
+          )
+        }
+      } else {
+        status_banner <- .generate_status_banner(
+          type = "success",
+          content = list(
+            strong("Success"),
+            p("ISAnalytics configuration imported successfully")
+          )
+        )
+      }
+      list(status_banner = status_banner, flag = TRUE)
+    },
+    error = function(e) {
+      details <- if ("missing_req_tags_opts" %in% attributes(e)$class) {
+        div(
+          strong("Missing required tags in ISAnalytics options"),
+          p(
+            "The following tags are required but",
+            "missing from the association file specs:",
+            br(),
+            tags$code(e$message)
+          ),
+          p(
+            icon("xmark"),
+            "Can't proceed, please choose a different config file"
+          ),
+          p(
+            icon("circle-info"),
+            "ISAnalytics settings will be reverted to default"
+          )
+        )
+      } else {
+        div(e$message)
+      }
+      status_banner <- .generate_status_banner(
+        type = "danger",
+        content = list(
+          strong("Something went wrong"),
+          p(
+            "Details of the error are specified below. ",
+            "If you proceed without importing options,",
+            "defaults will be used"
+          ),
+          hr(),
+          details
+        )
+      )
+      list(status_banner = status_banner, flag = FALSE)
+    }
+  )
+  return(to_return)
+}
+
+## Performs additional checks on metadata
+.meta_additional_checks <- function(imported_meta,
+                                    control_cell_line,
+                                    indep_sample_id) {
+  add_checks <- list()
+  add_checks$meta_empty <- nrow(imported_meta) == 0
+  col_specs <- ISAnalytics::association_file_columns(TRUE) %>%
+    dplyr::filter(.data$tag %in% .global_required_af_tags())
+  add_checks$req_cols_present <- col_specs$names[!col_specs$names %in%
+    colnames(imported_meta)]
+  add_checks$ind_smpl_id <- all(indep_sample_id %in% colnames(imported_meta))
+  if (add_checks$meta_empty == FALSE &
+    purrr::is_empty(add_checks$req_cols_present)) {
+    pool_col <- col_specs %>%
+      dplyr::filter(.data$tag == "vispa_concatenate") %>%
+      dplyr::pull(.data$names)
+    subj_col <- col_specs %>%
+      dplyr::filter(.data$tag == "subject") %>%
+      dplyr::pull(.data$names)
+    control_cl <- imported_meta %>%
+      dplyr::group_by(dplyr::across(dplyr::all_of(pool_col))) %>%
+      dplyr::summarise(
+        control_line_present = control_cell_line %in% .data[[subj_col]]
+      )
+    add_checks$control_cl <- control_cl
+  }
+  return(add_checks)
+}
+
+# Function responsible of the import of metadata, performing additional
+# checks and producing the correct classification of statuses/reports
+.meta_import_and_check <- function(path,
+                                   root,
+                                   control_cell_line,
+                                   sep,
+                                   dates_format,
+                                   filter,
+                                   indep_sample_id,
+                                   nsp) {
+  result <- list()
+  withr::local_options(list(
+    ISAnalytics.reports = FALSE,
+    ISAnalytics.verbose = FALSE
+  ))
+  ## Import VISPA2 iss if root is not NULL (alignment requested)
+  iss_import <- if (!is.null(root)) TRUE else FALSE
+  separator <- switch(sep,
+    "tab" = "\t",
+    "," = ",",
+    ";" = ";",
+    "space" = " "
+  )
+  checks_res <- rlang::new_environment() # Extract internal checks results
+  iss_failed <- FALSE
+  import_ok <- tryCatch(
+    {
+      withCallingHandlers(
+        {
+          af <- ISAnalytics::import_association_file(
+            path = path, root = root,
+            dates_format = dates_format,
+            separator = separator,
+            filter_for = filter,
+            import_iss = iss_import,
+            checks_env = checks_res
+          )
+        },
+        fail_stats_msg = function(m) {
+          ## Signals the iss import step was skipped entirely
+          rlang::env_bind(rlang::env_parent(), iss_failed = TRUE)
+        }
+      )
+      correctly_aligned <- if (any(is.na(af$Path))) {
+        FALSE
+      } else if (any(is.na(af$Path_quant))) {
+        FALSE
+      } else {
+        TRUE
+      }
+      list(status = TRUE) # Signal import is done
+    },
+    error = function(e) {
+      list(status = FALSE, error = e$message) # Signal import failed
+    }
+  )
+
+  ## STATUS LEGEND:
+  ## - 0: AF imported, all checks ok
+  ## - 1: AF not imported due to error
+  ## - 2: AF imported but with warnings to display
+  ##
+  ## SUB-STATUS:
+  ## - 1.0: generic error
+  ## - 1.1: fail with simple error - no additional info
+  ## - 1.2: fail because no pools found
+  if (import_ok$status == FALSE) {
+    result$status <- 1
+    result$substatus <- 0
+    result$errors <- div(import_ok$error)
+    return(result)
+  }
+  ## Perform additional checks
+  add_checks <- .meta_additional_checks(af, control_cell_line, indep_sample_id)
+
+  ## ---- Catch and propagate errors
+  ### Error if metadata is empty - no data to import
+  if (add_checks$meta_empty == TRUE) {
+    result$status <- 1
+    result$substatus <- 1
+    result$error <- div(
+      strong("Metadata is empty"), br(),
+      "Did you set filters correctly?"
+    )
+    return(result)
+  }
+
+  ### Error if any of the required columns is missing
+  if (!purrr::is_empty(add_checks$req_cols_present)) {
+    result$status <- 1
+    result$substatus <- 1
+    result$error <- div(
+      strong("Metadata is missing the following required columns"),
+      br(),
+      HTML(
+        paste0(
+          "<ul>",
+          paste0(
+            paste0("<li>", add_checks$req_cols_present, "</li>"),
+            collapse = "\n"
+          ),
+          "</ul>"
+        )
+      )
+    )
+    return(result)
+  }
+
+  ### Error if independent sample key is not present in the columns
+  if (add_checks$ind_smpl_id == FALSE) {
+    result$status <- 1
+    result$substatus <- 1
+    result$error <- div(
+      strong("Missing independent sample id"),
+      br(),
+      p(
+        "Independent sample id ",
+        tags$code(paste0(indep_sample_id, collapse = ", ")),
+        " was not found in metadata columns"
+      )
+    )
+    return(result)
+  }
+
+  ### Error if no pool contains the control cell line
+  if (all(add_checks$control_cl$control_line_present == FALSE)) {
+    result$status <- 1
+    result$substatus <- 1
+    result$error <- div(
+      strong("Missing control cell line"),
+      br(),
+      p("Control cell line selected is missing in all found pools")
+    )
+    return(result)
+  }
+
+  ### Error if no pool was found
+  if (!is.null(root) & !correctly_aligned &
+    all(is.na(checks_res$fs_align$Path_quant))) {
+    result$status <- 1
+    result$substatus <- 2
+    alignment_tbl <- .render_fs_align_tbl(
+      checks_res$fs_align,
+      nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_1))
+    result$error <- div(
+      strong("No pools found on disk"),
+      br(),
+      p("No quantification folders were found for any of the pools")
+    )
+    result$info <- list(alignment_tbl = alignment_tbl)
+    return(result)
+  }
+
+  ### ---- Manage success with warnings
+  any_missing_controls <- any(
+    add_checks$control_cl$control_line_present == FALSE
+  )
+  any_missing_stats <- if (!is.null(root)) {
+    any(is.na(checks_res$fs_align$Path_iss))
+  } else {
+    FALSE
+  }
+
+  result$status <- if (iss_failed || any_missing_stats || !correctly_aligned ||
+    any_missing_controls) {
+    2
+  } else {
+    0
+  }
+  result$info <- list()
+  if (!is.null(root)) {
+    result$info$alignment_tbl <- .render_fs_align_tbl(
+      checks_res$fs_align,
+      nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_1)
+    )
+    if (iss_failed) {
+      result$info$iss_failed <- TRUE
+    } else {
+      result$info$iss_failed <- FALSE
+      result$info$iss_summary <- .render_iss_checks_tbl(
+        checks_res$iss_stats,
+        nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_2)
+      )
+      result$info$iss_missing <- .render_iss_missing_tbl(
+        checks_res$iss_stats_miss,
+        nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_3)
+      )
+    }
+  }
+  result$info$control_cl <- .render_control_line_tbl(
+    add_checks$control_cl,
+    nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_4)
+  )
+  proj_col <- ISAnalytics::association_file_columns(TRUE) %>%
+    dplyr::filter(.data$tag == "project_id") %>%
+    dplyr::pull(.data$names)
+  pool_col <- ISAnalytics::association_file_columns(TRUE) %>%
+    dplyr::filter(.data$tag == "vispa_concatenate") %>%
+    dplyr::pull(.data$names)
+
+  result$af <- af
+  if (!is.null(root)) {
+    result$af <- result$af %>%
+      dplyr::semi_join(checks_res$fs_align %>%
+        dplyr::filter(!is.na(.data$Path_quant)),
+      by = c(proj_col, pool_col)
+      )
+  }
+  result$af <- result$af %>%
+    dplyr::semi_join(add_checks$control_cl %>%
+      dplyr::filter(.data$control_line_present == TRUE),
+    by = pool_col
+    )
+
+  result$info$pool_in <- length(unique(af[[pool_col]]))
+  result$info$pool_out <- length(unique(result$af[[pool_col]]))
+  return(result)
+}
+
+.data_import_and_check_auto <- function(metadata,
+                                        matrix_annotated,
+                                        workers,
+                                        file_patterns,
+                                        match_opt,
+                                        separator,
+                                        nsp) {
+  result <- list()
+  separator <- switch(separator,
+                      "tab" = "\t",
+                      "," = ",",
+                      ";" = ";",
+                      "space" = " "
+  )
+  withr::local_options(list(
+    ISAnalytics.reports = FALSE,
+    ISAnalytics.verbose = FALSE
+  ))
+  checks <- rlang::new_environment()
+  import_ok <- tryCatch({
+    progressr::withProgressShiny({
+      matrices <- ISAnalytics::import_parallel_Vispa2Matrices(
+        metadata, quantification_type = "seqCount",
+        matrix_type = ifelse(matrix_annotated == TRUE, "annotated",
+                             "not_annotated"),
+        workers = workers, report_path = NULL, mode = "AUTO",
+        patterns = file_patterns, matching_opt = match_opt,
+        checks_env = checks, separator = separator
+      )
+    }, message = "Importing data...")
+    list(status = TRUE)
+  },
+  error = function(e) {
+    list(status = FALSE, error = e$message)
+  })
+
+  if (import_ok$status == FALSE) {
+    result$status <- 1
+    result$error <- div(import_ok$error)
+    return(result)
+  }
+
+  ## Errors if all files have anomalies or were not imported
+  all_anomalies <- all(checks$files_found$Anomalies == TRUE)
+  all_not_imported <- all(checks$files_imp$Imported == FALSE)
+
+  if (all_anomalies || all_not_imported) {
+    result$status <- 1
+    result$error <- div(
+      strong("Error: no files imported"),
+      p("Issues identified when trying to import files, see below")
+    )
+  } else if (all(checks$files_found$Anomalies == FALSE) &&
+        all(checks$files_imp$Imported == TRUE)) {
+    result$status <- 0
+  } else {
+    result$status <- 2
+  }
+
+  result$info$files_found_tbl <- .render_files_found_auto(
+    checks$files_found,
+    nsp(id_list()$data_import$data_section$outputs$checks_tbl_1))
+
+  result$info$files_imported <- .render_files_imp_auto(
+    checks$files_imp,
+    nsp(id_list()$data_import$data_section$outputs$checks_tbl_2))
+  result$matrices <- matrices
+  return(result)
+}
+
+.data_import_and_check_manual <- function(paths,
+                                          tidy_format,
+                                          matrix_annotated,
+                                          separator,
+                                          metadata,
+                                          nsp) {
+  result <- list()
+  separator <- switch(separator,
+                      "tab" = "\t",
+                      "," = ",",
+                      ";" = ";",
+                      "space" = " "
+  )
+  withr::local_options(list(
+    ISAnalytics.reports = FALSE,
+    ISAnalytics.verbose = FALSE
+  ))
+  prog <- progressr::progressor(along = paths)
+  if (!tidy_format) {
+    import_with_isa <- function(path) {
+      matrix <- ISAnalytics::import_single_Vispa2Matrix(
+        path = path, separator = separator
+      )
+      prog()
+      return(matrix)
+    }
+    import_ok <- tryCatch({
+      progressr::withProgressShiny({
+        matrices <- purrr::map(paths, import_with_isa)
+      }, message = "Importing data...")
+      list(status = TRUE)
+    },
+    error = function(e) {
+      list(status = FALSE, error = e$message)
+    })
+  } else {
+    import_tidy <- function(path) {
+      col_types <- ISAnalytics:::.mandatory_IS_types("classic")
+      if (matrix_annotated) {
+        col_types <- append(
+          col_types,
+          ISAnalytics:::.annotation_IS_types("classic")
+        )
+      }
+      col_types[[ISAnalytics::pcr_id_column()]] <- "c"
+      col_types[[".default"]] <- "n"
+      df <- readr::read_delim(
+        file = path,
+        delim = separator,
+        col_types = do.call(readr::cols, col_types),
+        na = c("NONE", "NA", "NULL", "NaN", ""),
+        trim_ws = TRUE,
+        progress = FALSE
+      )
+      prog()
+      return(df)
+    }
+    import_ok <- tryCatch({
+      progressr::withProgressShiny({
+        matrices <- purrr::map(paths, import_tidy)
+      }, message = "Importing data...")
+      list(status = TRUE)
+    },
+    error = function(e) {
+      list(status = FALSE, error = e$message)
+    })
+  }
+
+  if (import_ok$status == FALSE) {
+    result$status <- 1
+    result$error <- div(import_ok$error)
+    return(result)
+  }
+  final_matrices <- purrr::reduce(matrices, dplyr::bind_rows)
+  final_matrices_filt <- final_matrices %>%
+    dplyr::semi_join(metadata, by = ISAnalytics::pcr_id_column())
+
+  ## --- Selecting only data in metadata file
+  if (nrow(final_matrices_filt) == 0) {
+    result$status <- 1
+    result$error <- div(
+      strong("Error: no correspondance between data and metadata"),
+      p("Please check data and metadata files and ensure correspondance",
+        "between the two")
+    )
+    return(result)
+  }
+  if (nrow(final_matrices_filt) < nrow(final_matrices)) {
+    result$status <- 2
+    result$info$missing_data <- .render_missing_data_tbl(
+      final_matrices %>%
+        dplyr::anti_join(
+          metadata, by = ISAnalytics::pcr_id_column()
+        ),
+      nsp(id_list()$data_import$data_section$outputs$checks_tbl_3)
+    )
+  }
+  if (nrow(final_matrices_filt) == nrow(final_matrices)) {
+    result$status <- 0
+  }
+  result$info$n_imported <- length(matrices)
+  result$info$distinct_replic <- length(unique(
+    final_matrices_filt[[ISAnalytics::pcr_id_column()]]))
+  result$matrices <- final_matrices_filt
+  return(result)
+}
+
+.recalibrate <- function(data, map, map_path, workers, is_tags,
+                         criteria, session) {
+  silent_rec <- purrr::quietly(ISAnalytics::compute_near_integrations)
+  rec_data <- NULL
+  rec_ok <- tryCatch({
+    progressr::withProgressShiny(
+      {
+        rec_data <- silent_rec(
+          x = data,
+          value_columns = "seqCount",
+          map_as_file = map,
+          file_path = map_path,
+          max_workers = workers,
+          is_identity_tags = is_tags,
+          keep_criteria = criteria
+        )
+      },
+      message = "Recalibrating",
+      session = session
+    )
+    list(status = TRUE)
+  }, error = function(e) {
+    list(status = FALSE, error = e$message)
+  })
+  return(list(res = rec_data, info = rec_ok))
+}
+
+## Utils for tables styling ---
+
+.filter_input <- function(id) {
+  function(values, name) {
+    tags$select(
+      # Set to undefined to clear the filter
+      onchange = sprintf(
+        paste0(
+          "Reactable.setFilter('", id, "', ",
+          "'%s', event.target.value || undefined)"
+        ),
+        name
+      ),
+      # "All" has an empty value to clear the filter, and is the default option
+      tags$option(value = "", "All"),
+      lapply(unique(values), tags$option),
+      "aria-label" = sprintf("Filter %s", name),
+      style = "width: 100%;"
+    )
+  }
+}
+
+.na_as_cross <- function() {
+  success_color <- bslib::bs_get_variables(
+    app_theme(),
+    "success"
+  )
+  danger_color <- bslib::bs_get_variables(
+    app_theme(),
+    "danger"
+  )
+  render_miss <- function(value) {
+    if (is.na(value)) {
+      icon("times", style = paste0("color:", danger_color, ";"))
+    } else {
+      value
+    }
+  }
+  return(render_miss)
+}
+
+.style_true_false <- function(invert = FALSE, colname) {
+  success_color <- bslib::bs_get_variables(
+    app_theme(),
+    "success"
+  )
+  danger_color <- bslib::bs_get_variables(
+    app_theme(),
+    "danger"
+  )
+  if (invert) {
+    return(htmlwidgets::JS(sprintf("
+         function(rowInfo) {
+         if (rowInfo.values['%s'] == true) {
+          color = '%s';
+         } else {
+          color = '%s';
+         }
+          return {color: color, fontWeight: 'bold', textTransform: 'uppercase'}
+         }
+         ", colname, danger_color, success_color)))
+  }
+  return(htmlwidgets::JS(sprintf("
+         function(rowInfo) {
+         if (rowInfo.values['%s'] == true) {
+          color = '%s';
+         } else {
+          color = '%s';
+         }
+          return {color: color, fontWeight: 'bold', textTransform: 'uppercase'}
+         }
+         ", colname, success_color, danger_color)))
+}
+
+## Creates table for the metadata fs alignment summary
+.render_fs_align_tbl <- function(data, tbl_id) {
+  reactable::reactable(
+    data,
+    defaultPageSize = 10,
+    pageSizeOptions = c(5, 10, 25, 30, 40, 50),
+    showPagination = TRUE,
+    defaultSorted = list(
+      Found = "asc", Path = "desc", Path_quant = "desc",
+      Path_iss = "desc"
+    ),
+    defaultColDef = reactable::colDef(
+      sortNALast = FALSE,
+      filterInput = .filter_input(tbl_id),
+      align = "center"
+    ),
+    showSortable = TRUE,
+    filterable = TRUE,
+    searchable = TRUE,
+    highlight = TRUE,
+    resizable = TRUE,
+    columns = list(
+      Found = reactable::colDef(
+        style = .style_true_false(colname = "Found")
+      ),
+      Path = reactable::colDef(
+        cell = .na_as_cross()
+      ),
+      Path_quant = reactable::colDef(
+        cell = .na_as_cross()
+      ),
+      Path_iss = reactable::colDef(
+        cell = .na_as_cross()
+      )
+    )
+  )
+}
+
+## Creates table for iss summary
+.render_iss_checks_tbl <- function(data, tbl_id) {
+  reactable::reactable(
+    data,
+    defaultPageSize = 10,
+    pageSizeOptions = c(5, 10, 25, 30, 40, 50),
+    showPagination = TRUE,
+    defaultSorted = list(Imported = "asc"),
+    defaultColDef = reactable::colDef(
+      sortNALast = FALSE,
+      filterInput = .filter_input(tbl_id),
+      align = "center"
+    ),
+    showSortable = TRUE,
+    filterable = TRUE,
+    searchable = TRUE,
+    highlight = TRUE,
+    resizable = TRUE,
+    columns = list(
+      Imported = reactable::colDef(
+        style = .style_true_false(colname = "Imported")
+      ),
+      stats_files = reactable::colDef(
+        cell = .na_as_cross()
+      ),
+      Path_iss = reactable::colDef(
+        cell = .na_as_cross()
+      )
+    )
+  )
+}
+
+## Creates table for missing iss in samples
+.render_iss_missing_tbl <- function(data, tbl_id) {
+  reactable::reactable(
+    data,
+    defaultPageSize = 10,
+    pageSizeOptions = c(5, 10, 25, 30, 40, 50),
+    showPagination = TRUE,
+    defaultColDef = reactable::colDef(
+      align = "center",
+      filterInput = .filter_input(tbl_id)
+    ),
+    showSortable = TRUE,
+    filterable = TRUE,
+    searchable = TRUE,
+    highlight = TRUE,
+    resizable = TRUE
+  )
+}
+
+## Creates table for control line checks
+.render_control_line_tbl <- function(data, tbl_id) {
+  reactable::reactable(
+    data,
+    defaultPageSize = 10,
+    pageSizeOptions = c(5, 10, 25, 30, 40, 50),
+    showPagination = TRUE,
+    defaultSorted = list(control_line_present = "asc"),
+    defaultColDef = reactable::colDef(
+      align = "center",
+      filterInput = .filter_input(tbl_id)
+    ),
+    showSortable = TRUE,
+    filterable = TRUE,
+    searchable = TRUE,
+    highlight = TRUE,
+    resizable = TRUE,
+    columns = list(
+      control_line_present = reactable::colDef(
+        style = .style_true_false(colname = "control_line_present")
+      )
+    )
+  )
+}
+
+## Creates table for data files found (auto mode)
+.render_files_found_auto <- function(data, tbl_id) {
+  reactable::reactable(
+    data %>%
+      dplyr::select(!c("Files", "Files_count")),
+    defaultPageSize = 10,
+    pageSizeOptions = c(5, 10, 25, 30, 40, 50),
+    showPagination = TRUE,
+    defaultSorted = list(Anomalies = "desc"),
+    defaultColDef = reactable::colDef(
+      align = "center",
+      filterInput = .filter_input(tbl_id)
+    ),
+    showSortable = TRUE,
+    filterable = TRUE,
+    searchable = TRUE,
+    highlight = TRUE,
+    resizable = TRUE,
+    columns = list(
+      Anomalies = reactable::colDef(
+        style = .style_true_false(colname = "Anomalies", invert = TRUE)
+      )
+    ),
+    details = function(index) {
+      div(
+        style = "padding: 10px;",
+        reactable::reactable(
+          data$Files_count[[index]],
+          compact = TRUE
+        )
+      )
+    }
+  )
+}
+
+## Creates table for data files imported (auto mode)
+.render_files_imp_auto <- function(data, tbl_id) {
+  reactable::reactable(
+    data,
+    defaultPageSize = 10,
+    pageSizeOptions = c(5, 10, 25, 30, 40, 50),
+    showPagination = TRUE,
+    defaultSorted = list(Imported = "asc"),
+    defaultColDef = reactable::colDef(
+      align = "center",
+      filterInput = .filter_input(tbl_id)
+    ),
+    showSortable = TRUE,
+    filterable = TRUE,
+    searchable = TRUE,
+    highlight = TRUE,
+    resizable = TRUE,
+    columns = list(
+      Imported = reactable::colDef(
+        style = .style_true_false(colname = "control_line_present",
+                                  invert = TRUE)
+      ),
+      Number_of_samples = reactable::colDef(filterable = FALSE),
+      Distinct_is = reactable::colDef(filterable = FALSE)
+    )
+  )
+}
+
+## Creates table for missing data (manual mode)
+.render_missing_data_tbl <- function(data, tbl_id) {
+  reactable::reactable(
+    data,
+    defaultPageSize = 10,
+    pageSizeOptions = c(5, 10, 25, 30, 40, 50),
+    showPagination = TRUE,
+    defaultColDef = reactable::colDef(
+      align = "center",
+      filterInput = .filter_input(tbl_id)
+    ),
+    showSortable = TRUE,
+    filterable = TRUE,
+    searchable = TRUE,
+    highlight = TRUE,
+    resizable = TRUE
+  )
+}
+
+## ---- For generating UI ---- ##
+.meta_checks_panel <- function(status,
+                               substatus = NULL,
+                               align_requested = FALSE,
+                               error = NULL,
+                               info = NULL,
+                               nsp) {
+  if (align_requested == TRUE & status %in% c(0, 2)) {
+    fs_align_card <- div(
+      class = "card",
+      style = "margin-bottom: 5px;",
+      div(
+        class = "card-body",
+        h5(
+          class = "card-title",
+          "File system alignment summary"
+        ),
+        reactable::reactableOutput(
+          nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_1))
+      )
+    )
+    iss_card <- if (info$iss_failed) {
+      div(
+        class = "card",
+        style = "margin-bottom: 5px;",
+        div(
+          class = "card-body",
+          h5(
+            class = "card-title",
+            "VISPA2 stats import"
+          ),
+          h6(
+            class = "card-subtitle text-muted",
+            "SKIPPED"
+          ),
+          p(
+            class = "card-text",
+            "VISPA2 stats import was skipped due to an error"
+          )
+        )
+      )
+    } else {
+      div(
+        class = "card",
+        style = "margin-bottom: 5px;",
+        div(
+          class = "card-body",
+          h5(
+            class = "card-title",
+            "VISPA2 stats import"
+          ),
+          h6(
+            class = "card-subtitle text-muted",
+            "IMPORTED"
+          ),
+          strong(
+            class = "card-text",
+            "Summary of files found per pool"
+          ),
+          reactable::reactableOutput(
+            nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_2)
+          ),
+          strong(
+            class = "card-text",
+            "Missing stats for specific samples"
+          ),
+          reactable::reactableOutput(
+            nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_3)
+          )
+        )
+      )
+    }
+  } else {
+    fs_align_card <- NULL
+    iss_card <- NULL
+  }
+
+  card_content <- if (status == 1 &&
+    substatus %in% c(0, 1)) {
+    tagAppendAttributes(
+      error,
+      class = "card-body text-danger"
+    )
+  } else if (status == 1 &&
+    substatus == 2) {
+    div(
+      class = "card-body",
+      error,
+      reactable::reactableOutput(
+        nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_1)
+      )
+    )
+  } else {
+    div(
+      class = "card-body",
+      h3(
+        class = "card-title",
+        "Metadata checks summary"
+      ),
+      p(
+        "Metadata was correctly imported, below a summary of checks",
+        "performed - review carefully."
+      ),
+      ## --- Using card group
+      div(
+        class = "card-group",
+        style = "margin-bottom: 5px;",
+        ### --- Alignment performed?
+        div(
+          class = "card",
+          div(
+            class = "card-body",
+            h5(
+              class = "card-title",
+              "File system alignment",
+            ),
+            h6(
+              class = "card-subtitle text-muted",
+              ifelse(align_requested == TRUE, "PERFORMED", "NOT PERFORMED")
+            ),
+            p(
+              class = "card-text",
+              ifelse(align_requested == TRUE,
+                "File system alignment was requested and performed",
+                paste(
+                  "File system alignment was not requested - please",
+                  "note that data automated import will be disabled",
+                  "and matrices will have to be imported manually"
+                )
+              )
+            )
+          )
+        ),
+        ### --- Pools counts
+        div(
+          class = "card",
+          div(
+            class = "card-body",
+            h5(
+              class = "card-title",
+              "Pool counts"
+            ),
+            p(
+              class = "card-text",
+              "Number of pools in input: ",
+              strong(info$pool_in),
+              br(),
+              "Number of pools after cleaning: ",
+              strong(info$pool_out),
+              "(", round((info$pool_out / info$pool_in) * 100, 2), "% on ",
+              "input)"
+            )
+          )
+        )
+      ),
+      ### --- Optional: fs alignment results + stats
+      fs_align_card,
+      iss_card,
+      ### --- Control cell line summary
+      div(
+        class = "card",
+        div(
+          class = "card-body",
+          h5(
+            class = "card-title",
+            "Control cell line checks"
+          ),
+          p(
+            class = "card-text",
+            "Pools that do not contain the control cell line will",
+            "NOT be analysed"
+          ),
+          reactable::reactableOutput(
+            nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_4)
+          )
+        )
+      )
+    )
+  }
+
+  ## Border according to status
+  card_classes <- if (status == 1) {
+    "card border-danger"
+  } else if (status == 2) {
+    "card border-warning"
+  } else {
+    "card border-success"
+  }
+  checks_card <- div(
+    class = card_classes,
+    card_content
+  )
+  return(checks_card)
+}
+
+.data_checks_panel <- function(status,
+                               mode,
+                               error = NULL,
+                               info = NULL,
+                               nsp) {
+  if (mode == "AUTO") {
+    files_found_card <- if (!is.null(info) &&
+                            "files_found_tbl" %in% names(info)) {
+      div(
+        class = "card",
+        style = "margin-bottom: 5px;",
+        div(
+          class = "card-body",
+          h5(
+            class = "card-title",
+            "Files found summary"
+          ),
+          reactable::reactableOutput(
+            nsp(id_list()$data_import$data_section$outputs$checks_tbl_1)
+          )
+        )
+      )
+    } else {
+      NULL
+    }
+    files_imp_card <- if (!is.null(info) && "files_imported" %in% names(info)) {
+      div(
+        class = "card",
+        style = "margin-bottom: 5px;",
+        div(
+          class = "card-body",
+          h5(
+            class = "card-title",
+            "Files imported summary"
+          ),
+          reactable::reactableOutput(
+            nsp(id_list()$data_import$data_section$outputs$checks_tbl_2)
+          )
+        )
+      )
+    } else {
+      NULL
+    }
+    card_content <- if (status == 1) {
+      div(
+        class = "card-body text-danger",
+        error,
+        files_found_card,
+        files_imp_card
+      )
+    } else {
+      div(
+        class = "card-body",
+        h5(
+          class = "card-title",
+          ifelse(status == 0, "Files imported successfully",
+                 "Anomalies detected")
+        ),
+        files_found_card,
+        files_imp_card
+      )
+    }
+  } else {
+    n_imported_card <- div(
+      class = "card",
+      div(
+        class = "card-body",
+        h5(
+          class = "card-title",
+          "Number of imported matrices"
+        ),
+        strong(info$n_imported)
+      )
+    )
+    distinct_repl_card <- div(
+      class = "card",
+      div(
+        class = "card-body",
+        h5(
+          class = "card-title",
+          "Number of distinct PCR replicates"
+        ),
+        strong(info$distinct_replic)
+      )
+    )
+    card_content <- if (status == 1) {
+      div(
+        class = "card-body text-danger",
+        error
+      )
+    } else if (status == 2) {
+      div(
+        class = "card-body",
+        h5(
+          class = "card-title",
+          "Warning: some data missing in final matrices"
+        ),
+        p("This may be due to replicate information being present in",
+          " matrices but not in the metadata file. Review carefully the ",
+          "missing replicates"),
+        div(
+          class = "card-group",
+          style = "margin-bottom: 5px;",
+          n_imported_card,
+          distinct_repl_card,
+        ),
+        reactable::reactableOutput(
+          nsp(id_list()$data_import$data_section$outputs$checks_tbl_3)
+        )
+      )
+    } else {
+      div(
+        class = "card-body",
+        div(
+          class = "card-group",
+          style = "margin-bottom: 5px;",
+          n_imported_card,
+          distinct_repl_card,
+        )
+      )
+    }
+  }
+
+  ## Border according to status
+  card_classes <- if (status == 1) {
+    "card border-danger"
+  } else if (status == 2) {
+    "card border-warning"
+  } else {
+    "card border-success"
+  }
+  checks_card <- div(
+    class = card_classes,
+    card_content
+  )
+  return(checks_card)
+}
+
+.recalibr_info_panel <- function(info_list) {
+  status_banner <- if (info_list$info$status == FALSE) {
+    .generate_status_banner(
+      type = "danger",
+      content = list(
+        div(
+          strong("Something went wrong:"),
+          info_list$info$status$error
+        )
+      )
+    )
+  } else {
+    warnings <- if (!purrr::is_empty(info_list$res$warnings)) {
+      div(
+        "Warnings:",
+        br(),
+        info_list$res$warnings
+      )
+    } else {
+      NULL
+    }
+    messages <- if (!purrr::is_empty(info_list$res$messages)) {
+      div(
+        "Messages:",
+        br(),
+        info_list$res$messages
+      )
+    } else {
+      NULL
+    }
+    sep <- if (is.null(warnings) & is.null(messages)) {
+      NULL
+    } else {
+      hr()
+    }
+    .generate_status_banner(
+      type = "success",
+      content = list(
+        strong("Data recalibrated successfully"),
+        sep,
+        warnings,
+        messages
+      )
+    )
+  }
+
+  return(status_banner)
+}
