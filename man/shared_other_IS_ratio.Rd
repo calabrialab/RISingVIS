@@ -3,7 +3,7 @@
 \name{shared_other_IS_ratio}
 \alias{shared_other_IS_ratio}
 \title{Returns the ratio bewteen the SeqCount for shared IS coming from
-other samples in the CEMs and the SeqCount for those shared IS
+other samples in the controls and the SeqCount for those shared IS
 in the other samples}
 \usage{
 shared_other_IS_ratio(af, matrix)
@@ -18,9 +18,9 @@ Single value of the ratio between SeqCounts
 }
 \description{
 This function focuses on the shared IS that are not known to
-belong to CEMs but come from the other samples.
+belong to controls but come from the other samples.
 After aggregation of the data gives as output the ratio between
-the SeqCount for those IS in the CEMs and the SeqCount for those IS
+the SeqCount for those IS in all controls and the SeqCount for those IS
 in the other samples.
 }
 \examples{
