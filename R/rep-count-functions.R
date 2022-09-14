@@ -12,9 +12,14 @@
 #' each sample, the cell containing the overall replicate count 
 #' for that IS in that sample.
 #'
-#' @usage replicates_IS_count(af, matrix)
 #' @param af The association file
 #' @param matrix The integration matrix
+#' @param subject_col The name of the subject column in af, 
+#' default to "SubjectID"
+#' @param amp_col The name of the amplificate column in af and matrix, 
+#' default to "CompleteAmplificationID"
+#' @param value_col The name of the SeqCount column in matrix, 
+#' default to "Value"
 #' @return Dataframe of values corresponding to the replicate counts
 #'
 #' @importFrom magrittr `%>%`
@@ -80,9 +85,16 @@ replicates_IS_count <- function(af, matrix,
 #' containing all the ratios, which includes information about the 
 #' sample considered, the ratio itself and the type of IS considered.
 #'
-#' @usage replicates_IS_ratio(af, matrix, ...)
 #' @param af The association file
 #' @param matrix The integration matrix
+#' @param subject_col The name of the subject column in af, 
+#' default to "SubjectID"
+#' @param amp_col The name of the amplificate column in af and matrix, 
+#' default to "CompleteAmplificationID"
+#' @param value_col The name of the SeqCount column in matrix, 
+#' default to "Value"
+#' @param ctrl The named list of control with known integration sites,
+#' default is "CEM37" with known IS as in known_CEM_IS()
 #' @return Dataframe of values corresponding to the ratios
 #'
 #' @importFrom magrittr `%>%`
@@ -221,10 +233,16 @@ replicates_IS_ratio <- function(af, matrix,
 #' containing all the ratios, which includes information about the IS, 
 #' the sample, the ratio itself and the type of IS considered.
 #'
-#' @usage replicates_IS_ratio_byIS(af, matrix)
 #' @param af The association file
 #' @param matrix The integration matrix
-#' @return Dataframe of values corresponding to the ratios
+#' @param subject_col The name of the subject column in af, 
+#' default to "SubjectID"
+#' @param amp_col The name of the amplificate column in af and matrix, 
+#' default to "CompleteAmplificationID"
+#' @param value_col The name of the SeqCount column in matrix, 
+#' default to "Value"
+#' @param ctrl The named list of control with known integration sites,
+#' default is "CEM37" with known IS as in known_CEM_IS()
 #'
 #' @importFrom magrittr `%>%`
 #'

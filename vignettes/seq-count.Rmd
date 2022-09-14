@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-In this vignette we explain how to use the functions dedicated to the 
+In this vignette it will be explained how to use the functions dedicated to the 
 computation of the sequence count ratio. 
 
 The **sequence count ratio** is computed as follows: 
@@ -47,7 +47,7 @@ of the integration itself.
 
 First, create an appropriate matrix and association file or import the
 ones that are included in the package data (these files are designed manually 
-but simulate real research data).
+to simulate real research data).
 
 ```{r setup}
 library(RISingVIS)
@@ -56,21 +56,51 @@ data("association_file")
 data("integration_matrix")
 ```
 
+If the input files that you want to use are different from our standard ones 
+(see [ISAnalytics](https://calabrialab.github.io/ISAnalytics/dev/index.html) 
+for more information) it is fundamental that you set up the workflow 
+though the dynamic vars that are available thanks to ISAnalytics. Take a look [here](https://calabrialab.github.io/ISAnalytics/dev/articles/workflow_start.html)
+to know how to do so!
+
 Once we have our data we can start computing ratios. 
 
-# shared_CEM_known_IS_ratio()
 
-The function `shared_CEM_known_IS_ratio()` computes the ratio for all the 
-shared CEM known integrations.
+# shared_control_known_IS_ratio()
+
+The function `shared_control_known_IS_ratio()` computes the ratio for all the 
+shared control known integration sites. 
+
+It is mandatory to specify, when calling the function, the association file and
+the integration matrix; others parameters can be tuned according to need: 
+* **subject_col** (default is *SubjectID*): the name of the column 
+in the association file that reports the name of the subject 
+* **amp_col** (default is *CompleteAmplificationID*): the name of the column 
+in the association file and in the matrix that reports the identifier for the
+single amplification
+* **value_col** (default is *Value*): the name of the column in the integration
+matrix that reports the sequence count for that integration in that sample
+* **ctrl** (default is *CEM37*): if not default, this parameter must be a named 
+list containing the name of the control cell line and the list of known 
+integration sites for that control line. Default control il CEM37, which known 
+integration sites can be viewed by calling the function `known_CEM_IS()`
+
+The reported ratio is computed considering all shared integration sites known 
+to belong to the control(s), all samples and all controls together.
 
 ```{r}
-shared_CEM_known_IS_ratio(association_file, integration_matrix)
+shared_control_known_IS_ratio(association_file, integration_matrix)
 ```
 
 # shared_other_IS_ratio()
 
 The function `shared_other_IS_ratio()` computes the ratio for all the shared 
-integrations not belonging to CEMs. 
+integrations not belonging to controls. 
+
+Similarly to the previous function, association file and integration matrix are 
+mandatory, while other parametered can be tuned at need.
+
+The reported ratio is computed considering all shared integration sites known 
+to belong to the control(s), all samples and all controls together.
 
 ```{r}
 shared_other_IS_ratio(association_file, integration_matrix)
@@ -78,8 +108,17 @@ shared_other_IS_ratio(association_file, integration_matrix)
 
 # shared_IS_ratio()
 
-The function `shared_IS_ratio()` computes the ratio for all shared integrations 
-considering one sample at a time for the denominator or all samples. 
+The function `shared_IS_ratio()` computes the ratio for all shared integration 
+sites considering one sample at a time for the denominator and all samples 
+together. 
+
+Parameters are the same as before and can be tuned at need, with the 
+exception for the association file and integration matrix which are mandatory. 
+
+With the use of this function the ratio is reported for all shared integration 
+sites together, but considering one single sample at a time, then all together,
+and similarly one control at a time (if there are more than one) and then 
+all controls together. 
 
 ```{r}
 shared_IS_ratio(association_file, integration_matrix)
@@ -87,8 +126,16 @@ shared_IS_ratio(association_file, integration_matrix)
 
 # shared_IS_ratio_byIS()
 
-The function `shared_IS_ratio_byIS()` computes the ratio for all integrations
-considering one IS at a time, against each sample and all samples together. 
+The function `shared_IS_ratio_byIS()` computes the ratio for all integration 
+sites considering one IS at a time, against each sample and against all samples 
+together. 
+
+Parameters are the same as before and can be tuned at need, with the 
+exception for the association file and integration matrix which are mandatory. 
+
+In this function the ratio is reported considering each integration site, 
+first against each single sample and considering each single control and then
+considering all samples and all (eventual) controls. 
 
 ```{r}
 shared_IS_ratio_byIS(association_file, integration_matrix)
