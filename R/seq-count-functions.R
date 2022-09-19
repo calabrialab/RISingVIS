@@ -13,9 +13,16 @@
 #' the ratio between the SeqCount for those IS in all controls and
 #' the SeqCount for those IS in the other samples.
 #'
-#' @usage shared_control_known_IS_ratio(af, matrix, ...)
 #' @param af The association file
 #' @param matrix The integration matrix
+#' @param subject_col The name of the subject column in af, 
+#' default to "SubjectID"
+#' @param amp_col The name of the amplificate column in af and matrix, 
+#' default to "CompleteAmplificationID"
+#' @param value_col The name of the SeqCount column in matrix, 
+#' default to "Value"
+#' @param ctrl The named list of control with known integration sites,
+#' default is "CEM37" with known IS as in known_CEM_IS()
 #' @return Single value of the ratio between SeqCounts
 #'
 #' @importFrom magrittr `%>%`
@@ -102,9 +109,16 @@ shared_control_known_IS_ratio <- function(af, matrix,
 #' the SeqCount for those IS in all controls and the SeqCount for those IS
 #' in the other samples.
 #'
-#' @usage shared_other_IS_ratio(af, matrix)
 #' @param af The association file
 #' @param matrix The integration matrix
+#' @param subject_col The name of the subject column in af, 
+#' default to "SubjectID"
+#' @param amp_col The name of the amplificate column in af and matrix, 
+#' default to "CompleteAmplificationID"
+#' @param value_col The name of the SeqCount column in matrix, 
+#' default to "Value"
+#' @param ctrl The named list of control with known integration sites,
+#' default is "CEM37" with known IS as in known_CEM_IS()
 #' @return Single value of the ratio between SeqCounts
 #'
 #' @importFrom magrittr `%>%`
@@ -195,9 +209,16 @@ shared_other_IS_ratio <- function(af, matrix,
 #' containing all the ratios, which includes information about the
 #' sample considered, the ratio itself and the type of IS considered.
 #'
-#' @usage shared_IS_ratio(af, matrix, ...)
 #' @param af The association file
 #' @param matrix The integration matrix
+#' @param subject_col The name of the subject column in af, 
+#' default to "SubjectID"
+#' @param amp_col The name of the amplificate column in af and matrix, 
+#' default to "CompleteAmplificationID"
+#' @param value_col The name of the SeqCount column in matrix, 
+#' default to "Value"
+#' @param ctrl The named list of control with known integration sites,
+#' default is "CEM37" with known IS as in known_CEM_IS()
 #' @return Dataframe of values corresponding to the ratios between SeqCounts
 #'
 #' @importFrom magrittr `%>%`
@@ -336,9 +357,16 @@ shared_IS_ratio <- function(af, matrix,
 #' dataframe containing all the ratios, which includes information about
 #' the IS, the sample, the ratio itself and the type of IS considered.
 #'
-#' @usage shared_IS_ratio_byIS(af, matrix, ...)
 #' @param af The association file
 #' @param matrix The integration matrix
+#' @param subject_col The name of the subject column in af, 
+#' default to "SubjectID"
+#' @param amp_col The name of the amplificate column in af and matrix, 
+#' default to "CompleteAmplificationID"
+#' @param value_col The name of the SeqCount column in matrix, 
+#' default to "Value"
+#' @param ctrl The named list of control with known integration sites,
+#' default is "CEM37" with known IS as in known_CEM_IS()
 #' @return Dataframe of IS and values corresponding to the ratios of SeqCounts
 #'
 #' @importFrom magrittr `%>%`

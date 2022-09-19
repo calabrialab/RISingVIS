@@ -24,7 +24,6 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 Depends: 
     R (>= 4.2),
-    magrittr,
     shiny
 Suggests: 
     testthat (>= 3.0.0),
@@ -56,4 +55,7 @@ Imports:
     tidyr,
     tibble, 
     utils
+Config/testthat/edition: 3
 StagedInstall: no
+VignetteBuilder: knitr
+biocViews: BiomedicalInformatics, Sequencing, SingleCell

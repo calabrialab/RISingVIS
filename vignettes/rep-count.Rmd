@@ -45,8 +45,9 @@ for which that IS is an artifact.
 
 # Load data
 
-First, create an appropriate matrix and association file. 
-These files are designed manually but simulate real research data.
+First, create an appropriate matrix and association file or import the
+ones that are included in the package data (these files are designed manually 
+to simulate real research data).
 
 ```{r setup}
 library(RISingVIS)
@@ -55,12 +56,29 @@ data("association_file")
 data("integration_matrix")
 ```
 
+If the input files that you want to use are different from our standard ones 
+(see [ISAnalytics](https://calabrialab.github.io/ISAnalytics/dev/index.html) 
+for more information) it is fundamental that you set up the workflow 
+though the dynamic vars that are available thanks to ISAnalytics. Take a look [here](https://calabrialab.github.io/ISAnalytics/dev/articles/workflow_start.html)
+to know how to do so!
+
 Once we have our data we can start computing ratios. 
 
 # replicates_IS_count()
 
 The function `replicates_IS_count()` counts the number of replicates for
-each sample for each single IS in the matrix. 
+each sample (control(s) included) for each single integration site in 
+the matrix. 
+
+Association file and integration matrix are the mandatory parameters. 
+Other parameters can be tuned at need:
+* **subject_col** (default is *SubjectID*): the name of the column 
+in the association file that reports the name of the subject 
+* **amp_col** (default is *CompleteAmplificationID*): the name of the column 
+in the association file and in the matrix that reports the identifier for the
+single amplification
+* **value_col** (default is *Value*): the name of the column in the integration
+matrix that reports the sequence count for that integration in that sample
 
 ```{r}
 replicates_IS_count(association_file, integration_matrix)
@@ -71,6 +89,20 @@ replicates_IS_count(association_file, integration_matrix)
 The function `replicates_IS_ratio()` computes the ratio of the replicates count
 for all the shared IS, considering each single sample and all samples together.
 
+Again the only mandatory parameters are the association file and the 
+integration matrix. The other parameters can be tuned at need and include, 
+other than the ones above mentioned, the following:
+
+* **ctrl** (default is *CEM37*): if not default, this parameter must be a named 
+list containing the name of the control cell line and the list of known 
+integration sites for that control line. Default control il CEM37, which known 
+integration sites can be viewed by calling the function `known_CEM_IS()`
+
+With the use of this function the ratio is reported for all shared integration 
+sites together, but considering one single sample at a time, then all together,
+and similarly one control at a time (if there are more than one) and then 
+all controls together. 
+
 ```{r}
 replicates_IS_ratio(association_file, integration_matrix)
 ```
@@ -78,8 +110,16 @@ replicates_IS_ratio(association_file, integration_matrix)
 # replicates_IS_ratio_byIS()
 
 The function `replicates_IS_ratio_byIS()` computes the ratio for all shared 
-integrations considering one IS at a time, again computing it against each 
+integration sites considering one IS at a time, again computing it against each 
 sample and against all samples together.
+
+Parameters are the same as before and can be tuned at need, with the 
+exception for the association file and integration matrix which are mandatory. 
+
+In this function the ratio is reported considering each integration site, 
+first against each single sample and considering each single control and then
+considering all samples and all (eventual) controls. 
+
 
 ```{r}
 replicates_IS_ratio_byIS(association_file, integration_matrix)

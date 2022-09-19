@@ -10,7 +10,7 @@
 #' @importFrom rlang .data
 
 get_is_vars <- function() {
-    is_vars <- mandatory_IS_vars(include_types = TRUE)
+    is_vars <- ISAnalytics::mandatory_IS_vars(include_types = TRUE)
     chr <- as.character(is_vars %>%
                             dplyr::filter(.data$tag == "chromosome") %>%
                             dplyr::select(.data$names))
@@ -168,8 +168,8 @@ filter_shared_other_is <- function(matrix, is_vars, subject_col,
     if (ctrl_line %in% filter_other_is_full[[subject_col]]) {
         filter_other_is_full_wide <-
             tidyr::pivot_wider(filter_other_is_full,
-                               names_from = all_of(subject_col),
-                               values_from = all_of(value_col),
+                               names_from = dplyr::all_of(subject_col),
+                               values_from = dplyr::all_of(value_col),
                                values_fill = 0)
         filter_other_is_wide <- filter_other_is_full_wide %>%
             dplyr::filter(.data[[ctrl_line]] > 0) %>%
@@ -381,8 +381,8 @@ compute_counts_byIS <- function(filter_shared, is_vars, subject_col,
 internal_compute_ratio_byIS <- function(counts, is_vars,
                                         subject_col, value_col, ctrl_line) {
     shared_counts <- counts %>%
-        tidyr::pivot_wider(names_from = all_of(subject_col),
-                           values_from = all_of(value_col), values_fill = 0)
+        tidyr::pivot_wider(names_from = dplyr::all_of(subject_col),
+                           values_from = dplyr::all_of(value_col), values_fill = 0)
     subjects <- counts %>%
         dplyr::filter(.data[[subject_col]] != ctrl_line) %>%
         dplyr::pull(.data[[subject_col]]) %>%
@@ -405,7 +405,7 @@ internal_compute_ratio_byIS <- function(counts, is_vars,
         return(data)
     }))
     ratios <- ratios %>%
-        tidyr::pivot_wider(names_from = all_of(subject_col),
-                           values_from = Ratio)
+        tidyr::pivot_wider(names_from = dplyr::all_of(subject_col),
+                           values_from = "Ratio")
     return(ratios)
 }

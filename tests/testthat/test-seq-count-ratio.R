@@ -262,7 +262,7 @@ test_that("shared_other_IS_ratio works with different control", {
     mat <- ctrl_matrix
     af <- ctrl_af
     r <- shared_other_IS_ratio(af, mat, ctrl = controls)
-    expect_equal(r, 0.01691, tolerance = 0.0001)
+    expect_equal(r, 0.01691729, tolerance = 0.0001)
 })
 
 test_that("shared_IS_ratio works with different control", {
