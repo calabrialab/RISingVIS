@@ -117,9 +117,8 @@ RecUI <- function(id) {
       )
     ),
     div(
-      style = "margin-top: 10px;",
+      style = "margin-top: 10px; width:80%;",
       align = "left",
-      width = "80%",
       uiOutput(ns(id_list()$recalibration$outputs$info_panel))
     ),
     div(
@@ -222,6 +221,11 @@ RecServer <- function(id, workflow) {
       rec_data <- reactiveVal(NULL)
       observeEvent(rec_data(), {
         workflow$set_recalibr(rec_data())
+        if (!is.null(rec_data())) {
+          shinyjs::show(id = id_list()$recalibration$inputs$next_btn)
+        } else {
+          shinyjs::hide(id = id_list()$recalibration$inputs$next_btn)
+        }
       })
       observeEvent(input[[
       id_list()$recalibration$inputs$rec_btn
@@ -254,6 +258,14 @@ RecServer <- function(id, workflow) {
           id_list()$recalibration$outputs$info_panel
         ]] <- renderUI(info_banner)
         rec_data(recalibr_results$res$result)
+        observeEvent(input[[
+          id_list()$recalibration$inputs$next_btn
+        ]], {
+          shinyjs::runjs(sprintf("
+                   $('#%s').slideUp('fast')
+                   ", id_list()$recalibration$inputs$next_btn))
+          shinyjs::show(id = id_list()$plot_section$section_id, asis = TRUE)
+        })
 
         shinyjs::enable(id = id_list()$recalibration$inputs$rec_btn)
         shinyjs::enable(id = id_list()$recalibration$inputs$skip_btn)

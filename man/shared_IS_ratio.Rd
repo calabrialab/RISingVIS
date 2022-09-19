@@ -3,10 +3,10 @@
 \name{shared_IS_ratio}
 \alias{shared_IS_ratio}
 \title{Returns a dataframe containing the ratios between the
-SeqCount for the considered IS in the CEM samples and the
+SeqCount for the considered IS in the control samples and the
 SeqCount for the considered IS in the other samples.}
 \usage{
-shared_IS_ratio(af, matrix)
+shared_IS_ratio(af, matrix, ...)
 }
 \arguments{
 \item{af}{The association file}
@@ -18,10 +18,10 @@ Dataframe of values corresponding to the ratios between SeqCounts
 }
 \description{
 This function focuses on two categories of shared IS: the ones
-that are known to belong to CEMs and the one that come from
+that are known to belong to controls and the one that come from
 the other samples. Also it considers the count for single
 subjects and for the overall sum of these subjects, meaning
-that the ratio is computed against each subjects
+that the ratio is computed against each subject's
 SeqCount and against the sum of the SeqCount of all subjects.
 After aggregation of the data gives as output a dataframe
 containing all the ratios, which includes information about the

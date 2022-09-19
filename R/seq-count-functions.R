@@ -2,18 +2,18 @@
 # Sequence count functions
 #-----------------------------------------------------------------------------#
 
-# shared_CEM_known_IS_ratio
-#' Returns the ratio bewteen the SeqCount for shared known CEM IS 
-#' in the CEMs and the SeqCount for those shared IS 
+# shared_control_known_IS_ratio
+#' Returns the ratio bewteen the SeqCount for shared known control IS
+#' in all controls and the SeqCount for those shared IS
 #' in the other samples
 #'
-#' This function focuses on the shared IS that are known 
-#' to belong to CEMs. 
-#' After aggregation of the data gives as output 
-#' the ratio between the SeqCount for those IS in the CEMs and 
+#' This function focuses on the shared IS that are known
+#' to belong to controls.
+#' After aggregation of the data gives as output
+#' the ratio between the SeqCount for those IS in all controls and
 #' the SeqCount for those IS in the other samples.
 #'
-#' @usage shared_CEM_known_IS_ratio(af, matrix)
+#' @usage shared_control_known_IS_ratio(af, matrix, ...)
 #' @param af The association file
 #' @param matrix The integration matrix
 #' @return Single value of the ratio between SeqCounts
@@ -22,19 +22,24 @@
 #' @importFrom rlang .data
 #'
 #' @export
-#' 
-#' @examples 
+#'
+#' @examples
 #' data("association_file", package = "RISingVIS")
 #' data("integration_matrix", package = "RISingVIS")
-#' R <- shared_CEM_known_IS_ratio(association_file, integration_matrix)
+#' R <- shared_control_known_IS_ratio(association_file, integration_matrix)
 #' R
 
-shared_CEM_known_IS_ratio <- function(af, matrix, 
-                                      subject_col = "SubjectID", 
-                                      amp_col = "CompleteAmplificationID", 
-                                      value_col = "Value") {
+shared_control_known_IS_ratio <- function(af, matrix,
+                                      subject_col = "SubjectID",
+                                      amp_col = "CompleteAmplificationID",
+                                      value_col = "Value",
+                                      ctrl = "CEM37") {
     # Check input files
     if (files_check(af, matrix, subject_col, amp_col, value_col) != TRUE) {
+        stop()
+    }
+    # Check control
+    if (ctrl_check(af, subject_col, ctrl) != TRUE) {
         stop()
     }
     # Aggregate matrix and af
@@ -45,34 +50,56 @@ shared_CEM_known_IS_ratio <- function(af, matrix,
         key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
-    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
+    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <-
         value_col
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Retrieve shared integration sites
-    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix, is_vars, 
-                                               subject_col)
-    if (nrow(filter_shared_cem_is) == 0) {
-        stop("There are no IS shared from CEMs to other samples")
+    filter_control <- find_shared_IS(aggreg_matrix, is_vars,
+                                     subject_col, value_col,
+                                     ctrl, "control")
+    if (!is.list(ctrl)) {
+        lengths_ctrl <- length(filter_control)
+    } else {
+        lengths_ctrl <- purrr::map(filter_control[], function(x) {
+            dim(x)[1]
+        })
+    }
+    if (sum(sapply(lengths_ctrl,
+                   function(x) all(x == 0, na.rm = TRUE))) ==
+        length(lengths_ctrl)) {
+        stop("There are no IS shared from controls to other samples")
+    }
+    if (sum(sapply(lengths_ctrl,
+                   function(x) all(x == 0, na.rm = TRUE))) > 0) {
+        warning("One of the control lines is not sharing IS with samples")
     }
     # Compute ratio
-    R <- compute_ratio(filter_shared_cem_is, is_vars, subject_col, value_col)
-    Ratio <- R %>% 
-        dplyr::filter(.data$Sample == "All samples") %>% 
-        dplyr::pull(.data$Ratio)
-    return(Ratio)
+    R <- compute_ratio(filter_control, is_vars,
+                       subject_col, value_col, ctrl, type = "by sample")
+    if (length(names(ctrl)) > 1) {
+        Ratio <- R %>%
+            dplyr::filter(.data$Sample == "All samples") %>%
+            dplyr::pull(.data$`All controls`)
+        return(Ratio)
+    } else {
+        Ratio <- R %>%
+            dplyr::filter(.data$Sample == "All samples")
+        Ratio <- Ratio[[ctrl]]
+        return(Ratio)
+    }
 }
 
 
 # shared_other_IS_ratio
-#' Returns the ratio bewteen the SeqCount for shared IS coming from 
-#' other samples in the CEMs and the SeqCount for those shared IS
+#' Returns the ratio bewteen the SeqCount for shared IS coming from
+#' other samples in the controls and the SeqCount for those shared IS
 #' in the other samples
 #'
-#' This function focuses on the shared IS that are not known to 
-#' belong to CEMs but come from the other samples.
-#' After aggregation of the data gives as output the ratio between 
-#' the SeqCount for those IS in the CEMs and the SeqCount for those IS 
+#' This function focuses on the shared IS that are not known to
+#' belong to controls but come from the other samples.
+#' After aggregation of the data gives as output the ratio between
+#' the SeqCount for those IS in all controls and the SeqCount for those IS
 #' in the other samples.
 #'
 #' @usage shared_other_IS_ratio(af, matrix)
@@ -84,19 +111,24 @@ shared_CEM_known_IS_ratio <- function(af, matrix,
 #' @importFrom rlang .data
 #'
 #' @export
-#' 
-#' @examples 
+#'
+#' @examples
 #' data("association_file", package = "RISingVIS")
 #' data("integration_matrix", package = "RISingVIS")
 #' R <- shared_other_IS_ratio(association_file, integration_matrix)
 #' R
 
-shared_other_IS_ratio <- function(af, matrix, 
+shared_other_IS_ratio <- function(af, matrix,
                                   subject_col = "SubjectID",
-                                  amp_col = "CompleteAmplificationID", 
-                                  value_col = "Value") {
+                                  amp_col = "CompleteAmplificationID",
+                                  value_col = "Value",
+                                  ctrl = "CEM37") {
     # Check input files
     if (files_check(af, matrix, subject_col, amp_col, value_col) != TRUE) {
+        stop()
+    }
+    # Check control
+    if (ctrl_check(af, subject_col, ctrl) != TRUE) {
         stop()
     }
     # Aggregate matrix and af
@@ -107,41 +139,63 @@ shared_other_IS_ratio <- function(af, matrix,
         key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
-    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
+    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <-
         value_col
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Retrieve shared integration sites
-    filter_other_is <- find_shared_other_IS(aggreg_matrix, is_vars, 
-                                            subject_col, value_col)
-    if (nrow(filter_other_is) == 0) {
-        stop("There are no IS shared from the samples to CEMs")
+    filter_other <- find_shared_IS(aggreg_matrix, is_vars,
+                                   subject_col, value_col,
+                                   ctrl, type = "other")
+    if (!is.list(ctrl)) {
+        lengths_other <- length(filter_other)
+    } else {
+        lengths_other <- purrr::map(filter_other[], function(x) {
+            dim(x)[1]
+        })
+    }
+    if (sum(sapply(lengths_other,
+                   function(x) all(x == 0, na.rm = TRUE))) ==
+        length(lengths_other)) {
+        stop("There are no IS shared from samples to controls")
+    }
+    if (sum(sapply(lengths_other,
+                   function(x) all(x == 0, na.rm = TRUE))) > 0) {
+        warning("One of the control lines has no shared IS from samples")
     }
     # Compute ratio
-    R <- compute_ratio(filter_other_is, is_vars, subject_col, value_col)
-    Ratio <- R %>% 
-        dplyr::filter(.data$Sample == "All samples") %>% 
-        dplyr::pull(.data$Ratio)
-    return(Ratio)
+    R <- compute_ratio(filter_other, is_vars, subject_col,
+                       value_col, ctrl, type = "by sample")
+    if (length(names(ctrl)) > 1) {
+        Ratio <- R %>%
+            dplyr::filter(.data$Sample == "All samples") %>%
+            dplyr::pull(.data$`All controls`)
+        return(Ratio)
+    } else {
+        Ratio <- R %>%
+            dplyr::filter(.data$Sample == "All samples")
+        Ratio <- Ratio[[ctrl]]
+        return(Ratio)
+    }
 }
 
 
 # shared_IS_ratio
-#' Returns a dataframe containing the ratios between the 
-#' SeqCount for the considered IS in the CEM samples and the 
+#' Returns a dataframe containing the ratios between the
+#' SeqCount for the considered IS in the control samples and the
 #' SeqCount for the considered IS in the other samples.
 #'
-#' This function focuses on two categories of shared IS: the ones 
-#' that are known to belong to CEMs and the one that come from 
-#' the other samples. Also it considers the count for single 
-#' subjects and for the overall sum of these subjects, meaning 
-#' that the ratio is computed against each subjects
+#' This function focuses on two categories of shared IS: the ones
+#' that are known to belong to controls and the one that come from
+#' the other samples. Also it considers the count for single
+#' subjects and for the overall sum of these subjects, meaning
+#' that the ratio is computed against each subject's
 #' SeqCount and against the sum of the SeqCount of all subjects.
-#' After aggregation of the data gives as output a dataframe 
-#' containing all the ratios, which includes information about the 
+#' After aggregation of the data gives as output a dataframe
+#' containing all the ratios, which includes information about the
 #' sample considered, the ratio itself and the type of IS considered.
 #'
-#' @usage shared_IS_ratio(af, matrix)
+#' @usage shared_IS_ratio(af, matrix, ...)
 #' @param af The association file
 #' @param matrix The integration matrix
 #' @return Dataframe of values corresponding to the ratios between SeqCounts
@@ -149,19 +203,24 @@ shared_other_IS_ratio <- function(af, matrix,
 #' @importFrom magrittr `%>%`
 #'
 #' @export
-#' 
-#' @examples 
+#'
+#' @examples
 #' data("association_file", package = "RISingVIS")
 #' data("integration_matrix", package = "RISingVIS")
 #' R <- shared_IS_ratio(association_file, integration_matrix)
 #' head(R)
 
-shared_IS_ratio <- function(af, matrix, 
-                            subject_col = "SubjectID", 
-                            amp_col = "CompleteAmplificationID", 
-                            value_col = "Value") {
+shared_IS_ratio <- function(af, matrix,
+                            subject_col = "SubjectID",
+                            amp_col = "CompleteAmplificationID",
+                            value_col = "Value",
+                            ctrl = "CEM37") {
     # Check input files
     if (files_check(af, matrix, subject_col, amp_col, value_col) != TRUE) {
+        stop()
+    }
+    # Check control
+    if (ctrl_check(af, subject_col, ctrl) != TRUE) {
         stop()
     }
     # Aggregate matrix and af
@@ -172,68 +231,112 @@ shared_IS_ratio <- function(af, matrix,
         key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
-    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
+    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <-
         value_col
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Find shared integration sites belonging to controls
-    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix, is_vars,
-                                               subject_col)
+    filter_control <- find_shared_IS(aggreg_matrix, is_vars,
+                                               subject_col, value_col,
+                                               ctrl, type = "control")
     # Find shared integration sites belonging to samples
-    filter_shared_other_is <- find_shared_other_IS(aggreg_matrix, is_vars,
-                                                   subject_col, value_col)
+    filter_other <- find_shared_IS(aggreg_matrix, is_vars,
+                                             subject_col, value_col,
+                                             ctrl, type = "other")
     # Error if no IS is shared
-    if (nrow(filter_shared_cem_is) == 0 & nrow(filter_shared_other_is) == 0) {
+    if (!is.list(ctrl)) {
+        lengths_ctrl <- length(filter_control)
+        lengths_other <- length(filter_other)
+    } else {
+        lengths_ctrl <- purrr::map(filter_control[], function(x) {
+            dim(x)[1]
+        })
+        lengths_other <- purrr::map(filter_other[], function(x) {
+            dim(x)[1]
+        })
+    }
+    if (sum(sapply(lengths_ctrl,
+                   function(x) all(x == 0, na.rm = TRUE))) ==
+        length(lengths_ctrl) &
+        sum(sapply(lengths_other,
+                   function(x) all(x == 0, na.rm = TRUE))) ==
+        length(lengths_other)) {
         stop("There are no IS shared")
     }
+    if (sum(sapply(lengths_ctrl,
+                   function(x) all(x == 0, na.rm = TRUE))) > 0) {
+        warning("One of the control lines is not sharing IS with samples")
+    }
+    if (sum(sapply(lengths_other,
+                   function(x) all(x == 0, na.rm = TRUE))) > 0) {
+        warning("One of the control lines has no shared IS from samples")
+    }
     # Compute ratios
-    if (nrow(filter_shared_cem_is) > 0) {
-        Ratios_known_CEM_IS <- compute_ratio(filter_shared_cem_is, is_vars,
-                                             subject_col, value_col)
-        Ratios_known_CEM_IS$IS_Source <- "CEM"
-        rownames(Ratios_known_CEM_IS) <- NULL
+    if (sum(sapply(lengths_ctrl,
+                   function(x) all(x == 0, na.rm = TRUE))) !=
+        length(lengths_ctrl)) {
+        Ratios_known_control_IS <- compute_ratio(filter_control,
+                                                 is_vars, subject_col,
+                                                 value_col, ctrl,
+                                                 type = "by sample")
+        Ratios_known_control_IS$IS_Source <- "Control"
     } else {
-        warning("There are no IS shared from CEMs to other samples")
+        warning("There are no IS shared from controls to other samples")
     }
-    if (nrow(filter_shared_other_is) > 0) {
-        Ratios_other_IS <- compute_ratio(filter_shared_other_is, is_vars,
-                                         subject_col, value_col)
+    if (sum(sapply(lengths_other,
+                   function(x) all(x == 0, na.rm = TRUE)) !=
+            length(lengths_other))) {
+        Ratios_other_IS <- compute_ratio(filter_other, is_vars,
+                                         subject_col, value_col, ctrl,
+                                         type = "by sample")
         Ratios_other_IS$IS_Source <- "Samples"
-        rownames(Ratios_other_IS) <- NULL
     } else {
-        warning("There are no IS shared from the samples to CEMs")
+        warning("There are no IS shared from the samples to controls")
     }
-    if (nrow(filter_shared_cem_is) > 0 & nrow(filter_shared_other_is) > 0) {
-        Ratios_shared_IS <- Ratios_known_CEM_IS %>%
+    if (sum(sapply(lengths_ctrl,
+                   function(x) all(x == 0, na.rm = TRUE))) !=
+        length(lengths_ctrl) &
+        sum(sapply(lengths_other,
+                   function(x) all(x == 0, na.rm = TRUE))) !=
+        length(lengths_other)) {
+        Ratios_shared_IS <- Ratios_known_control_IS %>%
             dplyr::bind_rows(Ratios_other_IS)
         return(Ratios_shared_IS)
-    } else if (nrow(filter_shared_cem_is) > 0 & 
-               nrow(filter_shared_other_is) == 0) {
-        return(Ratios_known_CEM_IS)
-    } else if (nrow(filter_shared_cem_is) == 0 & 
-               nrow(filter_shared_other_is) > 0) {
+    } else if (sum(sapply(lengths_ctrl,
+                          function(x) all(x == 0, na.rm = TRUE))) !=
+               length(lengths_ctrl) &
+               sum(sapply(lengths_other,
+                          function(x) all(x == 0, na.rm = TRUE))) ==
+               length(lengths_other)) {
+        return(Ratios_known_control_IS)
+    } else if (sum(sapply(lengths_ctrl,
+                          function(x) all(x == 0, na.rm = TRUE))) ==
+               length(lengths_ctrl) &
+               sum(sapply(lengths_other,
+                          function(x) all(x == 0, na.rm = TRUE)))!=
+               length(lengths_other)) {
         return(Ratios_other_IS)
     }
 }
 
 
 # shared_IS_ratio_byIS
-#' Returns a dataframe containing the ratios between the SeqCount 
-#' for each IS in the CEM samples and the SeqCount for the same IS 
+#' Returns a dataframe containing the ratios between the SeqCount
+#' for each IS in the control samples and the SeqCount for the same IS
 #' in the other samples.
 #'
 #' This function returns the above mentioned ratio for each shared IS.
 #' It focuses on two categories of shared IS: the ones that are
-#' known to belong to CEMs and the one that come from the other samples.
-#' Also it considers the count for single subjects and for the 
-#' overall sum of these subjects, meaning that the ratio is computed 
-#' against each subjects SeqCount and against the sum of the SeqCount 
-#' of all subjects. 
-#' After aggregation of the data gives as output a 
-#' dataframe containing all the ratios, which includes information about 
+#' known to belong to controls and the one that come from the other samples.
+#' Also it considers the count for single subjects and for the
+#' overall sum of these subjects, meaning that the ratio is computed
+#' against each subjects SeqCount and against the sum of the SeqCount
+#' of all subjects.
+#' After aggregation of the data gives as output a
+#' dataframe containing all the ratios, which includes information about
 #' the IS, the sample, the ratio itself and the type of IS considered.
 #'
-#' @usage shared_IS_ratio_byIS(af, matrix)
+#' @usage shared_IS_ratio_byIS(af, matrix, ...)
 #' @param af The association file
 #' @param matrix The integration matrix
 #' @return Dataframe of IS and values corresponding to the ratios of SeqCounts
@@ -241,19 +344,24 @@ shared_IS_ratio <- function(af, matrix,
 #' @importFrom magrittr `%>%`
 #'
 #' @export
-#' 
-#' @examples 
+#'
+#' @examples
 #' data("association_file", package = "RISingVIS")
 #' data("integration_matrix", package = "RISingVIS")
 #' R <- shared_IS_ratio_byIS(association_file, integration_matrix)
 #' head(R)
 
-shared_IS_ratio_byIS <- function(af, matrix, 
-                                 subject_col = "SubjectID", 
-                                 amp_col = "CompleteAmplificationID", 
-                                 value_col = "Value") {
+shared_IS_ratio_byIS <- function(af, matrix,
+                                 subject_col = "SubjectID",
+                                 amp_col = "CompleteAmplificationID",
+                                 value_col = "Value",
+                                 ctrl = "CEM37") {
     # Check input files
     if (files_check(af, matrix, subject_col, amp_col, value_col) != TRUE) {
+        stop()
+    }
+    # Check control
+    if (ctrl_check(af, subject_col, ctrl) != TRUE) {
         stop()
     }
     # Aggregate matrix and af
@@ -264,49 +372,92 @@ shared_IS_ratio_byIS <- function(af, matrix,
         key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
-    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <- 
+    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <-
         value_col
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Find shared integration sites
     # Belonging to controls
-    filter_shared_cem_is <- find_shared_CEM_IS(aggreg_matrix, is_vars,
-                                               subject_col)
+    filter_control <- find_shared_IS(aggreg_matrix, is_vars,
+                                               subject_col, value_col,
+                                               ctrl, "control")
     # Belonging to samples
-    filter_shared_other_is <- find_shared_other_IS(aggreg_matrix, is_vars,
-                                                   subject_col, value_col)
+    filter_other <- find_shared_IS(aggreg_matrix, is_vars,
+                                             subject_col, value_col,
+                                             ctrl, "other")
     # Error if no IS is shared
-    if (nrow(filter_shared_cem_is) == 0 & nrow(filter_shared_other_is) == 0) {
+    if (!is.list(ctrl)) {
+        lengths_ctrl <- length(filter_control)
+        lengths_other <- length(filter_other)
+    } else {
+        lengths_ctrl <- purrr::map(filter_control[], function(x) {
+            dim(x)[1]
+        })
+        lengths_other <- purrr::map(filter_other[], function(x) {
+            dim(x)[1]
+        })
+    }
+    if (sum(sapply(lengths_ctrl,
+                   function(x) all(x == 0, na.rm = TRUE))) ==
+        length(lengths_ctrl) &
+        sum(sapply(lengths_other,
+                   function(x) all(x == 0, na.rm = TRUE))) ==
+        length(lengths_other)) {
         stop("There are no IS shared")
     }
-    # Compute ratios
-    if (nrow(filter_shared_cem_is) > 0) {
-        # Compute ratio for known CEM IS
-        known_cem_is_ratios <- 
-            compute_ratio_byIS(filter_shared_cem_is, is_vars, 
-                               subject_col, value_col)
-        known_cem_is_ratios$IS_Source <- "CEM"
-    } else {
-        warning("There are no IS shared from CEMs to other samples")
+    if (sum(sapply(lengths_ctrl,
+                   function(x) all(x == 0, na.rm = TRUE))) > 0) {
+        warning("One of the control lines is not sharing IS with samples")
     }
-    if (nrow(filter_shared_other_is) > 0) {
+    if (sum(sapply(lengths_other,
+                   function(x) all(x == 0, na.rm = TRUE))) > 0) {
+        warning("One of the control lines has no shared IS from samples")
+    }
+    # Compute ratios
+    if (sum(sapply(lengths_ctrl,
+                   function(x) all(x == 0, na.rm = TRUE))) !=
+        length(lengths_ctrl)) {
+        # Compute ratio for known control IS
+        known_control_is_ratios <-
+            compute_ratio(filter_control, is_vars,
+                               subject_col, value_col, ctrl, type = "by IS")
+        known_control_is_ratios$IS_Source <- "Control"
+    } else {
+        warning("There are no IS shared from controls to other samples")
+    }
+    if (sum(sapply(lengths_other,
+                   function(x) all(x == 0, na.rm = TRUE))) !=
+        length(lengths_other)) {
         # Compute ratio for shared IS from samples
         other_is_ratios <-
-            compute_ratio_byIS(filter_shared_other_is, is_vars,
-                               subject_col, value_col)
+            compute_ratio(filter_other, is_vars,
+                               subject_col, value_col, ctrl, type = "by IS")
         other_is_ratios$IS_Source <- "Samples"
     } else {
-        warning("There are no IS shared from the samples to CEMs")
+        warning("There are no IS shared from samples to controls")
     }
-    if (nrow(filter_shared_cem_is) > 0 & nrow(filter_shared_other_is) > 0) {
-        shared_IS_ratio <- known_cem_is_ratios %>%
+    if (sum(sapply(lengths_ctrl,
+                   function(x) all(x == 0, na.rm = TRUE))) !=
+        length(lengths_ctrl) &
+        sum(sapply(lengths_other,
+                   function(x) all(x == 0, na.rm = TRUE))) !=
+        length(lengths_other)) {
+        shared_IS_ratio <- known_control_is_ratios %>%
             dplyr::bind_rows(other_is_ratios)
         return(shared_IS_ratio)
-    } else if (nrow(filter_shared_cem_is) > 0 & 
-               nrow(filter_shared_other_is) == 0) {
-        return(known_cem_is_ratios)
-    } else if (nrow(filter_shared_cem_is) == 0 & 
-               nrow(filter_shared_other_is) > 0) {
+    } else if (sum(sapply(lengths_ctrl,
+                          function(x) all(x == 0, na.rm = TRUE))) !=
+               length(lengths_ctrl) &
+               sum(sapply(lengths_other,
+                          function(x) all(x == 0, na.rm = TRUE))) ==
+               length(lengths_other)) {
+        return(known_control_is_ratios)
+    } else if (sum(sapply(lengths_ctrl,
+                          function(x) all(x == 0, na.rm = TRUE))) ==
+               length(lengths_ctrl) &
+               sum(sapply(lengths_other,
+                          function(x) all(x == 0, na.rm = TRUE))) !=
+               length(lengths_other))  {
         return(other_is_ratios)
     }
 }

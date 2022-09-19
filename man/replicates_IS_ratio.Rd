@@ -3,11 +3,11 @@
 \name{replicates_IS_ratio}
 \alias{replicates_IS_ratio}
 \title{Returns a dataframe containing the ratios between the number
-of replicates for the considered type of IS in the CEM samples
+of replicates for the considered type of IS in the control samples
 and the number of replicates for the considered type of IS
 in the other samples.}
 \usage{
-replicates_IS_ratio(af, matrix)
+replicates_IS_ratio(af, matrix, ...)
 }
 \arguments{
 \item{af}{The association file}
@@ -21,7 +21,7 @@ Dataframe of values corresponding to the ratios
 This function counts the number of replicates in which each shared IS
 is found and sums them to obtain an overall count for each sample.
 This function focuses on two categories of shared IS: the ones that are
-known to belong to CEMs and the one that come from the other samples.
+known to belong to controls and the one that come from the other samples.
 Also it considers the count for single subjects and for the overall
 sum of these subjects, meaning that the ratio is computed against
 each subjects replicate count and against the sum of the replicate

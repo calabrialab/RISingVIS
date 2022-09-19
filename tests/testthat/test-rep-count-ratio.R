@@ -21,21 +21,22 @@ share_mat <- tibble::tribble(
 )
 
 ratios_out <- tibble::tribble(
-    ~Sample, ~Ratio, ~IS_Source,
-    "A", 2, "CEM",
-    "B", 2, "CEM",
-    "All samples", 1, "CEM",
+    ~Sample, ~CEM37, ~IS_Source,
+    "A", 2, "Control",
+    "B", 2, "Control",
+    "All samples", 1, "Control",
     "A", 2, "Samples",
     "B", 2, "Samples",
     "All samples", 1, "Samples"
 )
 
 ratios_byIS_out <- tibble::tribble(
-    ~chr, ~integration_locus, ~strand, ~A, ~B, ~`All samples`, ~IS_Source,
-    "11", 64537168, "-", 1, NA, 1, "CEM",
-    "2", 73762398, "-", NA, 1, 1, "CEM",
-    "17", 1632982, "-", 1, NA, 1, "Samples",
-    "5", 83626283, "+", NA, 1, 1, "Samples",
+    ~chr, ~integration_locus, ~strand, ~Control, ~A, ~B,
+    ~`All samples`, ~IS_Source,
+    "11", 64537168, "-", "CEM37", 1, NA, 1, "Control",
+    "2", 73762398, "-", "CEM37", NA, 1, 1, "Control",
+    "17", 1632982, "-", "CEM37", 1, NA, 1, "Samples",
+    "5", 83626283, "+", "CEM37", NA, 1, 1, "Samples",
 )
 
 no_share_mat <- tibble::tribble(
@@ -51,7 +52,7 @@ no_share_mat <- tibble::tribble(
     "21", 9243522, "-", "B3", 600
 )
 
-no_share_CEM_mat <- tibble::tribble(
+no_share_control_mat <- tibble::tribble(
     ~chr, ~integration_locus, ~strand, ~CompleteAmplificationID, ~Value,
     "8", 8866486, "+", "CEM1", 713,
     "11", 64537168, "-", "CEM2", 463,
@@ -88,6 +89,73 @@ mod_af <- tibble::tibble(ProjectID = "Proj1", PoolID = "Pool1",
                                                      "A1", "A2", "A3",
                                                      "B1", "B2", "B3"))
 
+ctrl_matrix <- tibble::tribble(
+    ~chr, ~integration_locus, ~strand, ~CompleteAmplificationID, ~Value,
+    "11", 64537168, "-", "ctrl1_2", 463,
+    "2", 73762398, "-", "ctrl1_3", 645,
+    "8", 8866486, "+", "ctrl2_1", 703,
+    "11", 64537168, "-", "ctrl2_2", 473,
+    "4", 73292632, "+", "A1", 215,
+    "19", 8621028, "-", "A2", 309,
+    "17", 1632982, "-", "A3", 311,
+    "2", 9876543, "+", "B1", 270,
+    "5", 83626283, "+", "B2", 753,
+    "21", 9243522, "-", "B3", 600,
+    "17", 1632982, "-", "ctrl1_3", 11,
+    "5", 83626283, "+", "ctrl2_1", 7,
+    "11", 64537168, "-", "A2", 3,
+    "2", 73762398, "-", "B3", 5
+)
+
+ctrl_af <- tibble::tibble(ProjectID = "Proj1", PoolID = "Pool1",
+                          SubjectID = c("ctrl1", "ctrl1", "ctrl1",
+                                        "ctrl2", "ctrl2", "ctrl2",
+                                        "A", "A", "A", "B", "B", "B"),
+                          CompleteAmplificationID = c("ctrl1_1", "ctrl1_2",
+                                                      "ctrl1_3", "ctrl2_1",
+                                                      "ctrl2_2", "ctrl2_3",
+                                                      "A1", "A2", "A3",
+                                                      "B1", "B2", "B3"))
+
+ctrl_out <- tibble::tribble(
+    ~Sample, ~ctrl1, ~ctrl2, ~`All controls`, ~IS_Source,
+    "A", 2, 1, 3, "Control",
+    "B", 2, NA, 3, "Control",
+    "All samples", 1, 1, 1.5, "Control",
+    "A", 1, NA, 2, "Samples",
+    "All samples", 1, 1, 1, "Samples",
+    "B", NA, 1, 2, "Samples"
+)
+
+ctrl_byIS_out <- tibble::tribble(
+    ~chr, ~integration_locus, ~strand, ~Control,
+    ~A, ~B, ~`All samples`, ~IS_Source,
+    "11", 64537168, "-", "ctrl1", 1, NA, 1, "Control",
+    "2", 73762398, "-", "ctrl1", NA, 1, 1, "Control",
+    "11", 64537168, "-", "ctrl2", 1, NA, 1, "Control",
+    "11", 64537168, "-", "All controls", 2, NA, 2, "Control",
+    "2", 73762398, "-", "All controls", NA, 1, 1, "Control",
+    "17", 1632982, "-", "ctrl1", 1, NA, 1, "Samples",
+    "5", 83626283, "+", "ctrl2", NA, 1, 1, "Samples",
+    "17", 1632982, "-", "All controls", 1, NA, 1, "Samples",
+    "5", 83626283, "+", "All controls", NA, 1, 1, "Samples"
+)
+
+
+ctrl_1_known_is <- tibble::tribble(
+    ~chr,	~integration_locus,	~strand,
+    "11",	64537168,	"-",
+    "2",	73762398,	"-"
+)
+
+ctrl_2_known_is <- tibble::tribble(
+    ~chr,	~integration_locus,	~strand,
+    "11",	64537168,	"-",
+    "8",	8866486,	"+"
+)
+
+controls <- list(ctrl1 = ctrl_1_known_is,
+                 ctrl2 = ctrl_2_known_is)
 
 # Correct output
 
@@ -136,7 +204,7 @@ test_that("replicates_IS_ratio reports error and warnings for no sharing", {
 })
 
 test_that("replicates_IS_ratio reports warning for no sharing from CEMs", {
-    mat <- no_share_CEM_mat
+    mat <- no_share_control_mat
     af <- association_file
     expect_warning(replicates_IS_ratio(af, mat))
     expect_warning(replicates_IS_ratio_byIS(af, mat))
@@ -158,11 +226,13 @@ test_that("replicates_IS_count works with non-default columns", {
     counts <- replicates_IS_count(af, mat, subject_col = "Subject")
     row <- tibble::tibble_row(counts %>%
                                   dplyr::filter(chr == "2" &
-                                                    integration_locus == 73762398 &
+                                                    integration_locus ==
+                                                    73762398 &
                                                     strand == "-"))
     row2 <- tibble::tibble_row(counts %>%
                                    dplyr::filter(chr == "19" &
-                                                     integration_locus == 8621028 &
+                                                     integration_locus ==
+                                                     8621028 &
                                                      strand == "-"))
     expect_true(row$CEM37 == 1 &
                     is.na(row$A) == TRUE &
@@ -184,4 +254,21 @@ test_that("replicates_IS_ratio_byIS works with non-default columns", {
     af <- mod_af
     r <- replicates_IS_ratio_byIS(af, mat, subject_col = "Subject")
     expect_equal(tibble::tibble(r), ratios_byIS_out, tolerance = 0.0001)
+})
+
+
+# Work with different controls
+
+test_that("replicates_IS_ratio works with different control", {
+    mat <- ctrl_matrix
+    af <- ctrl_af
+    r <- replicates_IS_ratio(af, mat, ctrl = controls)
+    expect_equal(tibble::tibble(r), ctrl_out, tolerance = 0.0001)
+})
+
+test_that("replicates_IS_ratio_byIS works with different control", {
+    mat <- ctrl_matrix
+    af <- ctrl_af
+    r <- replicates_IS_ratio_byIS(af, mat, ctrl = controls)
+    expect_equal(tibble::tibble(r), ctrl_byIS_out, tolerance = 0.0001)
 })
