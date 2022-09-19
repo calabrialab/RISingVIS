@@ -55,7 +55,3 @@ Imports:
     tidyr,
     tibble, 
     utils
-Config/testthat/edition: 3
-StagedInstall: no
-VignetteBuilder: knitr
-biocViews: BiomedicalInformatics, Sequencing, SingleCell
