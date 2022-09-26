@@ -134,6 +134,7 @@ find_shared_IS <- function(matrix, is_vars, subject_col,
 
 filter_shared_known_is <- function(matrix, is_vars, subject_col, 
                                    ctrl_line, known_is) {
+    known_is$integration_locus <- as.character(known_is$integration_locus)
     dplyr::bind_rows(apply(known_is, 1, function(x) {
         matrix_rows <- matrix %>%
             dplyr::filter(.data[[is_vars[1]]] == x["chr"] &
