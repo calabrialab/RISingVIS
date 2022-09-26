@@ -24,20 +24,34 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 Depends: 
     R (>= 4.2),
-    magrittr, 
-    rlang
+    shiny
 Suggests: 
     testthat (>= 3.0.0),
     knitr, 
     rmarkdown, 
-    BiocStyle, 
+    BiocStyle
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+biocViews: BiomedicalInformatics, Sequencing, SingleCell
+Imports: 
     ISAnalytics,
+    bslib,
+    shinyWidgets,
+    shinyFiles,
+    fs,
+    magrittr,
+    sass,
+    shinyjs,
+    dplyr,
+    htmlwidgets,
+    progressr,
+    purrr,
+    reactable,
+    rlang,
+    withr,
+    shinyvalidate,
     dplyr,
     purrr,
     tidyr,
     tibble, 
-    utils, 
-    tidyselect
-Config/testthat/edition: 3
-VignetteBuilder: knitr
-biocViews: BiomedicalInformatics, Sequencing, SingleCell
+    utils

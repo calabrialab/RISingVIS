@@ -1,0 +1,405 @@
+{
+    "mandatory_IS_vars":
+    [
+        {
+            "names": "chr",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "chromosome"
+        },
+        {
+            "names": "integration_locus",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "locus"
+        },
+        {
+            "names": "strand",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "is_strand"
+        }
+    ],
+    "annotation_IS_vars":
+    [
+        {
+            "names": "GeneName",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "gene_symbol"
+        },
+        {
+            "names": "GeneStrand",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "gene_strand"
+        }
+    ],
+    "association_file_columns":
+    [
+        {
+            "names": "ProjectID",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "project_id"
+        },
+        {
+            "names": "PoolID",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "pool_id"
+        },
+        {
+            "names": "TagSequence",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "tag_seq"
+        },
+        {
+            "names": "SubjectID",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "subject"
+        },
+        {
+            "names": "VectorID",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "vector_id"
+        },
+        {
+            "names": "Tissue",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "tissue"
+        },
+        {
+            "names": "TimePoint",
+            "types": "char",
+            "transform":
+            [
+                "stringr::str_pad(.x, 4, side = \"left\", pad = \"0\")"
+            ],
+            "flag": "required",
+            "tag": "tp_days"
+        },
+        {
+            "names": "PCRMethod",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "pcr_method"
+        },
+        {
+            "names": "CellMarker",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "cell_marker"
+        },
+        {
+            "names": "NGSTechnology",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "ngs_tech"
+        },
+        {
+            "names": "ReplicateNumber",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "pcr_replicate"
+        },
+        {
+            "names": "Genome",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "genome"
+        },
+        {
+            "names": "concatenatePoolIDSeqRun",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "vispa_concatenate"
+        },
+        {
+            "names": "CompleteAmplificationID",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "pcr_repl_id"
+        },
+        {
+            "names": "PathToFolderProjectID",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "proj_folder"
+        },
+        {
+            "names": "my_column",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "NA_character"
+        }
+    ],
+    "iss_stats_specs":
+    [
+        {
+            "names": "RUN_NAME",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required"
+        },
+        {
+            "names": "POOL",
+            "types": "char",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required",
+            "tag": "vispa_concatenate"
+        },
+        {
+            "names": "TAG",
+            "types": "char",
+            "transform":
+            [
+                "stringr::str_replace_all(.x, pattern = \"\\\\.\", replacement = \"\")"
+            ],
+            "flag": "required",
+            "tag": "tag_seq"
+        },
+        {
+            "names": "RAW_READS",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "optional"
+        },
+        {
+            "names": "QUALITY_PASSED",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "optional"
+        },
+        {
+            "names": "PHIX_MAPPING",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "optional"
+        },
+        {
+            "names": "PLASMID_MAPPED_BYPOOL",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "optional"
+        },
+        {
+            "names": "BARCODE_MUX",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "required"
+        },
+        {
+            "names": "LTR_IDENTIFIED",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "optional"
+        },
+        {
+            "names": "TRIMMING_FINAL_LTRLC",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "optional"
+        },
+        {
+            "names": "LV_MAPPED",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "optional"
+        },
+        {
+            "names": "BWA_MAPPED_OVERALL",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "optional"
+        },
+        {
+            "names": "ISS_MAPPED_OVERALL",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "optional"
+        },
+        {
+            "names": "ISS_MAPPED_PP",
+            "types": "int",
+            "transform":
+            [
+                "NULL"
+            ],
+            "flag": "optional"
+        }
+    ],
+    "matrix_file_suffixes":
+    [
+        {
+            "quantification": "seqCount",
+            "matrix_type": "annotated",
+            "file_suffix": "seqCount_matrix.no0.annotated.tsv.gz"
+        },
+        {
+            "quantification": "fragmentEstimate",
+            "matrix_type": "annotated",
+            "file_suffix": "fragmentEstimate_matrix.no0.annotated.tsv.gz"
+        },
+        {
+            "quantification": "barcodeCount",
+            "matrix_type": "annotated",
+            "file_suffix": "barcodeCount_matrix.no0.annotated.tsv.gz"
+        },
+        {
+            "quantification": "cellCount",
+            "matrix_type": "annotated",
+            "file_suffix": "cellCount_matrix.no0.annotated.tsv.gz"
+        },
+        {
+            "quantification": "ShsCount",
+            "matrix_type": "annotated",
+            "file_suffix": "ShsCount_matrix.no0.annotated.tsv.gz"
+        },
+        {
+            "quantification": "seqCount",
+            "matrix_type": "not_annotated",
+            "file_suffix": "seqCount_matrix.tsv.gz"
+        },
+        {
+            "quantification": "fragmentEstimate",
+            "matrix_type": "not_annotated",
+            "file_suffix": "fragmentEstimate_matrix.tsv.gz"
+        },
+        {
+            "quantification": "barcodeCount",
+            "matrix_type": "not_annotated",
+            "file_suffix": "barcodeCount_matrix.tsv.gz"
+        },
+        {
+            "quantification": "cellCount",
+            "matrix_type": "not_annotated",
+            "file_suffix": "cellCount_matrix.tsv.gz"
+        },
+        {
+            "quantification": "ShsCount",
+            "matrix_type": "not_annotated",
+            "file_suffix": "ShsCount_matrix.tsv.gz"
+        }
+    ]
+}
