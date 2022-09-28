@@ -33,6 +33,7 @@ dataImportUI <- function(id) {
 
 dataImportServer <- function(id, workflow) {
   moduleServer(id, function(input, output, session) {
+    to_return <- list()
     isa_opt_returns <- dataImport.ISAoptServer(
       id_list()$data_import$isa_opt_section$section_id, workflow
     )
@@ -40,6 +41,9 @@ dataImportServer <- function(id, workflow) {
       id_list()$data_import$metadata_section$section_id, workflow,
       isa_opt_returns$af_file_cols
     )
+    to_return$metadata <- meta_returns$metadata
+    to_return$ind_sample_id <- meta_returns$ind_sample_id
+    to_return$project <- meta_returns$project
     observeEvent(meta_returns$metadata(), {
       # Data panel shows only if metadata is set
       if (is.null(meta_returns$metadata())) {
@@ -52,11 +56,18 @@ dataImportServer <- function(id, workflow) {
       id_list()$data_import$data_section$section_id,
       workflow, meta_returns$metadata, meta_returns$fs_aligned_af
     )
+    to_return$data <- data_returns$matr
+    activate <- reactive({
+      if (!is.null(meta_returns$metadata()) & !is.null(data_returns$matr())) {
+        return(TRUE)
+      } else {
+        return(FALSE)
+      }
+    })
     observeEvent({
-      meta_returns$metadata()
-      data_returns$matrices()
+      activate()
     }, {
-      if (is.null(meta_returns$metadata()) | is.null(data_returns$matrices())) {
+      if (!activate()) {
         shinyjs::hide(id_list()$data_import$inputs$next_btn)
       } else {
         shinyjs::show(id_list()$data_import$inputs$next_btn)
@@ -70,6 +81,7 @@ dataImportServer <- function(id, workflow) {
                    ", id_list()$data_import$section_id))
       shinyjs::show(id = id_list()$recalibration$section_id, asis = TRUE)
     })
+    return(to_return)
   })
 }
 
@@ -590,8 +602,6 @@ dataImport.metadataServer <- function(id, workflow, af_file_cols) {
             control_cl_tbl <- reactiveVal(NULL)
             fs_aligned_af <- reactiveVal(FALSE)
             meta_checks_info <- reactiveVal(NULL)
-            to_return$metadata <- metadata
-            to_return$fs_aligned_af <- fs_aligned_af
             observeEvent(fs_align_tbl(), {
                 output[[
                 id_list()$data_import$metadata_section$outputs$checks_tbl_1
@@ -783,6 +793,13 @@ dataImport.metadataServer <- function(id, workflow, af_file_cols) {
                    ",
                     session$ns(id_list()$data_import$metadata_section$inputs$details_collapse)
                 ))
+            })
+            to_return$metadata <- reactive({metadata()})
+            to_return$fs_aligned_af <- reactive({fs_aligned_af()})
+            to_return$ind_sample_id <- reactive({input[[
+              id_list()$data_import$metadata_section$inputs$sample_id]]})
+            to_return$project <- reactive({
+              input[[id_list()$data_import$metadata_section$inputs$project]]
             })
             return(to_return)
         }
@@ -1006,6 +1023,7 @@ dataImport.dataServer <- function(id, workflow, metadata, fs_aligned_af) {
           data_ff_tbl <- reactiveVal(NULL)
           data_fi_tbl <- reactiveVal(NULL)
           data_miss_tbl <- reactiveVal(NULL)
+          #to_return$matr <- matrices
           observeEvent(data_ff_tbl(), {
             output[[
               id_list()$data_import$data_section$outputs$checks_tbl_1
@@ -1175,7 +1193,7 @@ dataImport.dataServer <- function(id, workflow, metadata, fs_aligned_af) {
             shinyjs::enable(
               id_list()$data_import$data_section$inputs$import_btn)
           })
-          to_return$matrices <- matrices
+          to_return$matr <- reactive({matrices()})
           return(to_return)
         }
     )

@@ -28,7 +28,13 @@ body {
   }
 }
 
-@media only screen and (min-width: 1200px) {
+@media only screen and (min-width: 1400px) {
+  .svg-content-mini {
+	  width: 25%;
+  }
+}
+
+@media only screen and (max-width: 1399px) {
   .svg-content-mini {
 	  width: 30%;
   }
@@ -281,4 +287,28 @@ body {
 
 .btn-grey:focus {
   box-shadow: 0rem 0rem 0rem 0.25rem rgba(172,172,172, 0.5) !important;
+}
+
+.irs-bar,
+.irs-bar-edge,
+.irs-single,
+.irs-grid-pol {
+  background: $secondary !important;
+  border-color: $secondary !important;
+}
+
+.plot-subcard {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+h2.card-title {
+  margin-top: 10px;
+}
+
+.text-bg-secondary {
+  color: #fff !important;
+  background-color: $secondary !important;
 }

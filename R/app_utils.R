@@ -99,8 +99,29 @@ id_list <- function() {
     ),
     plot_section = list(
       section_id = "plot-section",
-      inputs = list(),
-      outputs = list()
+      inputs = list(
+        data_type = "data-type",
+        pool_select = "pool-select",
+        seq_filter = "seq-count-threshold",
+        seq_filter_in = "seq-count-threshold-direct",
+        plot_panel_1 = "plot-panel-1",
+        plot_panel_2 = "plot-panel-2",
+        plot_panel_3 = "plot-panel-3",
+        plot_panel_4 = "plot-panel-4",
+        rbtn_1 = "rbtns-1"
+      ),
+      outputs = list(
+        counts_plot_sc = "plot-1-sc",
+        counts_plot_sc_down = "plot-1-sc-download",
+        counts_plot_bm = "plot-1-bm",
+        counts_plot_bm_down = "plot-1-bm-download",
+        sc_ratio_control_all = "sc-ratio-control-all",
+        rc_ratio_control_all = "rc-ratio-control-all",
+        sc_ratio_sample_all = "sc-ratio-sample-all",
+        rc_ratio_sample_all = "rc-ratio-sample-all",
+        shared_is_heatmap_control = "shared-is-heatmap-control",
+        shared_is_heatmap_sample = "shared-is-heatmap-sample"
+      )
     )
   )
 }
@@ -131,6 +152,105 @@ id_list <- function() {
     ...
   )
   return(banner)
+}
+
+.generate_plots_card <- function(ns, panel_number) {
+  if (panel_number == 2) {
+    card_id <- ns(id_list()$plot_section$inputs$plot_panel_2)
+    title <- "Control to sample contamination"
+    overall_sc <- ns(id_list()$plot_section$outputs$sc_ratio_control_all)
+    overall_rc <- ns(id_list()$plot_section$outputs$rc_ratio_control_all)
+    shared_is_heatmap <- ns(
+      id_list()$plot_section$outputs$shared_is_heatmap_control)
+  } else if (panel_number == 3) {
+    card_id <- ns(id_list()$plot_section$inputs$plot_panel_3)
+    title <- "Samples to control contamination"
+    overall_sc <- ns(id_list()$plot_section$outputs$sc_ratio_sample_all)
+    overall_rc <- ns(id_list()$plot_section$outputs$rc_ratio_sample_all)
+    shared_is_heatmap <- ns(
+      id_list()$plot_section$outputs$shared_is_heatmap_sample)
+  } else {
+    return(NULL)
+  }
+
+  card <- div(
+    id = card_id,
+    style = "width:80%; margin-bottom: 15px;",
+    class = "card",
+    div(
+      class = "card-body",
+      h3(
+        class = "card-title",
+        title
+      ),
+      div(
+        style = "display: flex;",
+        div(
+          class = "card text-bg-secondary mb-3",
+          style = paste("width: 0; flex: 1 1 0; margin-top: 10px;",
+                        "margin-bottom: 10px; margin-right:15px;"),
+          div(
+            class = "card-header",
+            "Overall sequence count ratio"
+          ),
+          div(
+            class = "card-body",
+            h4(
+              class = "card-title",
+              textOutput(
+                overall_sc
+              )
+            ),
+            div(
+              class = "card-text",
+              "Sequence count overall ratio is calculated as",
+              "ratio between total sequence count of the control",
+              "line samples and sum of the total sequence count of",
+              "all other samples"
+            )
+          )
+        ),
+        div(
+          class = "card text-bg-secondary mb-3",
+          style = paste("width: 0; flex: 1 1 0; margin-top: 10px;",
+                        "margin-bottom: 10px;"),
+          div(
+            class = "card-header",
+            "Overall replicate count ratio"
+          ),
+          div(
+            class = "card-body",
+            h4(
+              class = "card-title",
+              textOutput(
+                overall_rc
+              )
+            ),
+            div(
+              class = "card-text",
+              "Replicate count overall ratio is calculated as",
+              "ratio between total number of replicates having shared IS",
+              "of the control line samples and sum of",
+              "the total number of replicates having said IS in",
+              "all other samples"
+            )
+          )
+        )
+      ),
+      tabsetPanel(
+        tabPanel("Shared IS counts",
+                 div(
+                   style = "margin: 15px;",
+                   plotly::plotlyOutput(shared_is_heatmap)
+                 )),
+        tabPanel("Seq count ratio",
+                 div("placeholder")),
+        tabPanel("Replicate count ratio",
+                 div("placeholder")),
+        type = "pills"
+      )
+    )
+  )
 }
 
 ## For server processing -------------------------------------------------------
@@ -1325,3 +1445,181 @@ id_list <- function() {
 
   return(status_banner)
 }
+
+.get_counts <- function(dataset, ind_sample_id, pool_col) {
+  pcr_id_col <- ISAnalytics::pcr_id_column()
+
+  counts_cols <- c("seqCount")
+  if ("BARCODE_MUX" %in% colnames(dataset)) {
+    counts_cols <- c(counts_cols, "BARCODE_MUX")
+  }
+
+  counts_single_pcr <- dataset %>%
+    dplyr::group_by(dplyr::across(
+      dplyr::all_of(c(ind_sample_id, pool_col, pcr_id_col))
+    )) %>%
+    dplyr::summarise(
+      dplyr::across(
+        .cols = counts_cols,
+        .fns = ~ sum(.x, na.rm = TRUE),
+        .names = "{.col}"
+      ), .groups = "drop"
+    ) %>%
+    tidyr::unite(col = "id", !!!ind_sample_id)
+
+  counts_sample <- dataset %>%
+    dplyr::group_by(dplyr::across(
+      dplyr::all_of(c(ind_sample_id, pool_col))
+    )) %>%
+    dplyr::summarise(
+      dplyr::across(
+        .cols = counts_cols,
+        .fns = ~ sum(.x, na.rm = TRUE),
+        .names = "{.col}"
+      ), .groups = "drop"
+    ) %>%
+    tidyr::unite(col = "id", !!!ind_sample_id)
+
+  return(list(single = counts_single_pcr, sample = counts_sample))
+}
+
+.get_counts_plots <- function(counts_single, counts_sample,
+                              ind_sample_id, pool_id, pool_col,
+                              proj_name, threshold) {
+  if (is.null(counts_single) || is.null(counts_sample)) {
+    return(list(sc_plot = NULL, bm_plot = NULL))
+  }
+
+  counts_single_pool <- counts_single %>%
+    dplyr::filter(.data[[pool_col]] == pool_id)
+  counts_sample_pool <- counts_sample %>%
+    dplyr::filter(.data[[pool_col]] == pool_id)
+
+  annotations <- list()
+  for (i in seq(1, nrow(counts_sample_pool))) {
+    ## Seq count annot
+    annotations$seqCount[[i]] <- list(
+      x = counts_sample_pool$id[[i]],
+      y = counts_sample_pool$seqCount[[i]] + 5,
+      text = format(counts_sample_pool$seqCount[[i]],
+                    big.mark = ","),
+      yanchor = "bottom",
+      showarrow = FALSE
+    )
+    ## Raw reads
+    if ("BARCODE_MUX" %in% colnames(counts_sample_pool)) {
+      annotations$barcodemux[[i]] <- list(
+        x = counts_sample_pool$id[[i]],
+        y = counts_sample_pool$BARCODE_MUX[[i]] + 5,
+        text = format(counts_sample_pool$BARCODE_MUX[[i]],
+                      big.mark = ","),
+        yanchor = "bottom",
+        showarrow = FALSE
+      )
+    }
+  }
+    sc_filname <- .get_plot_filname(proj_name = proj_name,
+                                    pool_name = pool_id,
+                                    fixed_threshold = threshold,
+                                    plot_type = "totals-seqCount")
+    sc_plot <- plotly::plot_ly(
+      data = counts_single_pool,
+      x = ~id,
+      y = ~seqCount,
+      color = as.formula(paste0("~", ISAnalytics::pcr_id_column())),
+      colors = viridisLite::inferno(
+        length(unique(counts_single_pool$id)), begin = 0.3)
+    ) %>%
+      plotly::add_bars(color = ~id,
+                       showlegend = FALSE,
+                       marker = list(
+                         line = list(
+                           color = "rgb(0,0,0)",
+                           width = 1
+                         )
+                       ),
+                       customdata = counts_single_pool %>%
+                         dplyr::pull(.data[[ISAnalytics::pcr_id_column()]]),
+                       hovertemplate = paste(
+                         "PCR replicate: %{customdata}",
+                         "<br>Seq count: %{y}"
+                       )) %>%
+      plotly::layout(barmode = "stack",
+                     annotations = annotations$seqCount,
+                     title = list(
+                       text = paste("Pool", pool_id, "total seq count")
+                      ),
+                     xaxis = list(
+                       title = "Independent sample"
+                     ),
+                     yaxis = list(
+                       title = "Total sequence count"
+                     )) %>%
+      plotly::config(
+        toImageButtonOptions = list(
+          format = "png",
+          filename = sc_filname,
+          scale = 3, height = NULL, width = NULL
+        )
+      )
+
+    bm_filname <- .get_plot_filname(proj_name = proj_name,
+                                    pool_name = pool_id,
+                                    fixed_threshold = threshold,
+                                    plot_type = "totals-rawReads")
+  bm_plot <- NULL
+  if ("BARCODE_MUX" %in% colnames(counts_single_pool)) {
+      bm_plot <- plotly::plot_ly(
+        data = counts_single_pool,
+        x = ~id,
+        y = ~BARCODE_MUX,
+        color = as.formula(paste0("~", ISAnalytics::pcr_id_column())),
+        colors = viridisLite::inferno(
+          length(unique(counts_single_pool$id)), begin = 0.3)
+      ) %>%
+        plotly::add_bars(color = ~id,
+                         showlegend = FALSE,
+                         marker = list(
+                           line = list(
+                             color = "rgb(0,0,0)",
+                             width = 1
+                           )
+                         ),
+                         customdata = counts_single_pool %>%
+                           dplyr::pull(.data[[ISAnalytics::pcr_id_column()]]),
+                         hovertemplate = paste(
+                           "PCR replicate: %{customdata}",
+                           "<br>Raw reads: %{y}"
+                         )) %>%
+        plotly::layout(barmode = "stack",
+                       annotations = annotations$barcodemux,
+                       title = list(
+                         text = paste("Pool", pool_id, "total raw reads")
+                       ),
+                       xaxis = list(
+                         title = "Independent sample"
+                       ),
+                       yaxis = list(
+                         title = "Total raw reads"
+                       )) %>%
+        plotly::config(
+          toImageButtonOptions = list(
+            format = "png",
+            filename = bm_filname,
+            scale = 3, height = NULL, width = NULL
+          )
+        )
+  }
+  return(list(sc_plot = sc_plot, bm_plot = bm_plot))
+}
+
+.get_plot_filname <- function(proj_name, pool_name,
+                              fixed_threshold, plot_type) {
+  file_name <- paste(Sys.Date(), proj_name, pool_name,
+                     paste0("threshold-", fixed_threshold),
+                     plot_type,
+                     sep = "_")
+  return(file_name)
+}
+
+

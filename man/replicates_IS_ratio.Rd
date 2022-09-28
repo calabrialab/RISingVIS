@@ -7,12 +7,31 @@ of replicates for the considered type of IS in the control samples
 and the number of replicates for the considered type of IS
 in the other samples.}
 \usage{
-replicates_IS_ratio(af, matrix, ...)
+replicates_IS_ratio(
+  af,
+  matrix,
+  subject_col = "SubjectID",
+  amp_col = "CompleteAmplificationID",
+  value_col = "Value",
+  ctrl = "CEM37"
+)
 }
 \arguments{
 \item{af}{The association file}
 
 \item{matrix}{The integration matrix}
+
+\item{subject_col}{The name of the subject column in af,
+default to "SubjectID"}
+
+\item{amp_col}{The name of the amplificate column in af and matrix,
+default to "CompleteAmplificationID"}
+
+\item{value_col}{The name of the SeqCount column in matrix,
+default to "Value"}
+
+\item{ctrl}{The named list of control with known integration sites,
+default is "CEM37" with known IS as in known_CEM_IS()}
 }
 \value{
 Dataframe of values corresponding to the ratios

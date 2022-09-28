@@ -55,3 +55,4 @@ Imports:
     tidyr,
     tibble, 
     utils
+StagedInstall: no

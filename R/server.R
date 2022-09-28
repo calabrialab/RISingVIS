@@ -15,6 +15,15 @@ server <- function(input, output, session) {
   ## Recalibration section ----
   rec_returns <- RecServer(
     id_list()$recalibration$section_id,
-    workflow
+    workflow, matrices = data_imp_returns$data
   )
+  ## Plots section ----
+  plots_returns <- PlotsServer(
+    id_list()$plot_section$section_id,
+    workflow, data = data_imp_returns$data,
+    metadata = data_imp_returns$metadata,
+    data_rec = rec_returns,
+    indep_sample_id = data_imp_returns$ind_sample_id,
+    project_id = data_imp_returns$project
+    )
 }

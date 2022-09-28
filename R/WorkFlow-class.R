@@ -39,7 +39,11 @@ WorkFlow <- R6::R6Class(
     },
     get_data = function(checks = FALSE) {
       if (!checks) {
-        return(private$.data$df)
+        if (!all(is.na(private$.data)) & !is.null(private$.data)) {
+          return(private$.data$df)
+        } else {
+          return(NULL)
+        }
       } else {
         return(private$.data)
       }

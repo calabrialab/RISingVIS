@@ -5,12 +5,27 @@
 \title{Returns a dataframe containing the replicates count for
 each integration and for each sample.}
 \usage{
-replicates_IS_count(af, matrix)
+replicates_IS_count(
+  af,
+  matrix,
+  subject_col = "SubjectID",
+  amp_col = "CompleteAmplificationID",
+  value_col = "Value"
+)
 }
 \arguments{
 \item{af}{The association file}
 
 \item{matrix}{The integration matrix}
+
+\item{subject_col}{The name of the subject column in af,
+default to "SubjectID"}
+
+\item{amp_col}{The name of the amplificate column in af and matrix,
+default to "CompleteAmplificationID"}
+
+\item{value_col}{The name of the SeqCount column in matrix,
+default to "Value"}
 }
 \value{
 Dataframe of values corresponding to the replicate counts

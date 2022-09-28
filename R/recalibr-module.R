@@ -138,7 +138,7 @@ RecUI <- function(id) {
   )
 }
 
-RecServer <- function(id, workflow) {
+RecServer <- function(id, workflow, matrices) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -218,6 +218,14 @@ RecServer <- function(id, workflow) {
           cat("Choose dir...")
         }
       })
+      observeEvent(input[[
+        id_list()$recalibration$inputs$skip_btn
+      ]], {
+        shinyjs::runjs(sprintf("
+                   $('#%s').slideUp('fast')
+                   ", id_list()$recalibration$section_id))
+        shinyjs::show(id = id_list()$plot_section$section_id, asis = TRUE)
+      })
       rec_data <- reactiveVal(NULL)
       observeEvent(rec_data(), {
         workflow$set_recalibr(rec_data())
@@ -235,7 +243,7 @@ RecServer <- function(id, workflow) {
         output[[
           id_list()$recalibration$outputs$info_panel
         ]] <- NULL
-        to_rec <- workflow$get_data()
+        to_rec <- matrices()
         recalibr_results <- .recalibrate(
           data = to_rec,
           map = input[[
@@ -263,13 +271,14 @@ RecServer <- function(id, workflow) {
         ]], {
           shinyjs::runjs(sprintf("
                    $('#%s').slideUp('fast')
-                   ", id_list()$recalibration$inputs$next_btn))
+                   ", id_list()$recalibration$section_id))
           shinyjs::show(id = id_list()$plot_section$section_id, asis = TRUE)
         })
 
         shinyjs::enable(id = id_list()$recalibration$inputs$rec_btn)
         shinyjs::enable(id = id_list()$recalibration$inputs$skip_btn)
       })
+      return(reactive({rec_data()}))
     }
   )
 }

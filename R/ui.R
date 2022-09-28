@@ -3,11 +3,13 @@
 #' @importFrom bslib page_navbar nav
 ui <- tagList(
   shinyjs::useShinyjs(),
-  tags$head(
-    #tags$script(src = "node_clicked.js"),
-    tags$script(src = "style_fileinput.js"),
-    tags$script(src = "js_functions.js"),
-  ),
+  # tags$head(
+  #   #tags$script(src = "node_clicked.js"),
+  #   tags$script(src = "style_fileinput.js"),
+  #   tags$script(src = "js_functions.js"),
+  # ),
+  includeScript("R/www/style_fileinput.js"),
+  includeScript("R/www/js_functions.js"),
   bslib::page_navbar(
     title = "RISingVIS",
     theme = app_theme(),
@@ -45,7 +47,8 @@ ui <- tagList(
             width = 10,
             class = "pages-container",
             dataImportUI(id_list()$data_import$section_id),
-            RecUI(id_list()$recalibration$section_id)
+            RecUI(id_list()$recalibration$section_id),
+            PlotsUI(id_list()$plot_section$section_id)
           )
         )
       )

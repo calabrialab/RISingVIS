@@ -15,11 +15,11 @@
 #'
 #' @param af The association file
 #' @param matrix The integration matrix
-#' @param subject_col The name of the subject column in af, 
+#' @param subject_col The name of the subject column in af,
 #' default to "SubjectID"
-#' @param amp_col The name of the amplificate column in af and matrix, 
+#' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
-#' @param value_col The name of the SeqCount column in matrix, 
+#' @param value_col The name of the SeqCount column in matrix,
 #' default to "Value"
 #' @param ctrl The named list of control with known integration sites,
 #' default is "CEM37" with known IS as in known_CEM_IS()
@@ -111,11 +111,11 @@ shared_control_known_IS_ratio <- function(af, matrix,
 #'
 #' @param af The association file
 #' @param matrix The integration matrix
-#' @param subject_col The name of the subject column in af, 
+#' @param subject_col The name of the subject column in af,
 #' default to "SubjectID"
-#' @param amp_col The name of the amplificate column in af and matrix, 
+#' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
-#' @param value_col The name of the SeqCount column in matrix, 
+#' @param value_col The name of the SeqCount column in matrix,
 #' default to "Value"
 #' @param ctrl The named list of control with known integration sites,
 #' default is "CEM37" with known IS as in known_CEM_IS()
@@ -211,11 +211,11 @@ shared_other_IS_ratio <- function(af, matrix,
 #'
 #' @param af The association file
 #' @param matrix The integration matrix
-#' @param subject_col The name of the subject column in af, 
+#' @param subject_col The name of the subject column in af,
 #' default to "SubjectID"
-#' @param amp_col The name of the amplificate column in af and matrix, 
+#' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
-#' @param value_col The name of the SeqCount column in matrix, 
+#' @param value_col The name of the SeqCount column in matrix,
 #' default to "Value"
 #' @param ctrl The named list of control with known integration sites,
 #' default is "CEM37" with known IS as in known_CEM_IS()
@@ -252,14 +252,16 @@ shared_IS_ratio <- function(af, matrix,
         key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
-    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <-
-        value_col
+    aggreg_matrix <- aggreg_matrix %>%
+      dplyr::rename(
+        !!value_col := paste0(value_col, "_sum")
+      )
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Find shared integration sites belonging to controls
     filter_control <- find_shared_IS(aggreg_matrix, is_vars,
-                                               subject_col, value_col,
-                                               ctrl, type = "control")
+                                     subject_col, value_col,
+                                     ctrl, type = "control")
     # Find shared integration sites belonging to samples
     filter_other <- find_shared_IS(aggreg_matrix, is_vars,
                                              subject_col, value_col,
@@ -359,11 +361,11 @@ shared_IS_ratio <- function(af, matrix,
 #'
 #' @param af The association file
 #' @param matrix The integration matrix
-#' @param subject_col The name of the subject column in af, 
+#' @param subject_col The name of the subject column in af,
 #' default to "SubjectID"
-#' @param amp_col The name of the amplificate column in af and matrix, 
+#' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
-#' @param value_col The name of the SeqCount column in matrix, 
+#' @param value_col The name of the SeqCount column in matrix,
 #' default to "Value"
 #' @param ctrl The named list of control with known integration sites,
 #' default is "CEM37" with known IS as in known_CEM_IS()
@@ -400,8 +402,10 @@ shared_IS_ratio_byIS <- function(af, matrix,
         key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
-    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <-
-        value_col
+    aggreg_matrix <- aggreg_matrix %>%
+      dplyr::rename(
+        !!value_col := paste0(value_col, "_sum")
+      )
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Find shared integration sites
