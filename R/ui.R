@@ -48,7 +48,8 @@ ui <- tagList(
             class = "pages-container",
             dataImportUI(id_list()$data_import$section_id),
             RecUI(id_list()$recalibration$section_id),
-            PlotsUI(id_list()$plot_section$section_id)
+            #PlotsUI(id_list()$plot_section$section_id),
+            SavingUI(id_list()$saving_section$section_id)
           )
         )
       )

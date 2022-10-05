@@ -26,4 +26,11 @@ server <- function(input, output, session) {
     indep_sample_id = data_imp_returns$ind_sample_id,
     project_id = data_imp_returns$project
     )
+  ## Saving section ----
+  saving_returns <- SavingServer(
+      id_list()$saving_section$section_id,
+      workflow,
+      #filtered_data = plots_returns$data
+      filtered_data = data_imp_returns$data
+  )
 }
