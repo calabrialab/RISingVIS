@@ -157,7 +157,12 @@ replicates_IS_ratio <- function(af, matrix,
         sum(sapply(lengths_other,
                    function(x) all(x == 0, na.rm = TRUE))) ==
         length(lengths_other)) {
-        stop("There are no IS shared")
+        warning("There are no IS shared")
+        Ratio <- no_IS_shared(ctrl, af)
+        Ratio <- Ratio %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "RepCount"))
+        return(Ratio)
     }
     if (sum(sapply(lengths_ctrl,
                    function(x) all(x == 0, na.rm = TRUE))) > 0) {
@@ -175,6 +180,10 @@ replicates_IS_ratio <- function(af, matrix,
                           subject_col, value_col, ctrl,
                           type = "by sample")
         Ratios_known_control_replicate_count$IS_Source <- "Control"
+        Ratios_known_control_replicate_count <- 
+            Ratios_known_control_replicate_count %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "RepCount"))
     } else {
         warning("There are no IS shared from controls to other samples")
     }
@@ -186,6 +195,10 @@ replicates_IS_ratio <- function(af, matrix,
                           subject_col, value_col, ctrl,
                           type = "by sample")
         Ratios_other_replicate_count$IS_Source <- "Samples"
+        Ratios_other_replicate_count <- 
+            Ratios_other_replicate_count %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "RepCount"))
     } else {
         warning("There are no IS shared from samples to controls")
     }
@@ -300,7 +313,12 @@ replicates_IS_ratio_byIS <- function(af, matrix,
         sum(sapply(lengths_other,
                    function(x) all(x == 0, na.rm = TRUE))) ==
         length(lengths_other)) {
-        stop("There are no IS shared")
+        warning("There are no IS shared")
+        Ratio <- no_IS_shared(ctrl, af)
+        Ratio <- Ratio %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "RepCount"))
+        return(Ratio)
     }
     if (sum(sapply(lengths_ctrl,
                    function(x) all(x == 0, na.rm = TRUE))) > 0) {
@@ -317,6 +335,10 @@ replicates_IS_ratio_byIS <- function(af, matrix,
             compute_ratio(filter_control, is_vars,
                           subject_col, value_col, ctrl, type = "by IS")
         Ratios_known_control_replicate_count$IS_Source <- "Control"
+        Ratios_known_control_replicate_count <- 
+            Ratios_known_control_replicate_count %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "RepCount"))
     } else {
         warning("There are no IS shared from controls to other samples")
     }
@@ -327,6 +349,10 @@ replicates_IS_ratio_byIS <- function(af, matrix,
             compute_ratio(filter_other, is_vars,
                           subject_col, value_col, ctrl, type = "by IS")
         Ratios_other_replicate_count$IS_Source <- "Samples"
+        Ratios_other_replicate_count <- 
+            Ratios_other_replicate_count %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "RepCount"))
     } else {
         warning("There are no IS shared from samples to controls")
     }

@@ -213,8 +213,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
             counts <- compute_counts(filter_shared_is, subject_col,
                                      value_col, ctrl_names)
             res <- internal_compute_ratio(counts, subject_col, ctrl_line)
-        }
-        if (type == "by IS") {
+        } else if (type == "by IS") {
             counts <- compute_counts_byIS(filter_shared_is, is_vars,
                                           subject_col, value_col, ctrl_names)
             res <- internal_compute_ratio_byIS(counts, is_vars, subject_col,
@@ -264,7 +263,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
             if (type == "by sample") {
                 counts <- compute_counts(shared_is, subject_col,
                                          value_col, ctrl_names)
-                row <- data.frame(Sub = "All controls", Sum = sum(
+                row <- data.frame(Sub = "All_Controls", Sum = sum(
                     counts %>%
                         dplyr::filter(.data[[subject_col]] %in%
                                           ctrl_names) %>%
@@ -274,7 +273,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
                 counts <- counts %>% dplyr::filter(.data[[subject_col]]
                                                    %notin% ctrl_names)
                 ratio <- internal_compute_ratio(counts, subject_col,
-                                                "All controls")
+                                                "All_Controls")
                 res <- res %>% dplyr::full_join(ratio, by = "Sample")
             }
             if (type == "by IS") {
@@ -285,7 +284,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
                     dplyr::group_by(.data[[is_vars[1]]], .data[[is_vars[2]]],
                                     .data[[is_vars[[3]]]]) %>%
                     dplyr::summarise(value = sum(.data[[value_col]])) %>%
-                    dplyr::bind_cols(Sub = "All controls")
+                    dplyr::bind_cols(Sub = "All_Controls")
                 names(row)[names(row) == "Sub"] <- subject_col
                 names(row)[names(row) == "value"] <- value_col
                 counts <- counts %>%
@@ -294,7 +293,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
                     dplyr::filter(.data[[subject_col]] %notin% ctrl_names)
                 ratio <- internal_compute_ratio_byIS(counts, is_vars,
                                                      subject_col, value_col,
-                                                     "All controls")
+                                                     "All_Controls")
                 res <- res %>% dplyr::bind_rows(ratio)
             }
         }
@@ -313,7 +312,7 @@ compute_counts <- function(filter_shared_is, subject_col,
         dplyr::group_by(.data[[subject_col]]) %>%
         dplyr::summarise(Sum = sum(.data[[value_col]]))
     `%notin%` <- Negate(`%in%`)
-    row <- data.frame(Sub = "All samples", Sum =
+    row <- data.frame(Sub = "All_Samples", Sum =
                           sum(counts %>%
                                   dplyr::filter(.data[[subject_col]] %notin%
                                                     ctrl_names) %>%
@@ -341,14 +340,17 @@ internal_compute_ratio <- function(counts, subject_col, ctrl_line) {
             tot <- as.integer(x["Sum"])
             R <- ifelse(tot == 0, NA, ctrl_count / tot)
             sample <- x[subject_col]
-            data <- data.frame(sample, ctrl_line, R)
-            colnames(data) <- c("Sample", "Control", "Ratio")
+            data <- data.frame(sample, ctrl_line, R, ctrl_count, tot)
+            colnames(data) <- c("Sample", "Control", "Ratio", 
+                                paste0("Count(", ctrl_line, ")"), 
+                                paste0("Count(Sample-vs-", ctrl_line, ")"))
             return(data)
         }))
     ratios <- ratios %>% tidyr::pivot_wider(names_from = "Control",
                                             values_from = "Ratio",
                                             values_fill = NA)
-
+    ratios <- ratios %>% dplyr::rename(
+        !!paste0("Ratio_", ctrl_line) := ctrl_line)
     return(ratios)
 
 }
@@ -366,7 +368,7 @@ compute_counts_byIS <- function(filter_shared, is_vars, subject_col,
         dplyr::group_by(.data[[is_vars[1]]], .data[[is_vars[2]]],
                         .data[[is_vars[[3]]]]) %>%
         dplyr::summarise(value = sum(.data[[value_col]])) %>%
-        dplyr::bind_cols(Sub = "All samples")
+        dplyr::bind_cols(Sub = "All_Samples")
     names(counts)[names(counts) == "Sub"] <- subject_col
     names(counts)[names(counts) == "value"] <- value_col
     filtered_counts <- filter_shared %>%
@@ -396,17 +398,73 @@ internal_compute_ratio_byIS <- function(counts, is_vars,
             ctrl <- row[ctrl_line]
             R <- ifelse(tot == 0, NA,
                         as.integer(ctrl[[1]]) / as.integer(tot[[1]]))
-            res <- data.frame(y, ctrl_line, R)
+            res <- data.frame(y, ctrl_line, R, 
+                              as.integer(ctrl[[1]]), as.integer(tot[[1]]))
             return(res)
         }))
         data <- data.frame(row[[is_vars[1]]], row[[is_vars[2]]],
                            row[[is_vars[3]]], rats)
         colnames(data) <- c("chr", "integration_locus",
-                            "strand", subject_col, "Control", "Ratio")
+                            "strand", subject_col, "Control", "Ratio", 
+                            paste0("Count(", ctrl_line, ")"), 
+                            paste0("Count(Sample-vs-", ctrl_line, ")"))
         return(data)
     }))
     ratios <- ratios %>%
         tidyr::pivot_wider(names_from = dplyr::all_of(subject_col),
                            values_from = "Ratio")
+    data.table::setnames(ratios, old = subjects, 
+                         new = paste0("Ratio_", subjects))
     return(ratios)
+}
+
+
+# no_IS_shared()
+# Returns the output in the case of no integration sites shared among samples
+#' @importFrom magrittr `%>%`
+#' @importFrom rlang .data
+
+no_IS_shared <- function(ctrl, af) {
+    `%notin%` <- Negate(`%in%`)
+    subjects <- af %>% 
+        dplyr::filter(.data[[subject_col]] %notin% 
+                          c(names(ctrl), "CEM37")) %>%
+        dplyr::pull(.data[[subject_col]]) %>% 
+        unique()
+    subjects <- append(subjects, "All_Samples")
+    if (!is.list(ctrl)) {
+        Ratio <- dplyr::bind_rows(lapply(subjects, function(x) {
+            sub_name <- x
+            r <- tibble::tibble_row(
+                "Sample" = sub_name, 
+                "Ratio_CEM37" = NA, 
+                "IS_Source" = NA, 
+                "Count(CEM37)" = 0, 
+                "Count(Sample)" = 0
+            )
+            return(r)
+        }))
+    } else {
+        ctrl_names <- names(ctrl)
+        ctrl_names <- append(ctrl_names, "All_Controls")
+        Ratio <- dplyr::bind_rows(lapply(ctrl_names, function(x) {
+            ctrl_line <- x
+            res <- dplyr::bind_rows(lapply(subjects, function(y) {
+                sub_name <- y
+                r <- tibble::tibble_row(
+                    "Sample" = sub_name, 
+                    "Ctrl" = NA, 
+                    "IS_Source" = NA, 
+                    !!paste0("Count(", ctrl_line, ")") := 0, 
+                    "Count(Sample)" = 0
+                )
+                r <- r %>% dplyr::rename(
+                    !!paste0("Ratio_", x) := "Ctrl")
+                return(r)
+            }))
+            return(res)
+        }))
+        Ratio <- Ratio %>% unique()
+    }
+    return(Ratio)
 }

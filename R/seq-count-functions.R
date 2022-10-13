@@ -75,7 +75,9 @@ shared_control_known_IS_ratio <- function(af, matrix,
     if (sum(sapply(lengths_ctrl,
                    function(x) all(x == 0, na.rm = TRUE))) ==
         length(lengths_ctrl)) {
-        stop("There are no IS shared from controls to other samples")
+        warning("There are no IS shared from controls to other samples")
+        Ratio <- NA
+        return(Ratio)
     }
     if (sum(sapply(lengths_ctrl,
                    function(x) all(x == 0, na.rm = TRUE))) > 0) {
@@ -171,7 +173,9 @@ shared_other_IS_ratio <- function(af, matrix,
     if (sum(sapply(lengths_other,
                    function(x) all(x == 0, na.rm = TRUE))) ==
         length(lengths_other)) {
-        stop("There are no IS shared from samples to controls")
+        warning("There are no IS shared from samples to controls")
+        Ratio <- NA
+        return(Ratio)
     }
     if (sum(sapply(lengths_other,
                    function(x) all(x == 0, na.rm = TRUE))) > 0) {
@@ -284,7 +288,12 @@ shared_IS_ratio <- function(af, matrix,
         sum(sapply(lengths_other,
                    function(x) all(x == 0, na.rm = TRUE))) ==
         length(lengths_other)) {
-        stop("There are no IS shared")
+        warning("There are no IS shared")
+        Ratio <- no_IS_shared(ctrl, af)
+        Ratio <- Ratio %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "SeqCount"))
+        return(Ratio)
     }
     if (sum(sapply(lengths_ctrl,
                    function(x) all(x == 0, na.rm = TRUE))) > 0) {
@@ -303,6 +312,9 @@ shared_IS_ratio <- function(af, matrix,
                                                  value_col, ctrl,
                                                  type = "by sample")
         Ratios_known_control_IS$IS_Source <- "Control"
+        Ratios_known_control_IS <- Ratios_known_control_IS %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "SeqCount"))
     } else {
         warning("There are no IS shared from controls to other samples")
     }
@@ -313,6 +325,9 @@ shared_IS_ratio <- function(af, matrix,
                                          subject_col, value_col, ctrl,
                                          type = "by sample")
         Ratios_other_IS$IS_Source <- "Samples"
+        Ratios_other_IS <- Ratios_other_IS %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "SeqCount"))
     } else {
         warning("There are no IS shared from the samples to controls")
     }
@@ -435,7 +450,12 @@ shared_IS_ratio_byIS <- function(af, matrix,
         sum(sapply(lengths_other,
                    function(x) all(x == 0, na.rm = TRUE))) ==
         length(lengths_other)) {
-        stop("There are no IS shared")
+        warning("There are no IS shared")
+        Ratio <- no_IS_shared(ctrl, af)
+        Ratio <- Ratio %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "SeqCount"))
+        return(Ratio)
     }
     if (sum(sapply(lengths_ctrl,
                    function(x) all(x == 0, na.rm = TRUE))) > 0) {
@@ -454,6 +474,9 @@ shared_IS_ratio_byIS <- function(af, matrix,
             compute_ratio(filter_control, is_vars,
                                subject_col, value_col, ctrl, type = "by IS")
         known_control_is_ratios$IS_Source <- "Control"
+        known_control_is_ratios <- known_control_is_ratios %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "SeqCount"))
     } else {
         warning("There are no IS shared from controls to other samples")
     }
@@ -465,6 +488,9 @@ shared_IS_ratio_byIS <- function(af, matrix,
             compute_ratio(filter_other, is_vars,
                                subject_col, value_col, ctrl, type = "by IS")
         other_is_ratios$IS_Source <- "Samples"
+        other_is_ratios <- other_is_ratios %>% 
+            dplyr::rename_all(~stringr::str_replace_all(.x, 
+                                                        "Count", "SeqCount"))
     } else {
         warning("There are no IS shared from samples to controls")
     }
@@ -483,6 +509,7 @@ shared_IS_ratio_byIS <- function(af, matrix,
                sum(sapply(lengths_other,
                           function(x) all(x == 0, na.rm = TRUE))) ==
                length(lengths_other)) {
+        
         return(known_control_is_ratios)
     } else if (sum(sapply(lengths_ctrl,
                           function(x) all(x == 0, na.rm = TRUE))) ==
