@@ -16,7 +16,10 @@
 #' @param af The association file
 #' @param matrix The integration matrix
 #' @param subject_col The name of the subject column in af,
-#' default to "SubjectID"
+#' default to "SubjectID"; if multiple columns identify the subject then
+#' this must be a vector containing those columns names
+#' @param field_sep The character that in control names separates the different 
+#' columns values, default to "_"
 #' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
 #' @param value_col The name of the SeqCount column in matrix,
@@ -38,6 +41,7 @@
 
 shared_control_known_IS_ratio <- function(af, matrix,
                                       subject_col = "SubjectID",
+                                      field_sep = "_", 
                                       amp_col = "CompleteAmplificationID",
                                       value_col = "Value",
                                       ctrl = "CEM37") {
@@ -46,7 +50,7 @@ shared_control_known_IS_ratio <- function(af, matrix,
         stop()
     }
     # Check control
-    if (ctrl_check(af, subject_col, ctrl) != TRUE) {
+    if (ctrl_check(af, subject_col, ctrl, field_sep) != TRUE) {
         stop()
     }
     # Aggregate matrix and af
@@ -64,7 +68,7 @@ shared_control_known_IS_ratio <- function(af, matrix,
     # Retrieve shared integration sites
     filter_control <- find_shared_IS(aggreg_matrix, is_vars,
                                      subject_col, value_col,
-                                     ctrl, "control")
+                                     ctrl, "control", field_sep)
     if (!is.list(ctrl)) {
         lengths_ctrl <- length(filter_control)
     } else {
@@ -88,13 +92,18 @@ shared_control_known_IS_ratio <- function(af, matrix,
                        subject_col, value_col, ctrl, type = "by sample")
     if (length(names(ctrl)) > 1) {
         Ratio <- R %>%
-            dplyr::filter(.data$Sample == "All samples") %>%
-            dplyr::pull(.data$`All controls`)
+            dplyr::filter(.data[["Sample"]] == "All_Samples") %>%
+            dplyr::pull(.data$`Ratio_All_Controls`)
         return(Ratio)
     } else {
+        if (!is.list(ctrl)) {
+            ctrl_name <- ctrl
+        } else {
+            ctrl_name <- names(ctrl)
+        }
         Ratio <- R %>%
-            dplyr::filter(.data$Sample == "All samples")
-        Ratio <- Ratio[[ctrl]]
+            dplyr::filter(.data[["Sample"]] == "All_Samples") %>%
+            dplyr::pull(paste0("Ratio_", ctrl_name))
         return(Ratio)
     }
 }
@@ -114,7 +123,10 @@ shared_control_known_IS_ratio <- function(af, matrix,
 #' @param af The association file
 #' @param matrix The integration matrix
 #' @param subject_col The name of the subject column in af,
-#' default to "SubjectID"
+#' default to "SubjectID"; if multiple columns identify the subject then
+#' this must be a vector containing those columns names
+#' @param field_sep The character that in control names separates the different 
+#' columns values, default to "_"
 #' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
 #' @param value_col The name of the SeqCount column in matrix,
@@ -136,6 +148,7 @@ shared_control_known_IS_ratio <- function(af, matrix,
 
 shared_other_IS_ratio <- function(af, matrix,
                                   subject_col = "SubjectID",
+                                  field_sep = "_",
                                   amp_col = "CompleteAmplificationID",
                                   value_col = "Value",
                                   ctrl = "CEM37") {
@@ -144,7 +157,7 @@ shared_other_IS_ratio <- function(af, matrix,
         stop()
     }
     # Check control
-    if (ctrl_check(af, subject_col, ctrl) != TRUE) {
+    if (ctrl_check(af, subject_col, ctrl, field_sep) != TRUE) {
         stop()
     }
     # Aggregate matrix and af
@@ -162,7 +175,8 @@ shared_other_IS_ratio <- function(af, matrix,
     # Retrieve shared integration sites
     filter_other <- find_shared_IS(aggreg_matrix, is_vars,
                                    subject_col, value_col,
-                                   ctrl, type = "other")
+                                   ctrl, type = "other",
+                                   field_sep)
     if (!is.list(ctrl)) {
         lengths_other <- length(filter_other)
     } else {
@@ -186,13 +200,18 @@ shared_other_IS_ratio <- function(af, matrix,
                        value_col, ctrl, type = "by sample")
     if (length(names(ctrl)) > 1) {
         Ratio <- R %>%
-            dplyr::filter(.data$Sample == "All samples") %>%
-            dplyr::pull(.data$`All controls`)
+            dplyr::filter(.data[["Sample"]] == "All_Samples") %>%
+            dplyr::pull(.data$`Ratio_All_Controls`)
         return(Ratio)
     } else {
+        if (!is.list(ctrl)) {
+            ctrl_name <- ctrl
+        } else {
+            ctrl_name <- names(ctrl)
+        }
         Ratio <- R %>%
-            dplyr::filter(.data$Sample == "All samples")
-        Ratio <- Ratio[[ctrl]]
+            dplyr::filter(.data[["Sample"]] == "All_Samples") %>%
+            dplyr::pull(paste0("Ratio_", ctrl_name))
         return(Ratio)
     }
 }
@@ -216,7 +235,10 @@ shared_other_IS_ratio <- function(af, matrix,
 #' @param af The association file
 #' @param matrix The integration matrix
 #' @param subject_col The name of the subject column in af,
-#' default to "SubjectID"
+#' default to "SubjectID"; if multiple columns identify the subject then
+#' this must be a vector containing those columns names
+#' @param field_sep The character that in control names separates the different 
+#' columns values, default to "_"
 #' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
 #' @param value_col The name of the SeqCount column in matrix,
@@ -237,6 +259,7 @@ shared_other_IS_ratio <- function(af, matrix,
 
 shared_IS_ratio <- function(af, matrix,
                             subject_col = "SubjectID",
+                            field_sep = "_",
                             amp_col = "CompleteAmplificationID",
                             value_col = "Value",
                             ctrl = "CEM37") {
@@ -245,7 +268,7 @@ shared_IS_ratio <- function(af, matrix,
         stop()
     }
     # Check control
-    if (ctrl_check(af, subject_col, ctrl) != TRUE) {
+    if (ctrl_check(af, subject_col, ctrl, field_sep) != TRUE) {
         stop()
     }
     # Aggregate matrix and af
@@ -264,12 +287,12 @@ shared_IS_ratio <- function(af, matrix,
     is_vars <- get_is_vars()
     # Find shared integration sites belonging to controls
     filter_control <- find_shared_IS(aggreg_matrix, is_vars,
-                                     subject_col, value_col,
-                                     ctrl, type = "control")
+                                     subject_col, value_col, ctrl, 
+                                     type = "control", field_sep)
     # Find shared integration sites belonging to samples
     filter_other <- find_shared_IS(aggreg_matrix, is_vars,
-                                             subject_col, value_col,
-                                             ctrl, type = "other")
+                                   subject_col, value_col, ctrl, 
+                                   type = "other", field_sep)
     # Error if no IS is shared
     if (!is.list(ctrl)) {
         lengths_ctrl <- length(filter_control)
@@ -319,8 +342,8 @@ shared_IS_ratio <- function(af, matrix,
         warning("There are no IS shared from controls to other samples")
     }
     if (sum(sapply(lengths_other,
-                   function(x) all(x == 0, na.rm = TRUE)) !=
-            length(lengths_other))) {
+                   function(x) all(x == 0, na.rm = TRUE))) !=
+            length(lengths_other)) {
         Ratios_other_IS <- compute_ratio(filter_other, is_vars,
                                          subject_col, value_col, ctrl,
                                          type = "by sample")
@@ -377,7 +400,10 @@ shared_IS_ratio <- function(af, matrix,
 #' @param af The association file
 #' @param matrix The integration matrix
 #' @param subject_col The name of the subject column in af,
-#' default to "SubjectID"
+#' default to "SubjectID"; if multiple columns identify the subject then
+#' this must be a vector containing those columns names
+#' @param field_sep The character that in control names separates the different 
+#' columns values, default to "_"
 #' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
 #' @param value_col The name of the SeqCount column in matrix,
@@ -398,6 +424,7 @@ shared_IS_ratio <- function(af, matrix,
 
 shared_IS_ratio_byIS <- function(af, matrix,
                                  subject_col = "SubjectID",
+                                 field_sep = "_",
                                  amp_col = "CompleteAmplificationID",
                                  value_col = "Value",
                                  ctrl = "CEM37") {
@@ -406,7 +433,7 @@ shared_IS_ratio_byIS <- function(af, matrix,
         stop()
     }
     # Check control
-    if (ctrl_check(af, subject_col, ctrl) != TRUE) {
+    if (ctrl_check(af, subject_col, ctrl, field_sep) != TRUE) {
         stop()
     }
     # Aggregate matrix and af
@@ -426,12 +453,12 @@ shared_IS_ratio_byIS <- function(af, matrix,
     # Find shared integration sites
     # Belonging to controls
     filter_control <- find_shared_IS(aggreg_matrix, is_vars,
-                                               subject_col, value_col,
-                                               ctrl, "control")
+                                     subject_col, value_col,
+                                     ctrl, "control", field_sep)
     # Belonging to samples
     filter_other <- find_shared_IS(aggreg_matrix, is_vars,
-                                             subject_col, value_col,
-                                             ctrl, "other")
+                                   subject_col, value_col,
+                                   ctrl, "other", field_sep)
     # Error if no IS is shared
     if (!is.list(ctrl)) {
         lengths_ctrl <- length(filter_control)
@@ -471,8 +498,8 @@ shared_IS_ratio_byIS <- function(af, matrix,
         length(lengths_ctrl)) {
         # Compute ratio for known control IS
         known_control_is_ratios <-
-            compute_ratio(filter_control, is_vars,
-                               subject_col, value_col, ctrl, type = "by IS")
+            compute_ratio(filter_control, is_vars, subject_col, 
+                          value_col, ctrl, type = "by IS")
         known_control_is_ratios$IS_Source <- "Control"
         known_control_is_ratios <- known_control_is_ratios %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
@@ -485,8 +512,8 @@ shared_IS_ratio_byIS <- function(af, matrix,
         length(lengths_other)) {
         # Compute ratio for shared IS from samples
         other_is_ratios <-
-            compute_ratio(filter_other, is_vars,
-                               subject_col, value_col, ctrl, type = "by IS")
+            compute_ratio(filter_other, is_vars, subject_col, 
+                          value_col, ctrl, type = "by IS")
         other_is_ratios$IS_Source <- "Samples"
         other_is_ratios <- other_is_ratios %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 

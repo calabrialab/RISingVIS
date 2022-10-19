@@ -15,7 +15,10 @@
 #' @param af The association file
 #' @param matrix The integration matrix
 #' @param subject_col The name of the subject column in af, 
-#' default to "SubjectID"
+#' default to "SubjectID"; if multiple columns identify the subject then
+#' this must be a vector containing those columns names
+#' @param field_sep The character that in control names separates the different 
+#' columns values, default to "_"
 #' @param amp_col The name of the amplificate column in af and matrix, 
 #' default to "CompleteAmplificationID"
 #' @param value_col The name of the SeqCount column in matrix, 
@@ -35,6 +38,7 @@
 
 replicates_IS_count <- function(af, matrix,
                                 subject_col = "SubjectID",
+                                field_sep = "_",
                                 amp_col = "CompleteAmplificationID",
                                 value_col = "Value") {
     # Check input files
@@ -45,11 +49,13 @@ replicates_IS_count <- function(af, matrix,
     is_vars <- get_is_vars()
     # Retrieve subjects
     subjects <- af %>%
-        dplyr::select(.data[[subject_col]]) %>%
+        dplyr::select(dplyr::all_of(subject_col)) %>%
         unique()
     # Count replicates per subject per IS
     table <- apply(subjects, 1, function(x) {
-        replicates <- af %>% dplyr::filter(.data[[subject_col]] == x) %>%
+        row <- as.data.frame(as.list(x))
+        replicates <- as.data.frame(af) %>%
+            dplyr::inner_join(row, by = subject_col) %>%
             dplyr::pull(.data[[amp_col]])
         rows <- matrix %>%
             dplyr::filter(.data[[amp_col]] %in% replicates)
@@ -57,7 +63,14 @@ replicates_IS_count <- function(af, matrix,
             dplyr::group_by(.data[[is_vars[1]]], .data[[is_vars[2]]],
                             .data[[is_vars[3]]]) %>%
             dplyr::summarise(Count = dplyr::n())
-        names(counts)[names(counts) == "Count"] <- x
+        if (length(row) > 1) {
+            row <- row %>% 
+                tidyr::unite("Sample", subject_col, 
+                             sep = field_sep, remove = FALSE)
+            names(counts)[names(counts) == "Count"] <- row[["Sample"]]
+        } else {
+            names(counts)[names(counts) == "Count"] <- row[[subject_col]]
+        }
         return(counts)
     })
     IS_replicate_count <- table %>%
@@ -88,7 +101,10 @@ replicates_IS_count <- function(af, matrix,
 #' @param af The association file
 #' @param matrix The integration matrix
 #' @param subject_col The name of the subject column in af, 
-#' default to "SubjectID"
+#' default to "SubjectID"; if multiple columns identify the subject then
+#' this must be a vector containing those columns names
+#' @param field_sep The character that in control names separates the different 
+#' columns values, default to "_"
 #' @param amp_col The name of the amplificate column in af and matrix, 
 #' default to "CompleteAmplificationID"
 #' @param value_col The name of the SeqCount column in matrix, 
@@ -109,6 +125,7 @@ replicates_IS_count <- function(af, matrix,
 
 replicates_IS_ratio <- function(af, matrix,
                                 subject_col = "SubjectID",
+                                field_sep = "_",
                                 amp_col = "CompleteAmplificationID",
                                 value_col = "Value",
                                 ctrl = "CEM37") {
@@ -117,28 +134,35 @@ replicates_IS_ratio <- function(af, matrix,
         stop()
     }
     # Check control
-    if (ctrl_check(af, subject_col, ctrl) != TRUE) {
+    if (ctrl_check(af, subject_col, ctrl, field_sep) != TRUE) {
         stop()
     }
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Count replicates per IS
     IS_replicate_count <- replicates_IS_count(af, matrix, subject_col,
-                                              amp_col, value_col)
-    IS_replicate_count  <- IS_replicate_count %>%
-        tidyr::pivot_longer(cols = c(-is_vars[1], -is_vars[2], -is_vars[3]),
-                            names_to = subject_col, values_to = value_col,
-                            values_drop_na = TRUE)
+                                              field_sep, amp_col, value_col)
+    if (length(subject_col) > 1) {
+        IS_replicate_count  <- IS_replicate_count %>%
+            tidyr::pivot_longer(cols = c(-is_vars[1], -is_vars[2], -is_vars[3]),
+                                names_to = subject_col, names_sep = field_sep, 
+                                values_to = value_col, values_drop_na = TRUE)
+    } else {
+        IS_replicate_count  <- IS_replicate_count %>%
+            tidyr::pivot_longer(cols = c(-is_vars[1], -is_vars[2], -is_vars[3]),
+                                names_to = subject_col,  
+                                values_to = value_col, values_drop_na = TRUE)
+    }
     # Filter shared integrations belonging to controls
     filter_control <- find_shared_IS(IS_replicate_count,
                                                is_vars, subject_col,
                                                value_col, ctrl,
-                                               type = "control")
+                                               type = "control", field_sep)
     # Filter shared integrations belonging to samples
     filter_other <- find_shared_IS(IS_replicate_count,
                                              is_vars, subject_col,
                                              value_col, ctrl,
-                                             type = "other")
+                                             type = "other", field_sep)
     # Error if no IS is shared
     if (!is.list(ctrl)) {
         lengths_ctrl <- length(filter_control)
@@ -188,8 +212,8 @@ replicates_IS_ratio <- function(af, matrix,
         warning("There are no IS shared from controls to other samples")
     }
     if (sum(sapply(lengths_other,
-                   function(x) all(x == 0, na.rm = TRUE)) !=
-            length(lengths_other))) {
+                   function(x) all(x == 0, na.rm = TRUE))) !=
+            length(lengths_other)) {
         Ratios_other_replicate_count <-
             compute_ratio(filter_other, is_vars,
                           subject_col, value_col, ctrl,
@@ -249,7 +273,10 @@ replicates_IS_ratio <- function(af, matrix,
 #' @param af The association file
 #' @param matrix The integration matrix
 #' @param subject_col The name of the subject column in af, 
-#' default to "SubjectID"
+#' default to "SubjectID"; if multiple columns identify the subject then
+#' this must be a vector containing those columns names
+#' @param field_sep The character that in control names separates the different 
+#' columns values, default to "_"
 #' @param amp_col The name of the amplificate column in af and matrix, 
 #' default to "CompleteAmplificationID"
 #' @param value_col The name of the SeqCount column in matrix, 
@@ -268,7 +295,8 @@ replicates_IS_ratio <- function(af, matrix,
 #' head(R)
 
 replicates_IS_ratio_byIS <- function(af, matrix,
-                                     subject_col = "SubjectID",
+                                     subject_col = "SubjectID", 
+                                     field_sep = "_",
                                      amp_col = "CompleteAmplificationID",
                                      value_col = "Value",
                                      ctrl = "CEM37") {
@@ -277,24 +305,34 @@ replicates_IS_ratio_byIS <- function(af, matrix,
         stop()
     }
     # Check control
-    if (ctrl_check(af, subject_col, ctrl) != TRUE) {
+    if (ctrl_check(af, subject_col, ctrl, field_sep) != TRUE) {
         stop()
     }
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Count replicates per IS
     IS_replicate_count <- replicates_IS_count(af, matrix, subject_col,
-                                              amp_col, value_col)
-    IS_replicate_count  <- IS_replicate_count %>%
-        tidyr::pivot_longer(cols = c(-is_vars[1], -is_vars[2], -is_vars[3]),
-                            names_to = subject_col, values_to = value_col,
-                            values_drop_na = TRUE)
+                                              field_sep, amp_col, value_col)
+    if (length(subject_col) > 1) {
+        IS_replicate_count  <- IS_replicate_count %>%
+            tidyr::pivot_longer(cols = c(-is_vars[1], -is_vars[2], -is_vars[3]),
+                                names_to = subject_col, names_sep = field_sep, 
+                                values_to = value_col, values_drop_na = TRUE)
+    }
+    else {
+        IS_replicate_count  <- IS_replicate_count %>%
+            tidyr::pivot_longer(cols = c(-is_vars[1], -is_vars[2], -is_vars[3]),
+                                names_to = subject_col,  
+                                values_to = value_col, values_drop_na = TRUE)
+    }
     # Filter shared integrations belonging to controls
     filter_control <- find_shared_IS(IS_replicate_count, is_vars,
-                                     subject_col, value_col, ctrl, "control")
+                                     subject_col, value_col, 
+                                     ctrl, "control", field_sep)
     # Filter shared integrations belonging to samples
     filter_other <- find_shared_IS(IS_replicate_count, is_vars,
-                                   subject_col, value_col, ctrl, "other")
+                                   subject_col, value_col, 
+                                   ctrl, "other", field_sep)
     # Error if no IS is shared
     if (!is.list(ctrl)) {
         lengths_ctrl <- length(filter_control)
