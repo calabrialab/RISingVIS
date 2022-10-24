@@ -88,8 +88,8 @@ shared_control_known_IS_ratio <- function(af, matrix,
         warning("One of the control lines is not sharing IS with samples")
     }
     # Compute ratio
-    R <- compute_ratio(filter_control, is_vars,
-                       subject_col, value_col, ctrl, type = "by sample")
+    R <- compute_ratio(filter_control, is_vars, subject_col, 
+                       value_col, ctrl, field_sep, type = "by sample")
     if (length(names(ctrl)) > 1) {
         Ratio <- R %>%
             dplyr::filter(.data[["Sample"]] == "All_Samples") %>%
@@ -197,7 +197,7 @@ shared_other_IS_ratio <- function(af, matrix,
     }
     # Compute ratio
     R <- compute_ratio(filter_other, is_vars, subject_col,
-                       value_col, ctrl, type = "by sample")
+                       value_col, ctrl, field_sep, type = "by sample")
     if (length(names(ctrl)) > 1) {
         Ratio <- R %>%
             dplyr::filter(.data[["Sample"]] == "All_Samples") %>%
@@ -312,7 +312,7 @@ shared_IS_ratio <- function(af, matrix,
                    function(x) all(x == 0, na.rm = TRUE))) ==
         length(lengths_other)) {
         warning("There are no IS shared")
-        Ratio <- no_IS_shared(ctrl, af)
+        Ratio <- no_IS_shared(ctrl, af, subject_col, field_sep)
         Ratio <- Ratio %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
                                                         "Count", "SeqCount"))
@@ -333,7 +333,7 @@ shared_IS_ratio <- function(af, matrix,
         Ratios_known_control_IS <- compute_ratio(filter_control,
                                                  is_vars, subject_col,
                                                  value_col, ctrl,
-                                                 type = "by sample")
+                                                 field_sep, type = "by sample")
         Ratios_known_control_IS$IS_Source <- "Control"
         Ratios_known_control_IS <- Ratios_known_control_IS %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
@@ -346,7 +346,7 @@ shared_IS_ratio <- function(af, matrix,
             length(lengths_other)) {
         Ratios_other_IS <- compute_ratio(filter_other, is_vars,
                                          subject_col, value_col, ctrl,
-                                         type = "by sample")
+                                         field_sep, type = "by sample")
         Ratios_other_IS$IS_Source <- "Samples"
         Ratios_other_IS <- Ratios_other_IS %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
@@ -478,7 +478,7 @@ shared_IS_ratio_byIS <- function(af, matrix,
                    function(x) all(x == 0, na.rm = TRUE))) ==
         length(lengths_other)) {
         warning("There are no IS shared")
-        Ratio <- no_IS_shared(ctrl, af)
+        Ratio <- no_IS_shared(ctrl, af, subject_col, field_sep)
         Ratio <- Ratio %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
                                                         "Count", "SeqCount"))
@@ -499,7 +499,7 @@ shared_IS_ratio_byIS <- function(af, matrix,
         # Compute ratio for known control IS
         known_control_is_ratios <-
             compute_ratio(filter_control, is_vars, subject_col, 
-                          value_col, ctrl, type = "by IS")
+                          value_col, ctrl, field_sep, type = "by IS")
         known_control_is_ratios$IS_Source <- "Control"
         known_control_is_ratios <- known_control_is_ratios %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
@@ -513,7 +513,7 @@ shared_IS_ratio_byIS <- function(af, matrix,
         # Compute ratio for shared IS from samples
         other_is_ratios <-
             compute_ratio(filter_other, is_vars, subject_col, 
-                          value_col, ctrl, type = "by IS")
+                          value_col, ctrl, field_sep, type = "by IS")
         other_is_ratios$IS_Source <- "Samples"
         other_is_ratios <- other_is_ratios %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 

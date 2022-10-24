@@ -281,7 +281,7 @@ filter_shared_other_is <- function(matrix, is_vars, subject_col,
 #' @importFrom rlang .data
 
 compute_ratio <- function(filter_shared_is, is_vars, subject_col,
-                          value_col, ctrl, type) {
+                          value_col, ctrl, field_sep, type) {
     `%notin%` <- Negate(`%in%`)
     if (type %notin% c("by sample", "by IS")) {
         stop()
@@ -291,11 +291,12 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
         ctrl_line <- ctrl
         if (type == "by sample") {
             counts <- compute_counts(filter_shared_is, subject_col,
-                                     value_col, ctrl_names)
+                                     value_col, ctrl_names, field_sep)
             res <- internal_compute_ratio(counts, subject_col, ctrl_line)
         } else if (type == "by IS") {
             counts <- compute_counts_byIS(filter_shared_is, is_vars,
-                                          subject_col, value_col, ctrl_names)
+                                          subject_col, value_col, 
+                                          ctrl_names, field_sep)
             res <- internal_compute_ratio_byIS(counts, is_vars, subject_col,
                                                value_col, ctrl_line)
         }
@@ -311,7 +312,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
             } else {
                 if (type == "by sample") {
                     counts <- compute_counts(shared_is, subject_col,
-                                             value_col, ctrl_names)
+                                             value_col, ctrl_names, field_sep)
                     ret <- internal_compute_ratio(counts,
                                                   subject_col, ctrl_line)
                     return(ret)
@@ -319,7 +320,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
                 if (type == "by IS") {
                     counts <- compute_counts_byIS(shared_is, is_vars,
                                                   subject_col, value_col,
-                                                  ctrl_names)
+                                                  ctrl_names, field_sep)
                     ret <- internal_compute_ratio_byIS(counts, is_vars,
                                                        subject_col, value_col,
                                                        ctrl_line)
@@ -342,7 +343,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
             shared_is <- dplyr::distinct(shared_is)
             if (type == "by sample") {
                 counts <- compute_counts(shared_is, subject_col,
-                                         value_col, ctrl_names)
+                                         value_col, ctrl_names, field_sep)
                 row <- data.frame(Sub = "All_Controls", Sum = sum(
                     counts %>%
                         dplyr::filter(.data[["Sample"]] %in%
@@ -358,7 +359,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
             }
             if (type == "by IS") {
                 counts <- compute_counts_byIS(shared_is, is_vars, subject_col,
-                                              value_col, ctrl_names)
+                                              value_col, ctrl_names, field_sep)
                 row <- counts %>%
                     dplyr::filter(.data[["Sample"]] %in% ctrl_names) %>%
                     dplyr::group_by(.data[[is_vars[1]]], .data[[is_vars[2]]],
@@ -386,7 +387,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
 #' @importFrom rlang .data
 
 compute_counts <- function(filter_shared_is, subject_col,
-                           value_col, ctrl_names) {
+                           value_col, ctrl_names, field_sep) {
     counts <- filter_shared_is %>%
         dplyr::group_by(dplyr::across(dplyr::all_of(subject_col))) %>%
         dplyr::summarise(Sum = sum(.data[[value_col]]))
@@ -441,7 +442,7 @@ internal_compute_ratio <- function(counts, subject_col, ctrl_line) {
 #' @importFrom rlang .data
 
 compute_counts_byIS <- function(filter_shared, is_vars, subject_col,
-                                value_col, ctrl_names) {
+                                value_col, ctrl_names, field_sep) {
     `%notin%` <- Negate(`%in%`)
     filter_shared <- filter_shared %>% tidyr::unite("Sample", 
                                                     subject_col, 
@@ -504,12 +505,14 @@ internal_compute_ratio_byIS <- function(counts, is_vars,
 #' @importFrom magrittr `%>%`
 #' @importFrom rlang .data
 
-no_IS_shared <- function(ctrl, af) {
+no_IS_shared <- function(ctrl, af, subject_col, field_sep) {
     `%notin%` <- Negate(`%in%`)
+    af <- af %>% tidyr::unite("Sample", 
+                              subject_col, sep = field_sep)
     subjects <- af %>% 
-        dplyr::filter(.data[[subject_col]] %notin% 
+        dplyr::filter(.data[["Sample"]] %notin% 
                           c(names(ctrl), "CEM37")) %>%
-        dplyr::pull(.data[[subject_col]]) %>% 
+        dplyr::pull(.data[["Sample"]]) %>% 
         unique()
     subjects <- append(subjects, "All_Samples")
     if (!is.list(ctrl)) {

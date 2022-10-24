@@ -381,3 +381,4 @@ test_that("shared_IS_ratio_byIS works with multiple columns sample", {
         dplyr::filter(Sample == "All_Samples")
     expect_equal(tibble::tibble(r), ctrl_byIS_mult_out, tolerance = 0.0001)
 })
+s

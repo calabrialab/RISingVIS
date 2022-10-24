@@ -182,7 +182,7 @@ replicates_IS_ratio <- function(af, matrix,
                    function(x) all(x == 0, na.rm = TRUE))) ==
         length(lengths_other)) {
         warning("There are no IS shared")
-        Ratio <- no_IS_shared(ctrl, af)
+        Ratio <- no_IS_shared(ctrl, af, subject_col, field_sep)
         Ratio <- Ratio %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
                                                         "Count", "RepCount"))
@@ -202,7 +202,7 @@ replicates_IS_ratio <- function(af, matrix,
         Ratios_known_control_replicate_count <-
             compute_ratio(filter_control, is_vars,
                           subject_col, value_col, ctrl,
-                          type = "by sample")
+                          field_sep, type = "by sample")
         Ratios_known_control_replicate_count$IS_Source <- "Control"
         Ratios_known_control_replicate_count <- 
             Ratios_known_control_replicate_count %>% 
@@ -217,7 +217,7 @@ replicates_IS_ratio <- function(af, matrix,
         Ratios_other_replicate_count <-
             compute_ratio(filter_other, is_vars,
                           subject_col, value_col, ctrl,
-                          type = "by sample")
+                          field_sep, type = "by sample")
         Ratios_other_replicate_count$IS_Source <- "Samples"
         Ratios_other_replicate_count <- 
             Ratios_other_replicate_count %>% 
@@ -352,7 +352,7 @@ replicates_IS_ratio_byIS <- function(af, matrix,
                    function(x) all(x == 0, na.rm = TRUE))) ==
         length(lengths_other)) {
         warning("There are no IS shared")
-        Ratio <- no_IS_shared(ctrl, af)
+        Ratio <- no_IS_shared(ctrl, af, subject_col, field_sep)
         Ratio <- Ratio %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
                                                         "Count", "RepCount"))
@@ -370,8 +370,8 @@ replicates_IS_ratio_byIS <- function(af, matrix,
                    function(x) all(x == 0, na.rm = TRUE))) !=
         length(lengths_ctrl)) {
         Ratios_known_control_replicate_count <-
-            compute_ratio(filter_control, is_vars,
-                          subject_col, value_col, ctrl, type = "by IS")
+            compute_ratio(filter_control, is_vars, subject_col, 
+                          value_col, ctrl, field_sep, type = "by IS")
         Ratios_known_control_replicate_count$IS_Source <- "Control"
         Ratios_known_control_replicate_count <- 
             Ratios_known_control_replicate_count %>% 
@@ -384,8 +384,8 @@ replicates_IS_ratio_byIS <- function(af, matrix,
                    function(x) all(x == 0, na.rm = TRUE))) !=
         length(lengths_other)) {
         Ratios_other_replicate_count <-
-            compute_ratio(filter_other, is_vars,
-                          subject_col, value_col, ctrl, type = "by IS")
+            compute_ratio(filter_other, is_vars, subject_col, 
+                          value_col, ctrl, field_sep, type = "by IS")
         Ratios_other_replicate_count$IS_Source <- "Samples"
         Ratios_other_replicate_count <- 
             Ratios_other_replicate_count %>% 

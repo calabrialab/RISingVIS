@@ -212,7 +212,7 @@ test_that("compute_ratio works correctly", {
     )
     is_vars <- get_is_vars()
     r <- compute_ratio(shared, is_vars, "SubjectID", "value", 
-                       "CEM37", "by sample")
+                       "CEM37", "_", "by sample")
     rownames(r) <- NULL
     r <- tibble::tibble(r) %>%
         dplyr::select("Sample", "Ratio_CEM37")
@@ -229,7 +229,7 @@ test_that("compute_ratio_byIS works correctly", {
     )
     is_vars <- get_is_vars()
     r <- compute_ratio(shared, is_vars, "SubjectID", 
-                            "value", "CEM37", type = "by IS")
+                            "value", "CEM37", "_", type = "by IS")
     rownames(r) <- NULL
     r <- tibble::tibble(r) %>%
         dplyr::select("chr", "integration_locus", "strand", "Sample", 
@@ -275,7 +275,7 @@ test_that("get_is_vars returns three character values", {
 # Test no_IS_shared
 
 test_that("no_IS_shared returns all ratios equal to 0", {
-    r <- no_IS_shared("CEM37", association_file)
+    r <- no_IS_shared("CEM37", association_file, "SubjectID", "_")
     r <- tibble::tibble(r) %>%
         dplyr::select("Ratio_CEM37") %>%
         unique()
