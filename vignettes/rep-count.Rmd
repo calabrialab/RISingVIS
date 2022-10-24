@@ -72,7 +72,7 @@ the matrix.
 
 Association file and integration matrix are the mandatory parameters. 
 Other parameters can be tuned at need:
-* **subject_col** (default is *SubjectID*): the name of the column 
+* **subject_col** (default is *SubjectID*): the name of the column(s) 
 in the association file that reports the name of the subject 
 * **amp_col** (default is *CompleteAmplificationID*): the name of the column 
 in the association file and in the matrix that reports the identifier for the
@@ -93,6 +93,8 @@ Again the only mandatory parameters are the association file and the
 integration matrix. The other parameters can be tuned at need and include, 
 other than the ones above mentioned, the following:
 
+* **field_sep** (default is *_*): the character that is used in controls list
+to separate the fields/column values that identify the control (subject_col)
 * **ctrl** (default is *CEM37*): if not default, this parameter must be a named 
 list containing the name of the control cell line and the list of known 
 integration sites for that control line. Default control il CEM37, which known 

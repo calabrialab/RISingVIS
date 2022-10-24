@@ -72,8 +72,10 @@ shared control known integration sites.
 
 It is mandatory to specify, when calling the function, the association file and
 the integration matrix; others parameters can be tuned according to need: 
-* **subject_col** (default is *SubjectID*): the name of the column 
+* **subject_col** (default is *SubjectID*): the name of the column(s) 
 in the association file that reports the name of the subject 
+* **field_sep** (default is *_*): the character that is used in controls list
+to separate the fields/column values that identify the control (subject_col)
 * **amp_col** (default is *CompleteAmplificationID*): the name of the column 
 in the association file and in the matrix that reports the identifier for the
 single amplification
@@ -97,7 +99,7 @@ The function `shared_other_IS_ratio()` computes the ratio for all the shared
 integrations not belonging to controls. 
 
 Similarly to the previous function, association file and integration matrix are 
-mandatory, while other parametered can be tuned at need.
+mandatory, while other parameters can be tuned at need.
 
 The reported ratio is computed considering all shared integration sites known 
 to belong to the control(s), all samples and all controls together.
