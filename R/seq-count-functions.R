@@ -66,8 +66,8 @@ shared_control_known_IS_ratio <- function(af, matrix,
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Retrieve shared integration sites
-    filter_control <- find_shared_IS(aggreg_matrix, is_vars,
-                                     subject_col, value_col,
+    filter_control <- find_shared_IS(aggreg_matrix, af, is_vars,
+                                     subject_col, amp_col, value_col,
                                      ctrl, "control", field_sep)
     if (!is.list(ctrl)) {
         lengths_ctrl <- length(filter_control)
@@ -173,10 +173,9 @@ shared_other_IS_ratio <- function(af, matrix,
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Retrieve shared integration sites
-    filter_other <- find_shared_IS(aggreg_matrix, is_vars,
-                                   subject_col, value_col,
-                                   ctrl, type = "other",
-                                   field_sep)
+    filter_other <- find_shared_IS(aggreg_matrix, af, is_vars,
+                                   subject_col, amp_col, value_col,
+                                   ctrl, type = "other", field_sep)
     if (!is.list(ctrl)) {
         lengths_other <- length(filter_other)
     } else {
@@ -286,12 +285,12 @@ shared_IS_ratio <- function(af, matrix,
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Find shared integration sites belonging to controls
-    filter_control <- find_shared_IS(aggreg_matrix, is_vars,
-                                     subject_col, value_col, ctrl, 
+    filter_control <- find_shared_IS(aggreg_matrix, af, is_vars,
+                                     subject_col, amp_col, value_col, ctrl, 
                                      type = "control", field_sep)
     # Find shared integration sites belonging to samples
-    filter_other <- find_shared_IS(aggreg_matrix, is_vars,
-                                   subject_col, value_col, ctrl, 
+    filter_other <- find_shared_IS(aggreg_matrix, af, is_vars,
+                                   subject_col, amp_col, value_col, ctrl, 
                                    type = "other", field_sep)
     # Error if no IS is shared
     if (!is.list(ctrl)) {
@@ -452,12 +451,12 @@ shared_IS_ratio_byIS <- function(af, matrix,
     is_vars <- get_is_vars()
     # Find shared integration sites
     # Belonging to controls
-    filter_control <- find_shared_IS(aggreg_matrix, is_vars,
-                                     subject_col, value_col,
+    filter_control <- find_shared_IS(aggreg_matrix, af, is_vars,
+                                     subject_col, amp_col, value_col,
                                      ctrl, "control", field_sep)
     # Belonging to samples
-    filter_other <- find_shared_IS(aggreg_matrix, is_vars,
-                                   subject_col, value_col,
+    filter_other <- find_shared_IS(aggreg_matrix, af, is_vars,
+                                   subject_col, amp_col, value_col,
                                    ctrl, "other", field_sep)
     # Error if no IS is shared
     if (!is.list(ctrl)) {

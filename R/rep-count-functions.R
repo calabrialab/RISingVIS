@@ -86,8 +86,9 @@ replicates_IS_count <- function(af, matrix,
 #' and the number of replicates for the considered type of IS
 #' in the other samples.
 #'
-#' This function counts the number of replicates in which each shared IS
-#' is found and sums them to obtain an overall count for each sample.
+#' This function counts the number of replicates in which at least one shared 
+#' IS per type is found for each sample. Ratio's numerator and denominator are
+#' proportioned by the total number of replicates for the considered sample. 
 #' This function focuses on two categories of shared IS: the ones that are
 #' known to belong to controls and the one that come from the other samples.
 #' Also it considers the count for single subjects and for the overall
@@ -139,34 +140,20 @@ replicates_IS_ratio <- function(af, matrix,
     }
     # Retrieve IS variables
     is_vars <- get_is_vars()
-    # Count replicates per IS
-    IS_replicate_count <- replicates_IS_count(af, matrix, subject_col,
-                                              field_sep, amp_col, value_col)
-    if (length(subject_col) > 1) {
-        IS_replicate_count  <- IS_replicate_count %>%
-            tidyr::pivot_longer(cols = c(-is_vars[1], -is_vars[2], -is_vars[3]),
-                                names_to = subject_col, names_sep = field_sep, 
-                                values_to = value_col, values_drop_na = TRUE)
-    } else {
-        IS_replicate_count  <- IS_replicate_count %>%
-            tidyr::pivot_longer(cols = c(-is_vars[1], -is_vars[2], -is_vars[3]),
-                                names_to = subject_col,  
-                                values_to = value_col, values_drop_na = TRUE)
-    }
-    # Filter shared integrations belonging to controls
-    filter_control <- find_shared_IS(IS_replicate_count,
-                                               is_vars, subject_col,
-                                               value_col, ctrl,
-                                               type = "control", field_sep)
-    # Filter shared integrations belonging to samples
-    filter_other <- find_shared_IS(IS_replicate_count,
-                                             is_vars, subject_col,
-                                             value_col, ctrl,
-                                             type = "other", field_sep)
+    # Compute total number of replicates for each sample
+    n_rep <- compute_n_rep(af, subject_col, field_sep, ctrl)
+    # Find shared integration sites belonging to controls
+    filter_control <- find_shared_IS(matrix, af, is_vars,
+                                     subject_col, amp_col, value_col, ctrl, 
+                                     type = "control", field_sep)
+    # Find shared integration sites belonging to samples
+    filter_other <- find_shared_IS(matrix, af, is_vars,
+                                   subject_col, amp_col, value_col, ctrl, 
+                                   type = "other", field_sep)
     # Error if no IS is shared
     if (!is.list(ctrl)) {
-        lengths_ctrl <- length(filter_control)
-        lengths_other <- length(filter_other)
+        lengths_ctrl <- dim(filter_control)[1]
+        lengths_other <- dim(filter_other)[1]
     } else {
         lengths_ctrl <- purrr::map(filter_control[], function(x) {
             dim(x)[1]
@@ -196,13 +183,32 @@ replicates_IS_ratio <- function(af, matrix,
                    function(x) all(x == 0, na.rm = TRUE))) > 0) {
         warning("One of the control lines has no shared IS from samples")
     }
+    # Check for IS group presence in the samples
+    tables <- list("Controls" = filter_control, 
+                   "Samples" = filter_other)
+    ret <- purrr::map(names(tables), function(x) {
+        if (is.list(ctrl)) {
+            res <- purrr::map(names(tables[[x]]), function(c) {
+                ctrl_count <- compute_rep_count(tables[[x]][[c]], 
+                                                af, subject_col, amp_col, x)
+                return(ctrl_count)
+            })
+            names(res) <- names(tables[[x]])
+        } else {
+            res <- compute_rep_count(tables[[x]], 
+                                     af, subject_col, amp_col, x)
+        }
+        return(res)
+    })
+    names(ret) <- names(tables)
     if (sum(sapply(lengths_ctrl,
                    function(x) all(x == 0, na.rm = TRUE))) !=
         length(lengths_ctrl)) {
+        table <- ret[["Controls"]]
         Ratios_known_control_replicate_count <-
-            compute_ratio(filter_control, is_vars,
+            compute_ratio(table, is_vars,
                           subject_col, value_col, ctrl,
-                          field_sep, type = "by sample")
+                          field_sep, type = "by sample", n_rep)
         Ratios_known_control_replicate_count$IS_Source <- "Control"
         Ratios_known_control_replicate_count <- 
             Ratios_known_control_replicate_count %>% 
@@ -214,10 +220,11 @@ replicates_IS_ratio <- function(af, matrix,
     if (sum(sapply(lengths_other,
                    function(x) all(x == 0, na.rm = TRUE))) !=
             length(lengths_other)) {
+        table <- ret[["Samples"]]
         Ratios_other_replicate_count <-
-            compute_ratio(filter_other, is_vars,
+            compute_ratio(table, is_vars,
                           subject_col, value_col, ctrl,
-                          field_sep, type = "by sample")
+                          field_sep, type = "by sample", n_rep)
         Ratios_other_replicate_count$IS_Source <- "Samples"
         Ratios_other_replicate_count <- 
             Ratios_other_replicate_count %>% 
@@ -318,25 +325,24 @@ replicates_IS_ratio_byIS <- function(af, matrix,
             tidyr::pivot_longer(cols = c(-is_vars[1], -is_vars[2], -is_vars[3]),
                                 names_to = subject_col, names_sep = field_sep, 
                                 values_to = value_col, values_drop_na = TRUE)
-    }
-    else {
+    } else {
         IS_replicate_count  <- IS_replicate_count %>%
             tidyr::pivot_longer(cols = c(-is_vars[1], -is_vars[2], -is_vars[3]),
                                 names_to = subject_col,  
                                 values_to = value_col, values_drop_na = TRUE)
     }
     # Filter shared integrations belonging to controls
-    filter_control <- find_shared_IS(IS_replicate_count, is_vars,
-                                     subject_col, value_col, 
+    filter_control <- find_shared_IS(IS_replicate_count, af, is_vars,
+                                     subject_col, amp_col, value_col, 
                                      ctrl, "control", field_sep)
     # Filter shared integrations belonging to samples
-    filter_other <- find_shared_IS(IS_replicate_count, is_vars,
-                                   subject_col, value_col, 
+    filter_other <- find_shared_IS(IS_replicate_count, af, is_vars,
+                                   subject_col, amp_col, value_col, 
                                    ctrl, "other", field_sep)
     # Error if no IS is shared
     if (!is.list(ctrl)) {
-        lengths_ctrl <- length(filter_control)
-        lengths_other <- length(filter_other)
+        lengths_ctrl <- dim(filter_control)[1]
+        lengths_other <- dim(filter_other)[1]
     } else {
         lengths_ctrl <- purrr::map(filter_control[], function(x) {
             dim(x)[1]
@@ -385,7 +391,8 @@ replicates_IS_ratio_byIS <- function(af, matrix,
         length(lengths_other)) {
         Ratios_other_replicate_count <-
             compute_ratio(filter_other, is_vars, subject_col, 
-                          value_col, ctrl, field_sep, type = "by IS")
+                          value_col, ctrl, field_sep, 
+                          type = "by IS")
         Ratios_other_replicate_count$IS_Source <- "Samples"
         Ratios_other_replicate_count <- 
             Ratios_other_replicate_count %>% 

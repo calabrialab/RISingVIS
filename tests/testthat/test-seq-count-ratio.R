@@ -32,19 +32,11 @@ ratios_out <- tibble::tribble(
 )
 
 ratios_byIS_out <- tibble::tribble(
-    ~chr, ~integration_locus, ~strand, ~Sample, ~Control, ~Ratio, ~IS_Source,
-    "11", 64537168, "-", "A", "CEM37", 154.333333, "Control",
-    "11", 64537168, "-", "B", "CEM37", NA, "Control", 
-    "11", 64537168, "-", "All_Samples", "CEM37", 154.333333, "Control", 
-    "2", 73762398, "-", "A", "CEM37", NA, "Control", 
-    "2", 73762398, "-", "B", "CEM37", 129.000000, "Control", 
-    "2", 73762398, "-", "All_Samples", "CEM37", 129.000000, "Control", 
-    "17", 1632982, "-", "A", "CEM37", 0.0353697, "Samples", 
-    "17", 1632982, "-", "B", "CEM37", NA, "Samples",
-    "17", 1632982, "-", "All_Samples", "CEM37", 0.0353697, "Samples",
-    "5", 83626283, "+", "A", "CEM37", NA, "Samples",
-    "5", 83626283, "+", "B", "CEM37", 0.00929614, "Samples",
-    "5", 83626283, "+", "All_Samples", "CEM37", 0.00929614, "Samples",
+    ~chr, ~integration_locus, ~strand, ~Sample, ~Ratio_CEM37, ~IS_Source,
+    "11", 64537168, "-", "All_Samples", 154.333333, "Control", 
+    "2", 73762398, "-", "All_Samples", 129.000000, "Control", 
+    "17", 1632982, "-", "All_Samples", 0.0353697, "Samples",
+    "5", 83626283, "+", "All_Samples", 0.00929614, "Samples",
 )
 
 no_share_mat <- tibble::tribble(
@@ -162,29 +154,21 @@ ctrl_mult_out <- tibble::tribble(
 )
 
 ctrl_byIS_out <- tibble::tribble(
-    ~chr, ~integration_locus, ~strand, ~Sample, ~Control, ~Ratio, ~IS_Source,
-    "11", 64537168, "-", "All_Samples", "ctrl1", 154.333333, "Control",
-    "2", 73762398, "-", "All_Samples", "ctrl1", 129.000000, "Control", 
-    "11", 64537168, "-", "All_Samples", "ctrl2", 157.666666, "Control", 
-    "11", 64537168, "-", "All_Samples", "All_Controls", 312.000000, "Control", 
-    "2", 73762398, "-", "All_Samples", "All_Controls", 129.000000, "Control", 
-    "17", 1632982, "-", "All_Samples", "ctrl1", 0.03536977, "Samples", 
-    "5", 83626283, "+", "All_Samples", "ctrl2", 0.00929615, "Samples", 
-    "17", 1632982, "-", "All_Samples", "All_Controls", 0.03536977, "Samples", 
-    "5", 83626283, "+", "All_Samples", "All_Controls", 0.00929615, "Samples"
+    ~chr, ~integration_locus, ~strand, ~Sample, ~Ratio_ctrl1, 
+    ~Ratio_ctrl2, ~Ratio_All_Controls, ~IS_Source,
+    "11", 64537168, "-", "All_Samples", 154.333333, 157.666666, 312, "Control",
+    "2", 73762398, "-", "All_Samples", 129.000000, NA, 129.000000, "Control", 
+    "17", 1632982, "-", "All_Samples", 0.03536977, NA, 0.03536977, "Samples", 
+    "5", 83626283, "+", "All_Samples", NA, 0.00929615, 0.00929615, "Samples"
 )
 
 ctrl_byIS_mult_out <- tibble::tribble(
-    ~chr, ~integration_locus, ~strand, ~Sample, ~Control, ~Ratio, ~IS_Source,
-    "11", 64537168, "-", "All_Samples", "ctrl1-Pool1", 154.333333, "Control",
-    "2", 73762398, "-", "All_Samples", "ctrl1-Pool1", 129.000000, "Control", 
-    "11", 64537168, "-", "All_Samples", "ctrl2-Pool1", 157.666666, "Control", 
-    "11", 64537168, "-", "All_Samples", "All_Controls", 312.000000, "Control", 
-    "2", 73762398, "-", "All_Samples", "All_Controls", 129.000000, "Control", 
-    "17", 1632982, "-", "All_Samples", "ctrl1-Pool1", 0.03536977, "Samples", 
-    "5", 83626283, "+", "All_Samples", "ctrl2-Pool1", 0.00929615, "Samples", 
-    "17", 1632982, "-", "All_Samples", "All_Controls", 0.03536977, "Samples", 
-    "5", 83626283, "+", "All_Samples", "All_Controls", 0.00929615, "Samples"
+    ~chr, ~integration_locus, ~strand, ~Sample, ~`Ratio_ctrl1-Pool1`, 
+    ~`Ratio_ctrl2-Pool1`, ~Ratio_All_Controls, ~IS_Source,
+    "11", 64537168, "-", "All_Samples", 154.333333, 157.666666, 312, "Control",
+    "2", 73762398, "-", "All_Samples", 129.000000, NA, 129.000000, "Control", 
+    "17", 1632982, "-", "All_Samples", 0.03536977, NA, 0.03536977, "Samples", 
+    "5", 83626283, "+", "All_Samples", NA, 0.00929615, 0.00929615, "Samples"
 )
 
 ctrl_1_known_is <- tibble::tribble(
@@ -236,7 +220,8 @@ test_that("shared_IS_ratio_byIS works correctly", {
     r <- shared_IS_ratio_byIS(af, mat)
     r <- tibble::tibble(r) %>%
         dplyr::select("chr", "integration_locus", "strand", "Sample", 
-                      "Control", "Ratio", "IS_Source")
+                      "Ratio_CEM37", "IS_Source") %>%
+        dplyr::filter(Sample == "All_Samples")
     expect_equal(tibble::tibble(r), ratios_byIS_out, tolerance = 0.0001)
 })
 
@@ -296,7 +281,8 @@ test_that("shared_IS_ratio_byIS works with non-default columns", {
     r <- shared_IS_ratio_byIS(af, mat, subject_col = "Subject")
     r <- tibble::tibble(r) %>%
         dplyr::select("chr", "integration_locus", "strand", "Sample", 
-                      "Control", "Ratio", "IS_Source")
+                      "Ratio_CEM37", "IS_Source") %>%
+        dplyr::filter(Sample == "All_Samples")
     expect_equal(r, ratios_byIS_out, tolerance = 0.0001)
 })
 
@@ -332,7 +318,8 @@ test_that("shared_IS_ratio_byIS works with different control", {
     r <- shared_IS_ratio_byIS(af, mat, ctrl = controls)
     r <- tibble::tibble(r) %>%
         dplyr::select("chr", "integration_locus", "strand", "Sample", 
-                      "Control", "Ratio", "IS_Source") %>%
+                      "Ratio_ctrl1", "Ratio_ctrl2", 
+                      "Ratio_All_Controls", "IS_Source") %>%
         dplyr::filter(Sample == "All_Samples")
     expect_equal(r, ctrl_byIS_out, tolerance = 0.0001)
 })
@@ -377,8 +364,8 @@ test_that("shared_IS_ratio_byIS works with multiple columns sample", {
                               field_sep = "-")
     r <- tibble::tibble(r) %>% 
         dplyr::select("chr", "integration_locus", "strand", "Sample", 
-                      "Control", "Ratio", "IS_Source") %>%
+                      "Ratio_ctrl1-Pool1", "Ratio_ctrl2-Pool1", 
+                      "Ratio_All_Controls", "IS_Source") %>%
         dplyr::filter(Sample == "All_Samples")
     expect_equal(tibble::tibble(r), ctrl_byIS_mult_out, tolerance = 0.0001)
 })
-s

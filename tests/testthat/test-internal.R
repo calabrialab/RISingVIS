@@ -12,9 +12,9 @@ ratios_out <- tibble::tribble(
 )
 
 ratios_out_byIS <- tibble::tribble(
-    ~chr, ~integration_locus, ~strand, ~Sample, ~Control, ~Ratio,
-    "11", 64537168, "-", "All_Samples", "CEM37", 154.333333,
-    "2", 73762398, "-", "All_Samples", "CEM37", 129
+    ~chr, ~integration_locus, ~strand, ~Sample, ~Ratio_CEM37,
+    "11", 64537168, "-", "All_Samples", 154.333333,
+    "2", 73762398, "-", "All_Samples", 129
 )
 
 share_mat <- tibble::tribble(
@@ -137,7 +137,8 @@ test_that("find_shared_IS works correctly for control IS", {
     colnames(agg)[which(names(agg) == "Value_sum")] <- 
         "value"
     is_vars <- get_is_vars()
-    shared <- find_shared_IS(agg, is_vars, "SubjectID", "Value", 
+    shared <- find_shared_IS(agg, af, is_vars, "SubjectID", 
+                             "CompleteAmplificationID", "Value", 
                              ctrl = "CEM37", type = "control")
     shared <- shared %>% 
         dplyr::select(.data$chr, .data$integration_locus, .data$strand) %>% 
@@ -163,7 +164,8 @@ test_that("find_shared_IS works correctly for different control", {
     colnames(agg)[which(names(agg) == "Value_sum")] <- 
         "Value"
     is_vars <- get_is_vars()
-    shared <- find_shared_IS(agg, is_vars, "SubjectID", "Value", 
+    shared <- find_shared_IS(agg, af, is_vars, "SubjectID", 
+                             "CompleteAmplificationID", "Value", 
                              controls, "control", "_")
     shared <- shared[["ctrl1"]] %>% 
         dplyr::select(.data$chr, .data$integration_locus, .data$strand) %>% 
@@ -189,7 +191,8 @@ test_that("find_shared_IS works correctly for samples IS", {
     colnames(agg)[which(names(agg) == "Value_sum")] <- 
         "Value"
     is_vars <- get_is_vars()
-    shared <- find_shared_IS(agg, is_vars, "SubjectID", "Value",
+    shared <- find_shared_IS(agg, af, is_vars, "SubjectID", 
+                             "CompleteAmplificationID", "Value",
                              ctrl = "CEM37", type = "other", field_sep = "_")
     shared <- shared %>% 
         dplyr::select(.data$chr, .data$integration_locus, .data$strand) %>% 
@@ -233,7 +236,7 @@ test_that("compute_ratio_byIS works correctly", {
     rownames(r) <- NULL
     r <- tibble::tibble(r) %>%
         dplyr::select("chr", "integration_locus", "strand", "Sample", 
-                      "Control", "Ratio") %>%
+                      "Ratio_CEM37") %>%
         dplyr::filter(Sample == "All_Samples")
     expect_equal(tibble::tibble(r), ratios_out_byIS, tolerance = 0.0001)
 })
