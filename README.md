@@ -2,7 +2,7 @@
 
 The R package <b>RISingVIS</b> was developed to (1) <i>identify</i>, (2) <i>analyze</i>, 
 through the use of different functions that compute statistics to assess 
-and quantify their presence, and (3) <i>remove</i> <i>index switching</i> events 
+and quantify their presence, and (3) <i>remove</i> index switching events 
 in vector integration sites, that can be misleading for further analysis.
 
 In the field of gene therapy <i>vector integration sites</i> (IS) are used as 
