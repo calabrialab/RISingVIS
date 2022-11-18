@@ -61,8 +61,10 @@ shared_control_known_IS_ratio <- function(af, matrix,
         key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
-    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <-
-        value_col
+    aggreg_matrix <- aggreg_matrix %>%
+        dplyr::rename(
+            !!value_col := paste0(value_col, "_sum")
+        )
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Retrieve shared integration sites
@@ -70,7 +72,7 @@ shared_control_known_IS_ratio <- function(af, matrix,
                                      subject_col, amp_col, value_col,
                                      ctrl, "control", field_sep)
     if (!is.list(ctrl)) {
-        lengths_ctrl <- length(filter_control)
+        lengths_ctrl <- dim(filter_control)[1]
     } else {
         lengths_ctrl <- purrr::map(filter_control[], function(x) {
             dim(x)[1]
@@ -168,8 +170,10 @@ shared_other_IS_ratio <- function(af, matrix,
         key = subject_col,
         group = ISAnalytics::mandatory_IS_vars()
     )
-    colnames(aggreg_matrix)[which(names(aggreg_matrix) == "Value_sum")] <-
-        value_col
+    aggreg_matrix <- aggreg_matrix %>%
+        dplyr::rename(
+            !!value_col := paste0(value_col, "_sum")
+        )
     # Retrieve IS variables
     is_vars <- get_is_vars()
     # Retrieve shared integration sites
@@ -177,7 +181,7 @@ shared_other_IS_ratio <- function(af, matrix,
                                    subject_col, amp_col, value_col,
                                    ctrl, type = "other", field_sep)
     if (!is.list(ctrl)) {
-        lengths_other <- length(filter_other)
+        lengths_other <- dim(filter_other)[1]
     } else {
         lengths_other <- purrr::map(filter_other[], function(x) {
             dim(x)[1]
@@ -294,8 +298,8 @@ shared_IS_ratio <- function(af, matrix,
                                    type = "other", field_sep)
     # Error if no IS is shared
     if (!is.list(ctrl)) {
-        lengths_ctrl <- length(filter_control)
-        lengths_other <- length(filter_other)
+        lengths_ctrl <- dim(filter_control)[1]
+        lengths_other <- dim(filter_other)[1]
     } else {
         lengths_ctrl <- purrr::map(filter_control[], function(x) {
             dim(x)[1]
@@ -460,8 +464,8 @@ shared_IS_ratio_byIS <- function(af, matrix,
                                    ctrl, "other", field_sep)
     # Error if no IS is shared
     if (!is.list(ctrl)) {
-        lengths_ctrl <- length(filter_control)
-        lengths_other <- length(filter_other)
+        lengths_ctrl <- dim(filter_control)[1]
+        lengths_other <- dim(filter_other)[1]
     } else {
         lengths_ctrl <- purrr::map(filter_control[], function(x) {
             dim(x)[1]

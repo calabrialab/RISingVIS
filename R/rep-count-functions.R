@@ -142,6 +142,10 @@ replicates_IS_ratio <- function(af, matrix,
     is_vars <- get_is_vars()
     # Compute total number of replicates for each sample
     n_rep <- compute_n_rep(af, subject_col, field_sep, ctrl)
+    # Keep only necessary columns in matrix
+    matrix <- matrix %>% 
+        dplyr::select(is_vars[1], is_vars[2], 
+                      is_vars[3], amp_col, value_col)
     # Find shared integration sites belonging to controls
     filter_control <- find_shared_IS(matrix, af, is_vars,
                                      subject_col, amp_col, value_col, ctrl, 
@@ -190,13 +194,15 @@ replicates_IS_ratio <- function(af, matrix,
         if (is.list(ctrl)) {
             res <- purrr::map(names(tables[[x]]), function(c) {
                 ctrl_count <- compute_rep_count(tables[[x]][[c]], 
-                                                af, subject_col, amp_col, x)
+                                                af, subject_col, amp_col, 
+                                                value_col, x)
                 return(ctrl_count)
             })
             names(res) <- names(tables[[x]])
         } else {
             res <- compute_rep_count(tables[[x]], 
-                                     af, subject_col, amp_col, x)
+                                     af, subject_col, amp_col, 
+                                     value_col, x)
         }
         return(res)
     })

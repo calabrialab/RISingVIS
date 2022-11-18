@@ -396,7 +396,8 @@ compute_n_rep <- function(af, subject_col, field_sep, ctrl) {
 # Computes the replicate count by sample for the given table of shared IS
 #' @importFrom magrittr `%>%`
 #' @importFrom rlang .data
-compute_rep_count <- function(current_table, af, subject_col, amp_col, x) {
+compute_rep_count <- function(current_table, af, subject_col, 
+                              amp_col, value_col, x) {
     if (length(subject_col) > 1) {
         subs <- af %>%
             dplyr::select(subject_col) %>% 
@@ -414,7 +415,7 @@ compute_rep_count <- function(current_table, af, subject_col, amp_col, x) {
                 }
             })
             sub_count <- data.frame(row,  sum(unlist(rep_vals)))
-            colnames(sub_count) <- c(names(row), "Value")
+            colnames(sub_count) <- c(names(row), value_col)
             return(sub_count)
         }))
     } else {
@@ -435,6 +436,8 @@ compute_rep_count <- function(current_table, af, subject_col, amp_col, x) {
             sub_count <- tibble::tibble("Sub" = y, "Value" = sum(unlist(rep_vals)))
             sub_count <- sub_count %>%
                 dplyr::rename(!!subject_col := "Sub")
+            sub_count <- sub_count %>%
+                dplyr::rename(!!value_col := "Value")
             return(sub_count)
         })
         rep_count <- rep_count %>%
