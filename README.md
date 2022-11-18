@@ -11,5 +11,5 @@ to assess the safety and efficacy of the treatment, as well for tracking
 studies in which they are fundamental to make various calculations. 
 These IS studies rely on high-throughput sequencing of DNA fragments and 
 they can be affected by the phenomenon called Index Switching: a molecular 
-“error” during the sequencing process that may cause mis-assignment <br>
+“error” during the sequencing process that may cause mis-assignment 
 of a fragment to the wrong sample and thus creating false positives.  
