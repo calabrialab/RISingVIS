@@ -282,8 +282,8 @@ filter_shared_other_is <- function(matrix, af, is_vars, subject_col,
             filter_other_is_wide <- filter_other_is_full_wide %>%
                 dplyr::filter(dplyr::if_any(dplyr::any_of(ctrl_amp), 
                                             ~ . > 0)) %>%
-                dplyr::filter(dplyr::if_any(c(dplyr::all_of(is_vars), 
-                                              dplyr::all_of(ctrl_amp)),
+                dplyr::filter(dplyr::if_any(c(-dplyr::all_of(is_vars), 
+                                              -dplyr::all_of(ctrl_amp)),
                                             ~ . > 0))
         } else {
             filter_other_is_full_wide <-
@@ -398,6 +398,9 @@ compute_n_rep <- function(af, subject_col, field_sep, ctrl) {
 #' @importFrom rlang .data
 compute_rep_count <- function(current_table, af, subject_col, 
                               amp_col, value_col, x) {
+    if (dim(current_table)[1] == 0) {
+        return(tibble::tibble())
+    }
     if (length(subject_col) > 1) {
         subs <- af %>%
             dplyr::select(subject_col) %>% 
