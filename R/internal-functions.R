@@ -521,8 +521,6 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
         }
         if (type == "by IS") {
             res <- Filter(Negate(is.null), res)
-            # res <- res %>%
-            #     purrr::reduce(dplyr::bind_rows)
             res <- res %>% 
                 purrr::reduce(dplyr::full_join, 
                               by = c(is_vars[1], is_vars[2], 
@@ -616,6 +614,11 @@ internal_compute_ratio <- function(counts, subject_col, ctrl_line, n_rep) {
             sample <- as.character(x["Sample"])
             if (is.null(n_rep)) {
                 R <- ifelse(tot == 0, NA, ctrl_count / tot)
+                data <- data.frame(sample, ctrl_line, R, ctrl_count, tot)
+                colnames(data) <- c("Sample", "Control", "Ratio", 
+                                    paste0("Count(", ctrl_line, ")"), 
+                                    paste0("Count(Sample-vs-", ctrl_line, ")"))
+                return(data)
             } else {
                 s_col <- ifelse(length(subject_col) > 1, 
                                 "Sample", subject_col)
@@ -627,12 +630,17 @@ internal_compute_ratio <- function(counts, subject_col, ctrl_line, n_rep) {
                     dplyr::pull("n")
                 R <- ifelse(tot == 0, NA, 
                             (ctrl_count / rep_ctrl) / (tot / rep_sample))
+                data <- data.frame(sample, ctrl_line, R, ctrl_count, 
+                                   rep_ctrl, tot, rep_sample)
+                colnames(data) <- c("Sample", "Control", "Ratio", 
+                                    paste0("Count(", ctrl_line, ")"), 
+                                    paste0("TotRep(", ctrl_line, ")"),
+                                    paste0("Count(Sample-vs-", ctrl_line, ")"),
+                                    paste0("TotRep(Sample-vs-", 
+                                           ctrl_line, ")"))
+                return(data)
             }
-            data <- data.frame(sample, ctrl_line, R, ctrl_count, tot)
-            colnames(data) <- c("Sample", "Control", "Ratio", 
-                                paste0("Count(", ctrl_line, ")"), 
-                                paste0("Count(Sample-vs-", ctrl_line, ")"))
-            return(data)
+            
         }))
     ratios <- ratios %>% tidyr::pivot_wider(names_from = "Control",
                                             values_from = "Ratio",
