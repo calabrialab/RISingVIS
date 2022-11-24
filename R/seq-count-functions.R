@@ -337,7 +337,7 @@ shared_IS_ratio <- function(af, matrix,
                                                  is_vars, subject_col,
                                                  value_col, ctrl,
                                                  field_sep, type = "by sample")
-        Ratios_known_control_IS$IS_Source <- "Control"
+        Ratios_known_control_IS$IS_Source <- "Controls"
         Ratios_known_control_IS <- Ratios_known_control_IS %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
                                                         "Count", "SeqCount"))
@@ -503,7 +503,7 @@ shared_IS_ratio_byIS <- function(af, matrix,
         known_control_is_ratios <-
             compute_ratio(filter_control, is_vars, subject_col, 
                           value_col, ctrl, field_sep, type = "by IS")
-        known_control_is_ratios$IS_Source <- "Control"
+        known_control_is_ratios$IS_Source <- "Controls"
         known_control_is_ratios <- known_control_is_ratios %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
                                                         "Count", "SeqCount"))

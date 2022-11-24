@@ -475,7 +475,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
                                           subject_col, value_col, 
                                           ctrl_names, field_sep)
             res <- internal_compute_ratio_byIS(counts, is_vars, subject_col,
-                                               value_col, ctrl_line)
+                                               value_col, ctrl_line, n_rep)
         }
         return(res)
     } else {
@@ -508,7 +508,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
                                                   ctrl_names, field_sep)
                     ret <- internal_compute_ratio_byIS(counts, is_vars,
                                                        subject_col, value_col,
-                                                       ctrl_line)
+                                                       ctrl_line, n_rep)
                     return(ret)
                 }
             }
@@ -562,7 +562,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
                     dplyr::filter(.data[["Sample"]] %notin% ctrl_names)
                 ratio <- internal_compute_ratio_byIS(counts, is_vars,
                                                      subject_col, value_col,
-                                                     "All_Controls")
+                                                     "All_Controls", n_rep)
                 res <- res %>% dplyr::full_join(ratio, 
                                                 by = c(is_vars[1], is_vars[2], 
                                                        is_vars[3], "Sample"))
@@ -679,7 +679,8 @@ compute_counts_byIS <- function(filter_shared, is_vars, subject_col,
 #' @importFrom rlang .data
 
 internal_compute_ratio_byIS <- function(counts, is_vars,
-                                        subject_col, value_col, ctrl_line) {
+                                        subject_col, value_col, 
+                                        ctrl_line, n_rep) {
     shared_counts <- counts %>%
         tidyr::pivot_wider(names_from = dplyr::all_of("Sample"),
                            values_from = dplyr::all_of(value_col), 
@@ -692,21 +693,47 @@ internal_compute_ratio_byIS <- function(counts, is_vars,
         row <- as.list(x)
         row[[is_vars[2]]] <- as.integer(row[[is_vars[2]]])
         rats <- dplyr::bind_rows(lapply(subjects, function(y) {
-            tot <- row[y]
-            ctrl <- row[ctrl_line]
-            R <- ifelse(tot == 0, NA,
-                        as.integer(ctrl[[1]]) / as.integer(tot[[1]]))
-            res <- data.frame(y, as.integer(ctrl[[1]]), 
-                              as.integer(tot[[1]]), R)
-            return(res)
+            tot <- as.integer(row[[y]])
+            ctrl_count <- as.integer(row[[ctrl_line]])
+            if (is.null(n_rep)) {
+                R <- ifelse(tot == 0, NA,
+                            as.integer(ctrl_count[[1]]) / as.integer(tot[[1]]))
+                res <- data.frame(y, as.integer(ctrl_count[[1]]), 
+                                  as.integer(tot[[1]]), R)
+                return(res)
+            } else {
+                s_col <- ifelse(length(subject_col) > 1, 
+                                "Sample", subject_col)
+                rep_ctrl <- n_rep %>%
+                    dplyr::filter(.data[[s_col]] == ctrl_line) %>%
+                    dplyr::pull("n")
+                rep_sample <- n_rep %>%
+                    dplyr::filter(.data[[s_col]] == y) %>%
+                    dplyr::pull("n")
+                R <- ifelse(tot == 0, NA,
+                            (ctrl_count / rep_ctrl) / (tot / rep_sample))
+                res <- data.frame(y, ctrl_line, R, ctrl_count, 
+                                   rep_ctrl, tot, rep_sample)
+                return(res)
+            }
         }))
         data <- data.frame(row[[is_vars[1]]], row[[is_vars[2]]],
                            row[[is_vars[3]]], rats)
-        colnames(data) <- c("chr", "integration_locus",
-                            "strand", "Sample", 
-                            paste0("Count(", ctrl_line, ")"), 
-                            paste0("Count(Sample-vs-", ctrl_line, ")"),
-                            "Ratio")
+        if (is.null(n_rep)) {
+            colnames(data) <- c("chr", "integration_locus",
+                                "strand", "Sample", 
+                                paste0("Count(", ctrl_line, ")"), 
+                                paste0("Count(Sample-vs-", ctrl_line, ")"),
+                                "Ratio")
+        } else {
+            colnames(data) <- c("chr", "integration_locus",
+                                "strand", "Sample", "Control", "Ratio", 
+                                paste0("Count(", ctrl_line, ")"), 
+                                paste0("TotRep(", ctrl_line, ")"),
+                                paste0("Count(Sample-vs-", ctrl_line, ")"),
+                                paste0("TotRep(Sample-vs-", 
+                                       ctrl_line, ")"))
+        }
         data <- data %>% dplyr::rename(
             !!paste0("Ratio_", ctrl_line) := "Ratio")
         return(data)

@@ -23,9 +23,9 @@ share_mat <- tibble::tribble(
 
 ratios_out <- tibble::tribble(
     ~Sample, ~Ratio_CEM37, ~IS_Source,
-    "A", 369.33333333, "Control",
-    "B", 221.60000000, "Control", 
-    "All_Samples", 138.50000000, "Control",
+    "A", 369.33333333, "Controls",
+    "B", 221.60000000, "Controls", 
+    "All_Samples", 138.50000000, "Controls",
     "A", 0.05787781, "Samples",
     "B", 0.02390438, "Samples", 
     "All_Samples", 0.01691729, "Samples"
@@ -33,8 +33,8 @@ ratios_out <- tibble::tribble(
 
 ratios_byIS_out <- tibble::tribble(
     ~chr, ~integration_locus, ~strand, ~Sample, ~Ratio_CEM37, ~IS_Source,
-    "11", 64537168, "-", "All_Samples", 154.333333, "Control", 
-    "2", 73762398, "-", "All_Samples", 129.000000, "Control", 
+    "11", 64537168, "-", "All_Samples", 154.333333, "Controls", 
+    "2", 73762398, "-", "All_Samples", 129.000000, "Controls", 
     "17", 1632982, "-", "All_Samples", 0.0353697, "Samples",
     "5", 83626283, "+", "All_Samples", 0.00929614, "Samples",
 )
@@ -134,9 +134,9 @@ ctrl_af <- tibble::tibble(ProjectID = "Proj1",
 
 ctrl_out <- tibble::tribble(
     ~Sample, ~Ratio_ctrl1, ~Ratio_ctrl2, ~`Ratio_All_Controls`, ~IS_Source,
-    "A", 369.33333333, 1.576667e+02, 527.00000000, "Control",
-    "B", 221.60000000, NA+01, 316.20000000, "Control", 
-    "All_Samples", 138.50000000, 1.576667e+02, 197.62500000, "Control",
+    "A", 369.33333333, 1.576667e+02, 527.00000000, "Controls",
+    "B", 221.60000000, NA+01, 316.20000000, "Controls", 
+    "All_Samples", 138.50000000, 1.576667e+02, 197.62500000, "Controls",
     "A", 0.03536977, NA-02, 0.05787781, "Samples",
     "All_Samples", 0.03536977, 9.296149e-03, 0.01691729, "Samples",
     "B", NA, 9.296149e-03, 0.02390438, "Samples"
@@ -145,9 +145,9 @@ ctrl_out <- tibble::tribble(
 ctrl_mult_out <- tibble::tribble(
     ~Sample, ~`Ratio_ctrl1-Pool1`, ~`Ratio_ctrl2-Pool1`, 
     ~`Ratio_All_Controls`, ~IS_Source,
-    "A-Pool1", 369.33333333, 1.576667e+02, 527.00000000, "Control",
-    "B-Pool1", 221.60000000, NA+01, 316.20000000, "Control", 
-    "All_Samples", 138.50000000, 1.576667e+02, 197.62500000, "Control",
+    "A-Pool1", 369.33333333, 1.576667e+02, 527.00000000, "Controls",
+    "B-Pool1", 221.60000000, NA+01, 316.20000000, "Controls", 
+    "All_Samples", 138.50000000, 1.576667e+02, 197.62500000, "Controls",
     "A-Pool1", 0.03536977, NA-02, 0.05787781, "Samples",
     "All_Samples", 0.03536977, 9.296149e-03, 0.01691729, "Samples",
     "B-Pool1", NA, 9.296149e-03, 0.02390438, "Samples"
@@ -156,8 +156,8 @@ ctrl_mult_out <- tibble::tribble(
 ctrl_byIS_out <- tibble::tribble(
     ~chr, ~integration_locus, ~strand, ~Sample, ~Ratio_ctrl1, 
     ~Ratio_ctrl2, ~Ratio_All_Controls, ~IS_Source,
-    "11", 64537168, "-", "All_Samples", 154.333333, 157.666666, 312, "Control",
-    "2", 73762398, "-", "All_Samples", 129.000000, NA, 129.000000, "Control", 
+    "11", 64537168, "-", "All_Samples", 154.333333, 157.666666, 312, "Controls",
+    "2", 73762398, "-", "All_Samples", 129.000000, NA, 129.000000, "Controls", 
     "17", 1632982, "-", "All_Samples", 0.03536977, NA, 0.03536977, "Samples", 
     "5", 83626283, "+", "All_Samples", NA, 0.00929615, 0.00929615, "Samples"
 )
@@ -165,8 +165,8 @@ ctrl_byIS_out <- tibble::tribble(
 ctrl_byIS_mult_out <- tibble::tribble(
     ~chr, ~integration_locus, ~strand, ~Sample, ~`Ratio_ctrl1-Pool1`, 
     ~`Ratio_ctrl2-Pool1`, ~Ratio_All_Controls, ~IS_Source,
-    "11", 64537168, "-", "All_Samples", 154.333333, 157.666666, 312, "Control",
-    "2", 73762398, "-", "All_Samples", 129.000000, NA, 129.000000, "Control", 
+    "11", 64537168, "-", "All_Samples", 154.333333, 157.666666, 312, "Controls",
+    "2", 73762398, "-", "All_Samples", 129.000000, NA, 129.000000, "Controls", 
     "17", 1632982, "-", "All_Samples", 0.03536977, NA, 0.03536977, "Samples", 
     "5", 83626283, "+", "All_Samples", NA, 0.00929615, 0.00929615, "Samples"
 )

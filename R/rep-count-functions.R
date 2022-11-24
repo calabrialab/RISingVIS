@@ -215,7 +215,7 @@ replicates_IS_ratio <- function(af, matrix,
             compute_ratio(table, is_vars,
                           subject_col, value_col, ctrl,
                           field_sep, type = "by sample", n_rep)
-        Ratios_known_control_replicate_count$IS_Source <- "Control"
+        Ratios_known_control_replicate_count$IS_Source <- "Controls"
         Ratios_known_control_replicate_count <- 
             Ratios_known_control_replicate_count %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
@@ -323,6 +323,8 @@ replicates_IS_ratio_byIS <- function(af, matrix,
     }
     # Retrieve IS variables
     is_vars <- get_is_vars()
+    # Compute total number of replicates for each sample
+    n_rep <- compute_n_rep(af, subject_col, field_sep, ctrl)
     # Count replicates per IS
     IS_replicate_count <- replicates_IS_count(af, matrix, subject_col,
                                               field_sep, amp_col, value_col)
@@ -383,8 +385,8 @@ replicates_IS_ratio_byIS <- function(af, matrix,
         length(lengths_ctrl)) {
         Ratios_known_control_replicate_count <-
             compute_ratio(filter_control, is_vars, subject_col, 
-                          value_col, ctrl, field_sep, type = "by IS")
-        Ratios_known_control_replicate_count$IS_Source <- "Control"
+                          value_col, ctrl, field_sep, type = "by IS", n_rep)
+        Ratios_known_control_replicate_count$IS_Source <- "Controls"
         Ratios_known_control_replicate_count <- 
             Ratios_known_control_replicate_count %>% 
             dplyr::rename_all(~stringr::str_replace_all(.x, 
@@ -398,7 +400,7 @@ replicates_IS_ratio_byIS <- function(af, matrix,
         Ratios_other_replicate_count <-
             compute_ratio(filter_other, is_vars, subject_col, 
                           value_col, ctrl, field_sep, 
-                          type = "by IS")
+                          type = "by IS", n_rep)
         Ratios_other_replicate_count$IS_Source <- "Samples"
         Ratios_other_replicate_count <- 
             Ratios_other_replicate_count %>% 
