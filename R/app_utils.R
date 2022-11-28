@@ -131,14 +131,10 @@ id_list <- function() {
             data_form = "data_form",
             by_pool = "by_pool",
             file_form = "file_form",
-            save_rep = "save_rep",
-            rep_form = "rep_form",
             save_btn = "save_btn"
         ),
         outputs = list(
-            dir_display = "dir_display",
-            download_mat = "download_mat",
-            download_repo = "download_repo"
+            dir_display = "dir_display"
         )
     )
   )
@@ -812,42 +808,26 @@ id_list <- function() {
   return(list(res = rec_data, info = rec_ok))
 }
 
+## Converts data from tidy format to sparse format
 .tidy_to_sparse <- function(data, session) {
-    silent_conv <- purrr::quietly(ISAnalytics::as_sparse_matrix)
-    conv_data <- NULL
-    conv_ok <- tryCatch({
-        progressr::withProgressShiny(
-            {
-                conv_data <- silent_conv(x = data)
-            },
-            message = "Conversion to sparse matrix...",
-            session = session
-        )
-        list(status = TRUE)
-    }, error = function(e) {
-        list(status = FALSE, error = e$message)
-    })
+    
+    conv_data <- ISAnalytics::as_sparse_matrix(data)
+    
     return(conv_data)
 }
 
+## Splits data by pool into different data frames
 .split_by_pool <- function(data, session) {
+    
     pool_col <- ISAnalytics::association_file_columns(TRUE) %>%
         dplyr::filter(.data$tag == "vispa_concatenate") %>%
         dplyr::pull(.data$names)
-    silent_split <- purrr::quietly(base::split)
-    split_data <- NULL
-    split_ok <- tryCatch({
-        progressr::withProgressShiny(
-            {
-                conv_data <- silent_split(x = data, f = pool_col)
-            },
-            message = "Dividing by pool...",
-            session = session
-        )
-        list(status = TRUE)
-    }, error = function(e) {
-        list(status = FALSE, error = e$message)
-    })
+    
+    # Test
+    # pool_col <- "PoolID"
+    
+    split_data <- split(x = data, f = data[[pool_col]])
+    
     return(split_data)
 }
 

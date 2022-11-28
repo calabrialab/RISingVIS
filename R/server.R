@@ -30,7 +30,7 @@ server <- function(input, output, session) {
   saving_returns <- SavingServer(
       id_list()$saving_section$section_id,
       workflow,
-      #filtered_data = plots_returns$data
-      filtered_data = data_imp_returns$data
+      filtered_data = plots_returns$data, 
+      matrix_cols = colnames(data_imp_returns$data)
   )
 }
