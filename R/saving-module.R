@@ -1,13 +1,13 @@
 # Saving module ---------------------------------------------------------------
-
 SavingUI <- function(id) {
     ns <- NS(id)
     div(
         id = id,
+        style = "display: none;",
         width = "100%",
         div("Save results",
             class = "display-2"
-        ), 
+        ),
         div(
             align = "left",
             id = ns(id_list()$saving_section$inputs$dir_container),
@@ -66,8 +66,8 @@ SavingUI <- function(id) {
             actionButton(
                 inputId = ns(id_list()$saving_section$inputs$save_btn),
                 label = "SAVE"
-            ), 
-        ), 
+            ),
+        ),
     )
 }
 
@@ -104,16 +104,16 @@ SavingServer <- function(id, workflow, filtered_data, matrix_cols) {
                         cat("Choose dir...")
                     }
                 })
-            
+
             # Test data
-            # data("integration_matrix") 
-            # data("association_file") 
-            # filtered_data <- integration_matrix %>% 
-            #     dplyr::left_join(association_file, 
-            #                      by = "CompleteAmplificationID") 
-            # matrix_cols <- c("chr", "integration_locus", "strand", 
-            #                  "CompleteAmplificationID", "Value") 
-            
+            # data("integration_matrix")
+            # data("association_file")
+            # filtered_data <- integration_matrix %>%
+            #     dplyr::left_join(association_file,
+            #                      by = "CompleteAmplificationID")
+            # matrix_cols <- c("chr", "integration_locus", "strand",
+            #                  "CompleteAmplificationID", "Value")
+
             # Download
             observeEvent(input[[id_list()$saving_section$inputs$save_btn]], {
                 observeEvent(input[[id_list()$saving_section$inputs$by_pool]], {
@@ -128,7 +128,7 @@ SavingServer <- function(id, workflow, filtered_data, matrix_cols) {
                             } else if (input[[id_list()$saving_section$inputs$data_form]] == 2) {
                                 final_data <- curr %>%
                                     dplyr::select(dplyr::all_of(matrix_cols))
-                                
+
                             }
                             observeEvent(input[[id_list()$saving_section$inputs$file_form]], {
                                 if (input[[id_list()$saving_section$inputs$file_form]] == 1) {
@@ -176,7 +176,5 @@ SavingServer <- function(id, workflow, filtered_data, matrix_cols) {
                     }
                 })
             })
-    
     })
-    return()
 }

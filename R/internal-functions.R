@@ -69,11 +69,11 @@ ctrl_check <- function(af, subject_col, ctrl, field_sep) {
         if (ctrl != "CEM37") {
             stop("Control is not a list")
         } else if (ctrl == "CEM37") {
-            if (ctrl %notin% af[[subject_col]]) { 
+            if (ctrl %notin% af[[subject_col]]) {
                 stop("Control not found in association file")
             }
         }
-    } 
+    }
     if (is.list(ctrl)) {
         if (length(names(ctrl)) != length(ctrl)) {
             stop("List of controls is not named or doesn't contain known IS")
@@ -85,21 +85,21 @@ ctrl_check <- function(af, subject_col, ctrl, field_sep) {
                     single_ok <- lapply(
                         names(fields[[ctrl_line]]), function(y) {
                             col_ctrl <- y
-                            ifelse(fields[[ctrl_line]][[col_ctrl]] %in% 
+                            ifelse(fields[[ctrl_line]][[col_ctrl]] %in%
                                        af[[col_ctrl]],
                                    TRUE, FALSE)
                             })
-                    ifelse(sum(unlist(single_ok)) == 
+                    ifelse(sum(unlist(single_ok)) ==
                                length(names(fields[[ctrl_line]])),
                            TRUE, FALSE)
                     })
                 if (sum(unlist(fields_ok)) != length(names(fields))) {
                     stop("Control not found in association file")
                 }
-        } else { 
-            if (any(names(ctrl) %notin% af[[subject_col]])) { 
+        } else {
+            if (any(names(ctrl) %notin% af[[subject_col]])) {
                 stop("Control not found in association file")
-            }   
+            }
         }
     }
     return(TRUE)
@@ -111,7 +111,7 @@ ctrl_check <- function(af, subject_col, ctrl, field_sep) {
 #' @importFrom magrittr `%>%`
 #' @importFrom rlang .data
 
-find_shared_IS <- function(matrix, af, is_vars, subject_col, amp_col, 
+find_shared_IS <- function(matrix, af, is_vars, subject_col, amp_col,
                            value_col, ctrl, type, field_sep) {
     `%notin%` <- Negate(`%in%`)
     if (type %notin% c("control", "other")) {
@@ -125,22 +125,22 @@ find_shared_IS <- function(matrix, af, is_vars, subject_col, amp_col,
         ctrl_line <- ctrl
         if (type == "control") {
             shared_known_is <- filter_shared_known_is(matrix, af, is_vars,
-                                                      subject_col, amp_col, 
+                                                      subject_col, amp_col,
                                                       ctrl_line, known_is)
             return(shared_known_is)
         } else if (type == "other") {
             shared_other_is <- filter_shared_other_is(matrix, af, is_vars,
-                                                      subject_col, amp_col, 
-                                                      value_col, ctrl_line, 
-                                                      ctrl_line, field_sep, 
+                                                      subject_col, amp_col,
+                                                      value_col, ctrl_line,
+                                                      ctrl_line, field_sep,
                                                       known_is)
             return(shared_other_is)
         }
     } else {
         if (amp_col %in% colnames(matrix)) {
-            matrix <- matrix %>% 
-                dplyr::left_join(af %>% 
-                                     dplyr::select(amp_col, subject_col), 
+            matrix <- matrix %>%
+                dplyr::left_join(af %>%
+                                     dplyr::select(amp_col, subject_col),
                                  by = amp_col)
         }
         fields <- ctrl_unfold(subject_col, ctrl, field_sep)
@@ -151,8 +151,8 @@ find_shared_IS <- function(matrix, af, is_vars, subject_col, amp_col,
             if (length(ctrl_names) > 1) {
                 other_ctrl <- ctrl_names[ctrl_names != x]
                 other_ctrl <- fields[[other_ctrl]]
-                filtered_matrix <- matrix %>% 
-                    dplyr::anti_join(as.data.frame(other_ctrl), 
+                filtered_matrix <- matrix %>%
+                    dplyr::anti_join(as.data.frame(other_ctrl),
                                      by = subject_col)
             } else {
                 filtered_matrix <- matrix
@@ -160,14 +160,14 @@ find_shared_IS <- function(matrix, af, is_vars, subject_col, amp_col,
             if (type == "control") {
                 shared_known_is <- filter_shared_known_is(filtered_matrix, af,
                                                           is_vars, subject_col,
-                                                          amp_col, ctrl_line, 
+                                                          amp_col, ctrl_line,
                                                           known_is)
                 return(shared_known_is)
             } else if (type == "other") {
-                shared_other_is <- filter_shared_other_is(filtered_matrix, af, 
+                shared_other_is <- filter_shared_other_is(filtered_matrix, af,
                                                           is_vars, subject_col,
-                                                          amp_col, value_col, x, 
-                                                          ctrl_line, field_sep, 
+                                                          amp_col, value_col, x,
+                                                          ctrl_line, field_sep,
                                                           known_is)
                 return(shared_other_is)
             }
@@ -194,9 +194,9 @@ filter_shared_known_is <- function(matrix, af, is_vars, subject_col,
                               .data[[is_vars[3]]] == x["strand"])
         if (any(ctrl_line == "CEM37")) {
             if (amp_col %in% colnames(matrix)) {
-                matrix_rows <- matrix_rows %>% 
-                    dplyr::left_join(af %>% 
-                                         dplyr::select(amp_col, subject_col), 
+                matrix_rows <- matrix_rows %>%
+                    dplyr::left_join(af %>%
+                                         dplyr::select(amp_col, subject_col),
                                      by = amp_col)
             }
             subs <- matrix_rows[[subject_col]] %>% unique()
@@ -225,11 +225,11 @@ filter_shared_known_is <- function(matrix, af, is_vars, subject_col,
 #' @importFrom rlang .data
 
 filter_shared_other_is <- function(matrix, af, is_vars, subject_col,
-                                   amp_col, value_col, ctrl_name, ctrl_line, 
+                                   amp_col, value_col, ctrl_name, ctrl_line,
                                    field_sep, known_is) {
     known_is$integration_locus <-
         as.integer(known_is$integration_locus)
-    matrix$integration_locus <- 
+    matrix$integration_locus <-
         as.integer(matrix$integration_locus)
     colnames(known_is) <- c(is_vars, "GeneName", "GeneStrand")
     filter_other_is_full <- matrix %>%
@@ -239,9 +239,10 @@ filter_shared_other_is <- function(matrix, af, is_vars, subject_col,
     join_ok <- FALSE
     if (ctrl_name == "CEM37") {
         if (amp_col %in% colnames(matrix)) {
-            filter_other_is_full <- filter_other_is_full %>% 
-                dplyr::left_join(af %>% 
-                                     dplyr::select(amp_col, subject_col), 
+            filter_other_is_full <- filter_other_is_full %>%
+                dplyr::left_join(af %>%
+                                     dplyr::select(
+                                       dplyr::all_of(c(amp_col, subject_col))),
                                  by = amp_col)
         }
         subs <- filter_other_is_full[[subject_col]] %>% unique()
@@ -266,23 +267,23 @@ filter_shared_other_is <- function(matrix, af, is_vars, subject_col,
                                    values_from = dplyr::all_of(value_col),
                                    values_fill = 0)
             if (length(subject_col) > 1) {
-                ctrl_amp <- af %>% 
+                ctrl_amp <- af %>%
                     tidyr::unite("Sample", subject_col, sep = field_sep) %>%
-                    dplyr::filter(.data[["Sample"]] == ctrl_name) %>% 
-                    dplyr::filter(.data[[amp_col]] %in% 
+                    dplyr::filter(.data[["Sample"]] == ctrl_name) %>%
+                    dplyr::filter(.data[[amp_col]] %in%
                                       colnames(filter_other_is_full_wide)) %>%
                     dplyr::pull(amp_col)
             } else {
-                ctrl_amp <- af %>% 
-                    dplyr::filter(.data[[subject_col]] == ctrl_name) %>% 
-                    dplyr::filter(.data[[amp_col]] %in% 
+                ctrl_amp <- af %>%
+                    dplyr::filter(.data[[subject_col]] == ctrl_name) %>%
+                    dplyr::filter(.data[[amp_col]] %in%
                                       colnames(filter_other_is_full_wide)) %>%
                     dplyr::pull(amp_col)
             }
             filter_other_is_wide <- filter_other_is_full_wide %>%
-                dplyr::filter(dplyr::if_any(dplyr::any_of(ctrl_amp), 
+                dplyr::filter(dplyr::if_any(dplyr::any_of(ctrl_amp),
                                             ~ . > 0)) %>%
-                dplyr::filter(dplyr::if_any(c(-dplyr::all_of(is_vars), 
+                dplyr::filter(dplyr::if_any(c(-dplyr::all_of(is_vars),
                                               -dplyr::all_of(ctrl_amp)),
                                             ~ . > 0))
         } else {
@@ -305,37 +306,37 @@ filter_shared_other_is <- function(matrix, af, is_vars, subject_col,
             if (amp_col %in% colnames(matrix)) {
                 filter_other_is_long <-
                     tidyr::pivot_longer(filter_other_is_wide,
-                                        cols = c(-is_vars[1], -is_vars[2], 
+                                        cols = c(-is_vars[1], -is_vars[2],
                                                  -is_vars[3]),
-                                        names_to = amp_col, 
+                                        names_to = amp_col,
                                         values_to = value_col)
             } else {
                 filter_other_is_long <-
                     tidyr::pivot_longer(filter_other_is_wide,
-                                        cols = c(-is_vars[1], -is_vars[2], 
+                                        cols = c(-is_vars[1], -is_vars[2],
                                                  -is_vars[3]),
-                                        names_to = subject_col, 
-                                        names_sep = field_sep, 
+                                        names_to = subject_col,
+                                        names_sep = field_sep,
                                         values_to = value_col)
             }
         } else {
             if (amp_col %in% colnames(matrix)) {
                 filter_other_is_long <-
                     tidyr::pivot_longer(filter_other_is_wide,
-                                        cols = c(-is_vars[1], -is_vars[2], 
+                                        cols = c(-is_vars[1], -is_vars[2],
                                                  -is_vars[3]),
-                                        names_to = amp_col, 
+                                        names_to = amp_col,
                                         values_to = value_col)
                 filter_other_is_long <- filter_other_is_long %>%
-                    dplyr::left_join(af %>% 
-                                         dplyr::select(amp_col, subject_col), 
+                    dplyr::left_join(af %>%
+                                         dplyr::select(amp_col, subject_col),
                                      by = amp_col)
             } else {
                 filter_other_is_long <-
                     tidyr::pivot_longer(filter_other_is_wide,
-                                        cols = c(-is_vars[1], -is_vars[2], 
+                                        cols = c(-is_vars[1], -is_vars[2],
                                                  -is_vars[3]),
-                                        names_to = subject_col, 
+                                        names_to = subject_col,
                                         values_to = value_col)
             }
         }
@@ -349,17 +350,17 @@ filter_shared_other_is <- function(matrix, af, is_vars, subject_col,
 }
 
 # compute_n_rep
-# Computes the total number of replicates for each sample from 
+# Computes the total number of replicates for each sample from
 # the association file
 
 compute_n_rep <- function(af, subject_col, field_sep, ctrl) {
     `%notin%` <- Negate(`%in%`)
-    n_rep <- af %>% 
-        dplyr::group_by(dplyr::across(dplyr::all_of(subject_col))) %>% 
+    n_rep <- af %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(subject_col))) %>%
         dplyr::summarise(n = dplyr::n())
     if (length(subject_col) > 1) {
-        n_rep <- n_rep %>% 
-            tidyr::unite("Sample", subject_col, 
+        n_rep <- n_rep %>%
+            tidyr::unite("Sample", subject_col,
                          sep = field_sep, remove = FALSE)
         s_col <- "Sample"
     } else {
@@ -377,7 +378,7 @@ compute_n_rep <- function(af, subject_col, field_sep, ctrl) {
     } else {
         tot_c <- n_rep %>%
             dplyr::filter(.data[[s_col]] == ctrl) %>%
-            dplyr::pull(n) 
+            dplyr::pull(n)
         tot_s <- n_rep %>%
             dplyr::filter(.data[[s_col]] != ctrl) %>%
             dplyr::pull(n) %>%
@@ -396,19 +397,19 @@ compute_n_rep <- function(af, subject_col, field_sep, ctrl) {
 # Computes the replicate count by sample for the given table of shared IS
 #' @importFrom magrittr `%>%`
 #' @importFrom rlang .data
-compute_rep_count <- function(current_table, af, subject_col, 
+compute_rep_count <- function(current_table, af, subject_col,
                               amp_col, value_col, x) {
     if (dim(current_table)[1] == 0) {
         return(tibble::tibble())
     }
     if (length(subject_col) > 1) {
         subs <- af %>%
-            dplyr::select(subject_col) %>% 
+            dplyr::select(subject_col) %>%
             unique()
         rep_count <- dplyr::bind_rows(apply(subs, 1, function(y) {
             row <- as.list(y)
             mod_af <- dplyr::inner_join(af, as.data.frame(row), by = subject_col)
-            reps <- mod_af %>% 
+            reps <- mod_af %>%
                 dplyr::pull(amp_col)
             rep_vals <- purrr::map(reps, function(z) {
                 if (z %in% current_table[[amp_col]]) {
@@ -422,12 +423,12 @@ compute_rep_count <- function(current_table, af, subject_col,
             return(sub_count)
         }))
     } else {
-        subs <- af %>% 
-            dplyr::pull(dplyr::all_of(subject_col)) %>% 
+        subs <- af %>%
+            dplyr::pull(dplyr::all_of(subject_col)) %>%
             unique()
         rep_count <- purrr::map(subs, function(y) {
-            reps <- af %>% 
-                dplyr::filter(.data[[subject_col]] == y) %>% 
+            reps <- af %>%
+                dplyr::filter(.data[[subject_col]] == y) %>%
                 dplyr::pull(amp_col)
             rep_vals <- purrr::map(reps, function(z) {
                 if (z %in% current_table[[amp_col]]) {
@@ -468,11 +469,11 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
         if (type == "by sample") {
             counts <- compute_counts(filter_shared_is, subject_col,
                                      value_col, ctrl_names, field_sep)
-            res <- internal_compute_ratio(counts, subject_col, 
+            res <- internal_compute_ratio(counts, subject_col,
                                           ctrl_line, n_rep)
         } else if (type == "by IS") {
             counts <- compute_counts_byIS(filter_shared_is, is_vars,
-                                          subject_col, value_col, 
+                                          subject_col, value_col,
                                           ctrl_names, field_sep)
             res <- internal_compute_ratio_byIS(counts, is_vars, subject_col,
                                                value_col, ctrl_line, n_rep)
@@ -482,11 +483,11 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
         ctrl_names <- names(ctrl)
         res <- purrr::map(ctrl_names, function(x) {
             ctrl_line <- x
-            shared_is <- filter_shared_is[[ctrl_line]] 
+            shared_is <- filter_shared_is[[ctrl_line]]
             if (type == "by sample") {
                 other_ctrl <- ctrl_names[ctrl_names != x]
-                shared_is <- shared_is %>% 
-                    tidyr::unite("Sample", subject_col, 
+                shared_is <- shared_is %>%
+                    tidyr::unite("Sample", subject_col,
                                  sep = field_sep, remove = FALSE) %>%
                     dplyr::filter(.data[["Sample"]] != dplyr::all_of(other_ctrl)) %>%
                     dplyr::select(-.data[["Sample"]])
@@ -498,7 +499,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
                 if (type == "by sample") {
                     counts <- compute_counts(shared_is, subject_col,
                                              value_col, ctrl_names, field_sep)
-                    ret <- internal_compute_ratio(counts, subject_col, 
+                    ret <- internal_compute_ratio(counts, subject_col,
                                                   ctrl_line, n_rep)
                     return(ret)
                 }
@@ -521,9 +522,9 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
         }
         if (type == "by IS") {
             res <- Filter(Negate(is.null), res)
-            res <- res %>% 
-                purrr::reduce(dplyr::full_join, 
-                              by = c(is_vars[1], is_vars[2], 
+            res <- res %>%
+                purrr::reduce(dplyr::full_join,
+                              by = c(is_vars[1], is_vars[2],
                                      is_vars[3], "Sample"))
         }
         n_ctrl <- length(ctrl_names)
@@ -563,8 +564,8 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
                 ratio <- internal_compute_ratio_byIS(counts, is_vars,
                                                      subject_col, value_col,
                                                      "All_Controls", n_rep)
-                res <- res %>% dplyr::full_join(ratio, 
-                                                by = c(is_vars[1], is_vars[2], 
+                res <- res %>% dplyr::full_join(ratio,
+                                                by = c(is_vars[1], is_vars[2],
                                                        is_vars[3], "Sample"))
             }
         }
@@ -583,11 +584,11 @@ compute_counts <- function(filter_shared_is, subject_col,
         dplyr::group_by(dplyr::across(dplyr::all_of(subject_col))) %>%
         dplyr::summarise(Sum = sum(.data[[value_col]]))
     `%notin%` <- Negate(`%in%`)
-    counts <- counts %>% tidyr::unite("Sample", subject_col, 
+    counts <- counts %>% tidyr::unite("Sample", subject_col,
                                       sep = field_sep, remove = FALSE)
     row <- data.frame(Sub = "All_Samples", Sum =
                           sum(counts %>%
-                                  dplyr::filter(.data[["Sample"]] %notin% 
+                                  dplyr::filter(.data[["Sample"]] %notin%
                                                     ctrl_names) %>%
                                   dplyr::pull(.data$Sum)))
     names(row)[names(row) == "Sub"] <- "Sample"
@@ -615,12 +616,12 @@ internal_compute_ratio <- function(counts, subject_col, ctrl_line, n_rep) {
             if (is.null(n_rep)) {
                 R <- ifelse(tot == 0, NA, ctrl_count / tot)
                 data <- data.frame(sample, ctrl_line, R, ctrl_count, tot)
-                colnames(data) <- c("Sample", "Control", "Ratio", 
-                                    paste0("Count(", ctrl_line, ")"), 
+                colnames(data) <- c("Sample", "Control", "Ratio",
+                                    paste0("Count(", ctrl_line, ")"),
                                     paste0("Count(Sample-vs-", ctrl_line, ")"))
                 return(data)
             } else {
-                s_col <- ifelse(length(subject_col) > 1, 
+                s_col <- ifelse(length(subject_col) > 1,
                                 "Sample", subject_col)
                 rep_ctrl <- n_rep %>%
                     dplyr::filter(.data[[s_col]] == ctrl_line) %>%
@@ -628,19 +629,18 @@ internal_compute_ratio <- function(counts, subject_col, ctrl_line, n_rep) {
                 rep_sample <- n_rep %>%
                     dplyr::filter(.data[[s_col]] == sample) %>%
                     dplyr::pull("n")
-                R <- ifelse(tot == 0, NA, 
+                R <- ifelse(tot == 0, NA,
                             (ctrl_count / rep_ctrl) / (tot / rep_sample))
-                data <- data.frame(sample, ctrl_line, R, ctrl_count, 
+                data <- data.frame(sample, ctrl_line, R, ctrl_count,
                                    rep_ctrl, tot, rep_sample)
-                colnames(data) <- c("Sample", "Control", "Ratio", 
-                                    paste0("Count(", ctrl_line, ")"), 
+                colnames(data) <- c("Sample", "Control", "Ratio",
+                                    paste0("Count(", ctrl_line, ")"),
                                     paste0("TotRep(", ctrl_line, ")"),
                                     paste0("Count(Sample-vs-", ctrl_line, ")"),
-                                    paste0("TotRep(Sample-vs-", 
+                                    paste0("TotRep(Sample-vs-",
                                            ctrl_line, ")"))
                 return(data)
             }
-            
         }))
     ratios <- ratios %>% tidyr::pivot_wider(names_from = "Control",
                                             values_from = "Ratio",
@@ -658,8 +658,8 @@ internal_compute_ratio <- function(counts, subject_col, ctrl_line, n_rep) {
 compute_counts_byIS <- function(filter_shared, is_vars, subject_col,
                                 value_col, ctrl_names, field_sep) {
     `%notin%` <- Negate(`%in%`)
-    filter_shared <- filter_shared %>% tidyr::unite("Sample", 
-                                                    subject_col, 
+    filter_shared <- filter_shared %>% tidyr::unite("Sample",
+                                                    subject_col,
                                                     sep = field_sep)
     counts <- filter_shared %>%
         dplyr::filter(.data[["Sample"]] %notin% ctrl_names) %>%
@@ -679,11 +679,11 @@ compute_counts_byIS <- function(filter_shared, is_vars, subject_col,
 #' @importFrom rlang .data
 
 internal_compute_ratio_byIS <- function(counts, is_vars,
-                                        subject_col, value_col, 
+                                        subject_col, value_col,
                                         ctrl_line, n_rep) {
     shared_counts <- counts %>%
         tidyr::pivot_wider(names_from = dplyr::all_of("Sample"),
-                           values_from = dplyr::all_of(value_col), 
+                           values_from = dplyr::all_of(value_col),
                            values_fill = 0)
     subjects <- counts %>%
         dplyr::filter(.data[["Sample"]] != ctrl_line) %>%
@@ -698,11 +698,11 @@ internal_compute_ratio_byIS <- function(counts, is_vars,
             if (is.null(n_rep)) {
                 R <- ifelse(tot == 0, NA,
                             as.integer(ctrl_count[[1]]) / as.integer(tot[[1]]))
-                res <- data.frame(y, as.integer(ctrl_count[[1]]), 
+                res <- data.frame(y, as.integer(ctrl_count[[1]]),
                                   as.integer(tot[[1]]), R)
                 return(res)
             } else {
-                s_col <- ifelse(length(subject_col) > 1, 
+                s_col <- ifelse(length(subject_col) > 1,
                                 "Sample", subject_col)
                 rep_ctrl <- n_rep %>%
                     dplyr::filter(.data[[s_col]] == ctrl_line) %>%
@@ -712,7 +712,7 @@ internal_compute_ratio_byIS <- function(counts, is_vars,
                     dplyr::pull("n")
                 R <- ifelse(tot == 0, NA,
                             (ctrl_count / rep_ctrl) / (tot / rep_sample))
-                res <- data.frame(y, ctrl_line, R, ctrl_count, 
+                res <- data.frame(y, ctrl_line, R, ctrl_count,
                                    rep_ctrl, tot, rep_sample)
                 return(res)
             }
@@ -721,17 +721,17 @@ internal_compute_ratio_byIS <- function(counts, is_vars,
                            row[[is_vars[3]]], rats)
         if (is.null(n_rep)) {
             colnames(data) <- c("chr", "integration_locus",
-                                "strand", "Sample", 
-                                paste0("Count(", ctrl_line, ")"), 
+                                "strand", "Sample",
+                                paste0("Count(", ctrl_line, ")"),
                                 paste0("Count(Sample-vs-", ctrl_line, ")"),
                                 "Ratio")
         } else {
             colnames(data) <- c("chr", "integration_locus",
-                                "strand", "Sample", "Control", "Ratio", 
-                                paste0("Count(", ctrl_line, ")"), 
+                                "strand", "Sample", "Control", "Ratio",
+                                paste0("Count(", ctrl_line, ")"),
                                 paste0("TotRep(", ctrl_line, ")"),
                                 paste0("Count(Sample-vs-", ctrl_line, ")"),
-                                paste0("TotRep(Sample-vs-", 
+                                paste0("TotRep(Sample-vs-",
                                        ctrl_line, ")"))
         }
         data <- data %>% dplyr::rename(
@@ -750,22 +750,22 @@ internal_compute_ratio_byIS <- function(counts, is_vars,
 
 no_IS_shared <- function(ctrl, af, subject_col, field_sep) {
     `%notin%` <- Negate(`%in%`)
-    af <- af %>% tidyr::unite("Sample", 
+    af <- af %>% tidyr::unite("Sample",
                               subject_col, sep = field_sep)
-    subjects <- af %>% 
-        dplyr::filter(.data[["Sample"]] %notin% 
+    subjects <- af %>%
+        dplyr::filter(.data[["Sample"]] %notin%
                           c(names(ctrl), "CEM37")) %>%
-        dplyr::pull(.data[["Sample"]]) %>% 
+        dplyr::pull(.data[["Sample"]]) %>%
         unique()
     subjects <- append(subjects, "All_Samples")
     if (!is.list(ctrl)) {
         Ratio <- dplyr::bind_rows(lapply(subjects, function(x) {
             sub_name <- x
             r <- tibble::tibble_row(
-                "Sample" = sub_name, 
-                "Ratio_CEM37" = NA, 
-                "IS_Source" = NA, 
-                "Count(CEM37)" = 0, 
+                "Sample" = sub_name,
+                "Ratio_CEM37" = NA,
+                "IS_Source" = NA,
+                "Count(CEM37)" = 0,
                 "Count(Sample)" = 0
             )
             return(r)
@@ -778,10 +778,10 @@ no_IS_shared <- function(ctrl, af, subject_col, field_sep) {
             res <- dplyr::bind_rows(lapply(subjects, function(y) {
                 sub_name <- y
                 r <- tibble::tibble_row(
-                    "Sample" = sub_name, 
-                    "Ctrl" = NA, 
-                    "IS_Source" = NA, 
-                    !!paste0("Count(", ctrl_line, ")") := 0, 
+                    "Sample" = sub_name,
+                    "Ctrl" = NA,
+                    "IS_Source" = NA,
+                    !!paste0("Count(", ctrl_line, ")") := 0,
                     "Count(Sample)" = 0
                 )
                 r <- r %>% dplyr::rename(

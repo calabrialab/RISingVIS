@@ -104,11 +104,18 @@ id_list <- function() {
         pool_select = "pool-select",
         seq_filter = "seq-count-threshold",
         seq_filter_in = "seq-count-threshold-direct",
+        plots_panels = "plots-panels",
         plot_panel_1 = "plot-panel-1",
         plot_panel_2 = "plot-panel-2",
         plot_panel_3 = "plot-panel-3",
         plot_panel_4 = "plot-panel-4",
-        rbtn_1 = "rbtns-1"
+        rbtn_1 = "rbtns-1",
+        rbtn_2 = "rbtns-2",
+        rbtn_3 = "rbtns-3",
+        rbtn_4 = "rbtns-4",
+        rbtn_5 = "rbtns-5",
+        recompute_btn = "recompute-btn",
+        next_btn = "next-btn"
       ),
       outputs = list(
         counts_plot_sc = "plot-1-sc",
@@ -119,14 +126,28 @@ id_list <- function() {
         rc_ratio_control_all = "rc-ratio-control-all",
         sc_ratio_sample_all = "sc-ratio-sample-all",
         rc_ratio_sample_all = "rc-ratio-sample-all",
-        shared_is_heatmap_control = "shared-is-heatmap-control",
-        shared_is_heatmap_sample = "shared-is-heatmap-sample"
+        overall_is_heatmap = "overall-is-heatmap",
+        control_is_heatmap = "control-is-heatmap",
+        samples_is_heatmap = "samples-is-heatmap",
+        hm_desc_1 = "hm-desc-1",
+        hm_desc_2 = "hm-desc-2",
+        hm_desc_3 = "hm-desc-3",
+        ratio_tbl_sc_control = "ratio-tbl-sc-control",
+        ratio_barplot_sc_control = "ratio-bp-sc-control",
+        ratio_tbl_sc_samples = "ratio-tbl-sc-samples",
+        ratio_barplot_sc_samples = "ratio-bp-sc-samples",
+        ratio_tbl_rep_control = "ratio-tbl-rep-control",
+        ratio_barplot_rep_control = "ratio-bp-rep-control",
+        ratio_tbl_rep_samples = "ratio-tbl-rep-samples",
+        ratio_barplot_rep_samples = "ratio-bp-rep-samples",
+        ratio_contour_controls = "ratio-contour-controls",
+        ratio_contour_samples = "ratio-contour-samples"
       )
     ),
     saving_section = list(
         section_id = "saving-section",
         inputs = list(
-            dir_container = "dir_container", 
+            dir_container = "dir_container",
             dir_path = "dir_path",
             data_form = "data_form",
             by_pool = "by_pool",
@@ -168,21 +189,150 @@ id_list <- function() {
   return(banner)
 }
 
+.generate_hm_card_content <- function(ns,
+                                      type = c("overall", "control", "other")) {
+  type <- rlang::arg_match(type)
+  btn_id <- if (type == "overall") {
+    ns(id_list()$plot_section$inputs$rbtn_1)
+  } else if (type == "control") {
+    ns(id_list()$plot_section$inputs$rbtn_2)
+  } else {
+    ns(id_list()$plot_section$inputs$rbtn_3)
+  }
+  hm_id <- if (type == "overall") {
+    ns(id_list()$plot_section$outputs$overall_is_heatmap)
+  } else if (type == "control") {
+    ns(id_list()$plot_section$outputs$control_is_heatmap)
+  } else {
+    ns(id_list()$plot_section$outputs$samples_is_heatmap)
+  }
+  hm_desc_id <- if (type == "overall") {
+    ns(id_list()$plot_section$outputs$hm_desc_1)
+  } else if (type == "control") {
+    ns(id_list()$plot_section$outputs$hm_desc_2)
+  } else {
+    ns(id_list()$plot_section$outputs$hm_desc_3)
+  }
+  div(
+    shinyWidgets::radioGroupButtons(
+      inputId = btn_id,
+      choices = c("Shared IS", "Shared IS seq count",
+                  "Shared IS replicates"),
+      size = "sm",
+      status = "secondary"
+    ),
+    div(
+      class = "card-subtitle mb-2 text-muted",
+      textOutput(hm_desc_id)
+    ),
+    shinycustomloader::withLoader(plotly::plotlyOutput(
+      hm_id
+    ), type = "html",
+    loader = "dnaspin")
+  )
+}
+
+.generate_ratios_segment <- function(ns, panel_number) {
+  if (panel_number == 2) {
+    ratio_toggles_id <- ns(id_list()$plot_section$inputs$rbtn_4)
+    sc_ratio_tbl_id <- ns(id_list()$plot_section$outputs$ratio_tbl_sc_control)
+    rep_ratio_tbl_id <- ns(id_list()$plot_section$outputs$ratio_tbl_rep_control)
+    sc_ratio_bp_id <- ns(
+      id_list()$plot_section$outputs$ratio_barplot_sc_control)
+    rep_ratio_bp_id <- ns(
+      id_list()$plot_section$outputs$ratio_barplot_rep_control)
+    contour_id <- ns(
+      id_list()$plot_section$outputs$ratio_contour_controls
+    )
+  } else if (panel_number == 3) {
+    ratio_toggles_id <- ns(id_list()$plot_section$inputs$rbtn_5)
+    sc_ratio_tbl_id <- ns(id_list()$plot_section$outputs$ratio_tbl_sc_samples)
+    rep_ratio_tbl_id <- ns(id_list()$plot_section$outputs$ratio_tbl_rep_samples)
+    sc_ratio_bp_id <- ns(
+      id_list()$plot_section$outputs$ratio_barplot_sc_samples)
+    rep_ratio_bp_id <- ns(
+      id_list()$plot_section$outputs$ratio_barplot_rep_samples)
+    contour_id <- ns(
+      id_list()$plot_section$outputs$ratio_contour_samples
+    )
+  } else {
+    return(NULL)
+  }
+
+  div(
+    h4("Ratios details - per sample"),
+    shinyWidgets::radioGroupButtons(
+      inputId = ratio_toggles_id,
+      choices = c("Table view", "Plot view"),
+      size = "sm",
+      status = "secondary"
+    ),
+    conditionalPanel(
+      condition = sprintf("input['%s'] == 'Table view'", ratio_toggles_id),
+      div(
+        style = "padding: 10px;",
+        h5("Sequence count ratios per sample"),
+        shinycustomloader::withLoader(
+        reactable::reactableOutput(sc_ratio_tbl_id),
+        type = "html",
+        loader = "dnaspin")
+      ),
+      div(
+        style = "padding: 10px;",
+        h5("Replicates count ratios per sample"),
+        shinycustomloader::withLoader(
+          reactable::reactableOutput(rep_ratio_tbl_id),
+          type = "html",
+          loader = "dnaspin")
+      )
+    ),
+    conditionalPanel(
+      condition = sprintf("input['%s'] == 'Plot view'", ratio_toggles_id),
+      div(
+        style = "padding: 10px;",
+        h5("Sequence count ratios per sample"),
+        shinycustomloader::withLoader(
+          plotly::plotlyOutput(sc_ratio_bp_id),
+          type = "html",
+          loader = "dnaspin")
+      ),
+      div(
+        style = "padding: 10px;",
+        h5("Replicates count ratios per sample"),
+        shinycustomloader::withLoader(
+          plotly::plotlyOutput(rep_ratio_bp_id),
+          type = "html",
+          loader = "dnaspin")
+      )
+    ),
+    h4("Ratios details - per integration"),
+    div(
+      h5("Sequence count ratio vs. Replicate count ratio"),
+      p("The plot shows a 2D histogram contour plot with marginals for ",
+        "each IS"),
+      shinycustomloader::withLoader(
+        plotly::plotlyOutput(contour_id),
+        type = "html",
+        loader = "dnaspin")
+    )
+  )
+}
+
 .generate_plots_card <- function(ns, panel_number) {
   if (panel_number == 2) {
     card_id <- ns(id_list()$plot_section$inputs$plot_panel_2)
     title <- "Control to sample contamination"
     overall_sc <- ns(id_list()$plot_section$outputs$sc_ratio_control_all)
     overall_rc <- ns(id_list()$plot_section$outputs$rc_ratio_control_all)
-    shared_is_heatmap <- ns(
-      id_list()$plot_section$outputs$shared_is_heatmap_control)
+    is_heatmap <- ns(id_list()$plot_section$outputs$control_is_heatmap)
+    type_hm <- "control"
   } else if (panel_number == 3) {
     card_id <- ns(id_list()$plot_section$inputs$plot_panel_3)
     title <- "Samples to control contamination"
     overall_sc <- ns(id_list()$plot_section$outputs$sc_ratio_sample_all)
     overall_rc <- ns(id_list()$plot_section$outputs$rc_ratio_sample_all)
-    shared_is_heatmap <- ns(
-      id_list()$plot_section$outputs$shared_is_heatmap_sample)
+    is_heatmap <- ns(id_list()$plot_section$outputs$samples_is_heatmap)
+    type_hm <- "other"
   } else {
     return(NULL)
   }
@@ -193,7 +343,7 @@ id_list <- function() {
     class = "card",
     div(
       class = "card-body",
-      h3(
+      h2(
         class = "card-title",
         title
       ),
@@ -251,18 +401,9 @@ id_list <- function() {
           )
         )
       ),
-      tabsetPanel(
-        tabPanel("Shared IS counts",
-                 div(
-                   style = "margin: 15px;",
-                   plotly::plotlyOutput(shared_is_heatmap)
-                 )),
-        tabPanel("Seq count ratio",
-                 div("placeholder")),
-        tabPanel("Replicate count ratio",
-                 div("placeholder")),
-        type = "pills"
-      )
+      .generate_hm_card_content(ns, type_hm),
+      hr(),
+      .generate_ratios_segment(ns, panel_number)
     )
   )
 }
@@ -1521,51 +1662,47 @@ id_list <- function() {
 }
 
 .get_counts_plots <- function(counts_single, counts_sample,
-                              ind_sample_id, pool_id, pool_col,
+                              ind_sample_id, pool_col, chosen_pool,
                               proj_name, threshold) {
   if (is.null(counts_single) || is.null(counts_sample)) {
     return(list(sc_plot = NULL, bm_plot = NULL))
   }
 
-  counts_single_pool <- counts_single %>%
-    dplyr::filter(.data[[pool_col]] == pool_id)
-  counts_sample_pool <- counts_sample %>%
-    dplyr::filter(.data[[pool_col]] == pool_id)
-
-  annotations <- list()
-  for (i in seq(1, nrow(counts_sample_pool))) {
-    ## Seq count annot
-    annotations$seqCount[[i]] <- list(
-      x = counts_sample_pool$id[[i]],
-      y = counts_sample_pool$seqCount[[i]] + 5,
-      text = format(counts_sample_pool$seqCount[[i]],
-                    big.mark = ","),
-      yanchor = "bottom",
-      showarrow = FALSE
-    )
-    ## Raw reads
-    if ("BARCODE_MUX" %in% colnames(counts_sample_pool)) {
-      annotations$barcodemux[[i]] <- list(
-        x = counts_sample_pool$id[[i]],
-        y = counts_sample_pool$BARCODE_MUX[[i]] + 5,
-        text = format(counts_sample_pool$BARCODE_MUX[[i]],
+  trace_plots <- function() {
+    annotations <- list()
+    for (i in seq(1, nrow(counts_sample))) {
+      ## Seq count annot
+      annotations$seqCount[[i]] <- list(
+        x = counts_sample$id[[i]],
+        y = counts_sample$seqCount[[i]] + 5,
+        text = format(counts_sample$seqCount[[i]],
                       big.mark = ","),
         yanchor = "bottom",
         showarrow = FALSE
       )
+      ## Raw reads
+      if ("BARCODE_MUX" %in% colnames(counts_sample)) {
+        annotations$barcodemux[[i]] <- list(
+          x = counts_sample$id[[i]],
+          y = counts_sample$BARCODE_MUX[[i]] + 5,
+          text = format(counts_sample$BARCODE_MUX[[i]],
+                        big.mark = ","),
+          yanchor = "bottom",
+          showarrow = FALSE
+        )
+      }
     }
-  }
     sc_filname <- .get_plot_filname(proj_name = proj_name,
-                                    pool_name = pool_id,
+                                    pool_name = chosen_pool,
                                     fixed_threshold = threshold,
                                     plot_type = "totals-seqCount")
     sc_plot <- plotly::plot_ly(
-      data = counts_single_pool,
+      data = counts_single,
       x = ~id,
       y = ~seqCount,
       color = as.formula(paste0("~", ISAnalytics::pcr_id_column())),
       colors = viridisLite::inferno(
-        length(unique(counts_single_pool$id)), begin = 0.3)
+        length(unique(counts_single$id)), begin = 0.3)
     ) %>%
       plotly::add_bars(color = ~id,
                        showlegend = FALSE,
@@ -1575,7 +1712,7 @@ id_list <- function() {
                            width = 1
                          )
                        ),
-                       customdata = counts_single_pool %>%
+                       customdata = counts_single %>%
                          dplyr::pull(.data[[ISAnalytics::pcr_id_column()]]),
                        hovertemplate = paste(
                          "PCR replicate: %{customdata}",
@@ -1584,8 +1721,8 @@ id_list <- function() {
       plotly::layout(barmode = "stack",
                      annotations = annotations$seqCount,
                      title = list(
-                       text = paste("Pool", pool_id, "total seq count")
-                      ),
+                       text = paste("Pool", chosen_pool, "total seq count")
+                     ),
                      xaxis = list(
                        title = "Independent sample"
                      ),
@@ -1601,18 +1738,18 @@ id_list <- function() {
       )
 
     bm_filname <- .get_plot_filname(proj_name = proj_name,
-                                    pool_name = pool_id,
+                                    pool_name = chosen_pool,
                                     fixed_threshold = threshold,
                                     plot_type = "totals-rawReads")
-  bm_plot <- NULL
-  if ("BARCODE_MUX" %in% colnames(counts_single_pool)) {
+    bm_plot <- NULL
+    if ("BARCODE_MUX" %in% colnames(counts_single)) {
       bm_plot <- plotly::plot_ly(
-        data = counts_single_pool,
+        data = counts_single,
         x = ~id,
         y = ~BARCODE_MUX,
         color = as.formula(paste0("~", ISAnalytics::pcr_id_column())),
         colors = viridisLite::inferno(
-          length(unique(counts_single_pool$id)), begin = 0.3)
+          length(unique(counts_single$id)), begin = 0.3)
       ) %>%
         plotly::add_bars(color = ~id,
                          showlegend = FALSE,
@@ -1622,7 +1759,7 @@ id_list <- function() {
                              width = 1
                            )
                          ),
-                         customdata = counts_single_pool %>%
+                         customdata = counts_single %>%
                            dplyr::pull(.data[[ISAnalytics::pcr_id_column()]]),
                          hovertemplate = paste(
                            "PCR replicate: %{customdata}",
@@ -1631,7 +1768,7 @@ id_list <- function() {
         plotly::layout(barmode = "stack",
                        annotations = annotations$barcodemux,
                        title = list(
-                         text = paste("Pool", pool_id, "total raw reads")
+                         text = paste("Pool", chosen_pool, "total raw reads")
                        ),
                        xaxis = list(
                          title = "Independent sample"
@@ -1646,8 +1783,12 @@ id_list <- function() {
             scale = 3, height = NULL, width = NULL
           )
         )
+    }
+    return(list(sc_plot = sc_plot, bm_plot = bm_plot))
   }
-  return(list(sc_plot = sc_plot, bm_plot = bm_plot))
+
+  plot_list <- trace_plots()
+  return(plot_list)
 }
 
 .get_plot_filname <- function(proj_name, pool_name,
@@ -1659,4 +1800,618 @@ id_list <- function() {
   return(file_name)
 }
 
+.get_sharing <- function(df, ind_sample_id, distinct_ind_samples) {
+  sharing_overall <- ISAnalytics::is_sharing(
+      df,
+      group_key = ind_sample_id, minimal = FALSE,
+      include_self_comp = TRUE, n_comp = 2,
+      keep_genomic_coord = TRUE
+    )
+  counts_overall <- sharing_overall %>%
+    dplyr::distinct(.data$g1, .data$count_g1) %>%
+    dplyr::mutate(count_g2 = .data$count_g1)
+  sharing_overall <- sharing_overall %>%
+    dplyr::mutate(g1 = factor(.data$g1, levels = distinct_ind_samples),
+                  g2 = factor(.data$g2, levels = distinct_ind_samples)) %>%
+    tidyr::complete(.data$g1, .data$g2, fill = list(
+      shared = 0
+    )) %>%
+    dplyr::select(-dplyr::all_of(c("count_g1", "count_g2"))) %>%
+    dplyr::left_join(counts_overall %>%
+                       dplyr::select(-dplyr::all_of("count_g2")),
+                     by = "g1") %>%
+    dplyr::left_join(counts_overall %>%
+                       dplyr::select(-dplyr::all_of("count_g1")),
+                     by = c("g2" = "g1"))
 
+  sharing_control <- ISAnalytics::is_sharing(
+      df %>%
+        dplyr::semi_join(known_CEM_IS(),
+          by = ISAnalytics::mandatory_IS_vars()
+        ),
+      group_key = ind_sample_id, minimal = FALSE,
+      include_self_comp = TRUE, n_comp = 2,
+      keep_genomic_coord = TRUE
+    )
+  counts_control <- sharing_control %>%
+    dplyr::distinct(.data$g1, .data$count_g1) %>%
+    dplyr::mutate(count_g2 = .data$count_g1)
+  sharing_control <- sharing_control %>%
+    dplyr::mutate(g1 = factor(.data$g1, levels = distinct_ind_samples),
+                  g2 = factor(.data$g2, levels = distinct_ind_samples)) %>%
+    tidyr::complete(.data$g1, .data$g2, fill = list(
+      shared = 0
+    )) %>%
+    dplyr::select(-dplyr::all_of(c("count_g1", "count_g2"))) %>%
+    dplyr::left_join(counts_control %>%
+                       dplyr::select(-dplyr::all_of("count_g2")),
+                     by = "g1") %>%
+    dplyr::left_join(counts_control %>%
+                       dplyr::select(-dplyr::all_of("count_g1")),
+                     by = c("g2" = "g1"))
+
+  sharing_other <- ISAnalytics::is_sharing(
+      df %>%
+        dplyr::anti_join(known_CEM_IS(),
+          by = ISAnalytics::mandatory_IS_vars()
+        ),
+      group_key = ind_sample_id, minimal = FALSE,
+      include_self_comp = TRUE, n_comp = 2,
+      keep_genomic_coord = TRUE
+    )
+  counts_other <- sharing_other %>%
+    dplyr::distinct(.data$g1, .data$count_g1) %>%
+    dplyr::mutate(count_g2 = .data$count_g1)
+  sharing_other <- sharing_other %>%
+    dplyr::mutate(g1 = factor(.data$g1, levels = distinct_ind_samples),
+                  g2 = factor(.data$g2, levels = distinct_ind_samples)) %>%
+    tidyr::complete(.data$g1, .data$g2, fill = list(
+      shared = 0
+    )) %>%
+    dplyr::select(-dplyr::all_of(c("count_g1", "count_g2"))) %>%
+    dplyr::left_join(counts_other %>%
+                       dplyr::select(-dplyr::all_of("count_g2")),
+                     by = "g1") %>%
+    dplyr::left_join(counts_other %>%
+                       dplyr::select(-dplyr::all_of("count_g1")),
+                     by = c("g2" = "g1"))
+  return(list(
+    overall = sharing_overall, control = sharing_control,
+    other = sharing_other
+  ))
+}
+
+.get_heatmap <- function(df, on_x, on_y, value,
+                         colorscale,
+                         type = c("sharing", "sc", "rep")) {
+  h_type <- rlang::arg_match(type)
+  on_x_sym <- rlang::sym(on_x)
+  on_y_sym <- rlang::sym(on_y)
+  value_sym <- rlang::sym(value)
+  x_data <- rlang::expr(~ !!on_x_sym)
+  y_data <- rlang::expr(~ !!on_y_sym)
+  z_data <- rlang::expr(~ !!value_sym)
+
+  hm <- if (h_type == "sharing") {
+    plotly::plot_ly(
+      data = df,
+      type = "heatmap",
+      x = rlang::eval_tidy(x_data),
+      y = rlang::eval_tidy(y_data),
+      z = rlang::eval_tidy(z_data),
+      colors = colorscale,
+      hoverinfo = "text",
+      text = ~ paste(
+        "</br>X:", rlang::eval_tidy(on_x_sym),
+        "</br>Y:", rlang::eval_tidy(on_y_sym),
+        "</br>Absolute shared IS:", rlang::eval_tidy(value_sym),
+        "</br>% on X:", ifelse(is.na(on_g1), "NA", round(on_g1, 2)),
+        "</br>% on union:", ifelse(is.na(on_g1), "NA", round(on_union, 2)),
+        "</br>Tot IS count X:", count_g1,
+        "</br>Tot IS count Y:", count_g2
+      )
+    )
+  } else if (h_type == "sc") {
+    plotly::plot_ly(
+      data = df,
+      type = "heatmap",
+      x = rlang::eval_tidy(x_data),
+      y = rlang::eval_tidy(y_data),
+      z = rlang::eval_tidy(z_data),
+      colors = colorscale,
+      hoverinfo = "text",
+      text = ~ paste(
+        "</br>X:", rlang::eval_tidy(on_x_sym),
+        "</br>Y:", rlang::eval_tidy(on_y_sym),
+        "</br>Shared is seq count of X (showed):", scales::label_number(
+          big.mark = ","
+        )(sc_g1),
+        "</br>Shared is seq count of Y:", scales::label_number(
+          big.mark = ","
+        )(sc_g2),
+        "</br>Shared is seq count union:", scales::label_number(
+          big.mark = ","
+        )(rlang::eval_tidy(sc_union))
+      )
+    )
+  } else {
+    plotly::plot_ly(
+      data = df,
+      type = "heatmap",
+      x = rlang::eval_tidy(x_data),
+      y = rlang::eval_tidy(y_data),
+      z = rlang::eval_tidy(z_data),
+      colors = colorscale,
+      hoverinfo = "text",
+      text = ~ paste(
+        "</br>X:", rlang::eval_tidy(on_x_sym),
+        "</br>Y:", rlang::eval_tidy(on_y_sym),
+        "</br>Number of replicates tracked on X (showing):", rep_g1,
+        paste0("(", scales::label_number(
+          accuracy = 0.01, scale = 100, suffix = "%"
+        )(rep_g1_perc), " on ", max_rep_g1, " total replicates)"),
+        "</br>Number of replicates tracked on Y:", rep_g2,
+        paste0("(", scales::label_number(
+          accuracy = 0.01, scale = 100, suffix = "%"
+        )(rep_g2_perc), " on ", max_rep_g2, " total replicates)"),
+        "</br>Perc of overall replicates tracked:", scales::label_number(
+          accuracy = 0.01, scale = 100, suffix = "%"
+        )(rlang::eval_tidy(value_sym)),
+        "</br>Number of overall replicates tracked:", rep_union,
+        paste0("(", scales::label_number(
+          accuracy = 0.01, scale = 100, suffix = "%"
+        )(rep_union_perc), " on ", max_rep_g1 + max_rep_g2,
+        " total replicates)")
+      )
+    )
+  }
+
+  if (h_type == "sc") {
+    hm <- hm %>%
+      plotly::add_annotations(
+        text = ~ ifelse(is.na(rlang::eval_tidy(value_sym)),
+                        "",
+                        scales::label_number(accuracy = 0.1,
+                                             scale_cut = scales::cut_short_scale())(
+                                               rlang::eval_tidy(value_sym)
+                                             )),
+        showarrow = FALSE
+      ) %>%
+      plotly::layout(
+        xaxis = list(title = ""),
+        yaxis = list(title = "")
+      )
+    return(hm)
+  }
+
+  if (h_type == "rep") {
+    hm <- hm %>%
+      plotly::add_annotations(
+        text = ~ ifelse(is.na(rlang::eval_tidy(value_sym)),
+                        "",
+                        scales::label_number(accuracy = 0.1,
+                                             scale = 100, suffix = "%")(
+                                               rlang::eval_tidy(value_sym)
+                                             )),
+        showarrow = FALSE
+      ) %>%
+      plotly::layout(
+        xaxis = list(title = ""),
+        yaxis = list(title = "")
+      )
+    return(hm)
+  }
+  hm <- hm %>%
+    plotly::add_annotations(
+      text = ~ifelse(is.na(rlang::eval_tidy(value_sym)), "",
+                     rlang::eval_tidy(value_sym)),
+      showarrow = FALSE
+    ) %>%
+    plotly::layout(
+      xaxis = list(title = ""),
+      yaxis = list(title = "")
+    )
+
+  return(hm)
+}
+
+.get_shared_is_counts <- function(df, ref, sample_id, pool_col, pool) {
+  ref_with_id <- ref %>%
+    dplyr::filter(.data[[pool_col]] == pool) %>%
+    tidyr::unite(dplyr::all_of(sample_id), col = "id", remove = FALSE)
+  cache_df <- tibble::tibble(
+    g1 = character(0),
+    g2 = character(0),
+    sc_g1 = numeric(0),
+    sc_g2 = numeric(0),
+    sc_union = numeric(0),
+    rep_g1 = numeric(0),
+    rep_g2 = numeric(0),
+    rep_union = numeric(0),
+    max_rep_g1 = numeric(0),
+    max_rep_g2 = numeric(0),
+    rep_g1_perc = numeric(0),
+    rep_g2_perc = numeric(0),
+    rep_union_perc = numeric(0)
+  )
+  p <- progressr::progressor(steps = nrow(df))
+  process_row <- function(...) {
+    row <- list(...)
+    is_coord <- row$is_coord
+    cache <- rlang::env_get(env = rlang::env_parent(),
+                            nm = "cache_df",
+                            default = NULL)
+    if (nrow(cache) > 0) {
+      # Check 1
+      comb_1_present <- cache %>%
+        dplyr::filter(.data$g1 == row$g1 & .data$g2 == row$g2)
+      if (nrow(comb_1_present) > 0) {
+        p()
+        return()
+      }
+      # Check 2
+      comb_2_present <- cache %>%
+        dplyr::filter(.data$g1 == row$g2 & .data$g2 == row$g1)
+      if (nrow(comb_2_present) > 0) {
+        rlang::env_poke(env = rlang::env_parent(),
+                        nm = "cache_df",
+                        value = cache %>%
+                          tibble::add_row(
+                            g1 = row$g1,
+                            g2 = row$g2,
+                            sc_g1 = comb_2_present$sc_g2[1],
+                            sc_g2 = comb_2_present$sc_g1[1],
+                            sc_union = comb_2_present$sc_union[1],
+                            rep_g1 = comb_2_present$rep_g2[1],
+                            rep_g2 = comb_2_present$rep_g1[1],
+                            rep_union = comb_2_present$rep_union[1],
+                            max_rep_g1 = comb_2_present$max_rep_g2[1],
+                            max_rep_g2 = comb_2_present$max_rep_g1[1],
+                            rep_g1_perc = comb_2_present$rep_g2_perc[1],
+                            rep_g2_perc = comb_2_present$rep_g1_perc[1],
+                            rep_union_perc = comb_2_present$rep_union_perc[1]
+                          ))
+        p()
+        return()
+      }
+    }
+    # If not in cache or cache null calculate
+    if (is.null(is_coord)) {
+      rlang::env_poke(env = rlang::env_parent(),
+                      nm = "cache_df",
+                      value = cache %>%
+                        tibble::add_row(
+                          g1 = row$g1,
+                          g2 = row$g2,
+                          sc_g1 = NA_real_,
+                          sc_g2 = NA_real_,
+                          sc_union = NA_real_,
+                          rep_g1 = NA_real_,
+                          rep_g2 = NA_real_,
+                          rep_union = NA_real_,
+                          max_rep_g1 = NA_real_,
+                          max_rep_g2 = NA_real_,
+                          rep_g1_perc = NA_real_,
+                          rep_g2_perc = NA_real_,
+                          rep_union_perc = NA_real_
+                        ))
+      p()
+      return()
+    }
+    filter_exp <- if (row$g1 == row$g2) {
+      rlang::expr(.data$id == row$g1)
+    } else {
+      rlang::expr(.data$id %in% c(row$g1, row$g2))
+    }
+    is_from_ref <- ref_with_id %>%
+      dplyr::filter(!!filter_exp)
+    max_rep_g1 <- max((is_from_ref %>%
+                         dplyr::filter(.data$id == row$g1))$ReplicateNumber)
+    max_rep_g2 <- max((is_from_ref %>%
+                         dplyr::filter(.data$id == row$g2))$ReplicateNumber)
+    is_from_ref <- is_from_ref %>%
+      dplyr::semi_join(is_coord, by = ISAnalytics::mandatory_IS_vars())
+    if (row$g1 == row$g2) {
+      seq_count_sum <- sum(is_from_ref$seqCount, na.rm = TRUE)
+      sc_sums <- list(sc_g1 = seq_count_sum, sc_g2 = seq_count_sum,
+                      sc_union = seq_count_sum)
+      rep_count_1 <- length(unique(is_from_ref$ReplicateNumber))
+      rep_counts <- list(rep_g1 = rep_count_1,
+                         rep_g2 = rep_count_1,
+                         rep_union = rep_count_1,
+                         rep_g1_perc = rep_count_1 / max_rep_g1,
+                         rep_g2_perc = rep_count_1 / max_rep_g1,
+                         rep_union_perc = rep_count_1 / max_rep_g1)
+    } else {
+      seq_count_sum_1 <- sum(is_from_ref %>%
+                               dplyr::filter(.data$id == row$g1) %>%
+                               dplyr::pull(.data$seqCount),
+                             na.rm = TRUE)
+      seq_count_sum_2 <- sum(is_from_ref %>%
+                               dplyr::filter(.data$id == row$g2) %>%
+                               dplyr::pull(.data$seqCount),
+                             na.rm = TRUE)
+      sc_sums <- list(sc_g1 = seq_count_sum_1, sc_g2 = seq_count_sum_2,
+                      sc_union = seq_count_sum_1 + seq_count_sum_2)
+
+      rep_count_1 <- length(unique(
+        is_from_ref %>%
+          dplyr::filter(.data$id == row$g1) %>%
+          dplyr::pull(.data$ReplicateNumber)
+      ))
+      rep_count_2 <- length(unique(
+        is_from_ref %>%
+          dplyr::filter(.data$id == row$g2) %>%
+          dplyr::pull(.data$ReplicateNumber)
+      ))
+      rep_counts <- list(
+        rep_g1 = rep_count_1,
+        rep_g2 = rep_count_2,
+        rep_union = rep_count_1 + rep_count_2,
+        rep_g1_perc = rep_count_1 / max_rep_g1,
+        rep_g2_perc = rep_count_2 / max_rep_g2,
+        rep_union_perc = (rep_count_1 + rep_count_2) /
+          (max_rep_g1 + max_rep_g2)
+      )
+    }
+    rlang::env_poke(env = rlang::env_parent(),
+                    nm = "cache_df",
+                    value = cache %>%
+                      tibble::add_row(
+                        g1 = row$g1,
+                        g2 = row$g2,
+                        sc_g1 = sc_sums$sc_g1,
+                        sc_g2 = sc_sums$sc_g2,
+                        sc_union = sc_sums$sc_union,
+                        rep_g1 = rep_counts$rep_g1,
+                        rep_g2 = rep_counts$rep_g2,
+                        rep_union = rep_counts$rep_union,
+                        max_rep_g1 = max_rep_g1,
+                        max_rep_g2 = max_rep_g2,
+                        rep_g1_perc = rep_counts$rep_g1_perc,
+                        rep_g2_perc = rep_counts$rep_g2_perc,
+                        rep_union_perc = rep_counts$rep_union_perc
+                      ))
+    p()
+    return()
+  }
+  purrr::pwalk(df, process_row)
+  return(cache_df)
+}
+
+.get_is_counts_with_plots <- function(type,
+                                      filtered_dataset,
+                                      is_shared,
+                                      indep_sample_id,
+                                      chosen_pool,
+                                      pool_col,
+                                      input,
+                                      uuids) {
+
+  if (type == "overall") {
+    sel_data <- is_shared$overall
+    prog_msg <- "Calculating shared IS stats - overall"
+  } else if (type == "control") {
+    sel_data <- is_shared$control
+    prog_msg <- "Calculating shared IS stats - control"
+  } else {
+    sel_data <- is_shared$other
+    prog_msg <- "Calculating shared IS stats - samples"
+  }
+
+  counts <- progressr::withProgressShiny(
+      .get_shared_is_counts(
+        sel_data,
+        ref = filtered_dataset,
+        sample_id = indep_sample_id,
+        pool_col = pool_col,
+        pool = chosen_pool
+      ),
+      message = prog_msg
+    )
+
+  seq_hm <- .get_heatmap(
+    counts,
+    on_x = "g1",
+    on_y = "g2",
+    value = "sc_g1",
+    colorscale = viridisLite::inferno(256),
+    type = "sc"
+  )
+  rep_hm <- .get_heatmap(
+    counts,
+    on_x = "g1",
+    on_y = "g2",
+    value = "rep_g1_perc",
+    colorscale = viridisLite::inferno(256),
+    type = "rep"
+  )
+
+  seq_rep_heatmap <- list(sc = seq_hm, rep = rep_hm)
+
+  return(list(counts = counts,
+              sc_r_hmps = seq_rep_heatmap))
+}
+
+.get_ratio_barplot <- function(ratio_df,
+                               type = c("sc", "rep"),
+                               source = c("Controls", "Samples")) {
+  type <- rlang::arg_match(type)
+  source <- rlang::arg_match(source)
+  selection_df <- ratio_df %>%
+      dplyr::filter(.data$IS_Source == source) %>%
+      dplyr::mutate(Sample = forcats::fct_relevel(
+        factor(.data$Sample),
+        "All_Samples",
+        after = Inf
+      ))
+  if (nrow(selection_df) == 0) {
+    return(NULL)
+  }
+  plt_title <- if (type == "sc") {
+    "Sequence count ratio per sample"
+  } else {
+    "Replicate count ratio per sample"
+  }
+  ratio_plot <- plotly::plot_ly(
+    data = selection_df,
+    x = ~Sample,
+    y = ~Ratio_CEM37,
+    color = ~Sample,
+    colors = viridisLite::inferno(
+      length(unique(selection_df$Sample)), begin = 0.3)
+  )
+
+  if (type == "sc") {
+    ratio_plot <- ratio_plot %>%
+      plotly::add_bars(
+        showlegend = FALSE,
+        hoverinfo = "text",
+        text = ~ paste(
+          "</br>Sample:", Sample,
+          "</br>Ratio:",  scales::label_number(
+            big.mark = ",", accuracy = 0.01
+          )(Ratio_CEM37),
+          "</br>Sample seqCount:", `SeqCount(Sample-vs-CEM37)`,
+          "</br>Control seqCount:", `SeqCount(CEM37)`
+        )
+      )
+  } else {
+    ratio_plot <- ratio_plot %>%
+      plotly::add_bars(
+        showlegend = FALSE,
+        hoverinfo = "text",
+        text = ~ paste(
+          "</br>Sample:", Sample,
+          "</br>Ratio:", scales::label_number(
+            big.mark = ",", accuracy = 0.01
+          )(Ratio_CEM37),
+          "</br>Sample replicate count:", `RepCount(Sample-vs-CEM37)`,
+          "</br>Control replicate count:", `RepCount(CEM37)`
+        )
+      )
+  }
+
+  ratio_plot <- ratio_plot %>%
+    plotly::layout(
+      title = list(
+        text = plt_title
+      ),
+      xaxis = list(
+        title = "Independent sample"
+      ),
+      yaxis = list(
+        title = "Ratio"
+      )
+    )
+  return(ratio_plot)
+}
+
+## Creates table for the sequence count ratios
+.render_ratio_tbl <- function(data, tbl_id) {
+  data <- data %>%
+    dplyr::mutate(Sample = as.factor(.data$Sample),
+                  IS_Source = as.factor(.data$IS_Source))
+  reactable::reactable(
+    data,
+    defaultPageSize = 5,
+    pageSizeOptions = c(5, 10, 25),
+    showPagination = TRUE,
+    defaultColDef = reactable::colDef(
+      sortNALast = FALSE,
+      filterInput = .filter_input(tbl_id),
+      align = "center"
+    ),
+    showSortable = TRUE,
+    filterable = TRUE,
+    searchable = TRUE,
+    highlight = TRUE,
+    resizable = TRUE
+  )
+}
+
+.get_ratio_contour <- function(ratio_df,
+                               source = c("Controls", "Samples")) {
+  source <- rlang::arg_match(source)
+  selection_df <- ratio_df %>%
+    dplyr::filter(.data$IS_Source == source,
+                  .data$Sample != "All_Samples",
+                  !is.na(.data$sc_rep_ratio))
+  if (nrow(selection_df) == 0) {
+    return(NULL)
+  }
+  is_details <- selection_df %>%
+    tidyr::nest(data = !dplyr::all_of(c(ISAnalytics::mandatory_IS_vars(),
+                                       "Ratio_CEM37_sc", "Ratio_CEM37_rep"))
+                ) %>%
+    dplyr::mutate(Samples = purrr::map_chr(.data$data,
+                                           ~ paste0(unique(.x$Sample),
+                                                    collapse = ", "))) %>%
+    dplyr::select(-.data$data)
+
+  plot_cont <- plotly::subplot(
+    # x-axis histogram
+    plotly::plot_ly(selection_df,
+            x = ~ Ratio_CEM37_sc,
+            type = 'histogram',
+            color = I("grey40"),
+            name = "SC ratios histogram",
+            showlegend = FALSE),
+    plotly::plotly_empty(type = "scatter", mode = "markers"),
+    # 2d contour + scatter
+    plotly::plot_ly(
+      selection_df,
+      x = ~ Ratio_CEM37_sc,
+      y = ~ Ratio_CEM37_rep,
+      type = 'histogram2dcontour',
+      colors = viridisLite::inferno(256, begin = 0.15)) %>%
+      plotly::layout(xaxis = list(title = "Sequence count ratio"),
+             yaxis = list(title = "Replicate count ratio")) %>%
+      plotly::add_trace(
+        inherit = FALSE,
+        data = is_details,
+        x = ~ Ratio_CEM37_sc,
+        y = ~ Ratio_CEM37_rep,
+        type = "scatter",
+        mode = "markers",
+        opacity = 0.7,
+        marker = list(
+          size = 7.5,
+          color = "rgb(0,0,0)"
+        ),
+        hoverinfo = "text",
+        text = ~ paste(
+          "</br>Sequence count ratio:", Ratio_CEM37_sc,
+          "</br>Rep count ratio:", Ratio_CEM37_rep,
+          "</br>IS coordinates:", paste0("(", chr, ", ",
+                                         integration_locus, ", ",
+                                         strand, ")"),
+          "</br>Samples:", Samples
+        ),
+        showlegend = FALSE
+      ),
+    # y-axis histogram
+    plotly::plot_ly(selection_df,
+            y = ~ Ratio_CEM37_rep,
+            type = 'histogram',
+            color = I("grey40"),
+            name = "REP ratios histogram",
+            showlegend = FALSE
+    ) %>%
+      plotly::layout(
+        yaxis = list(title = "",
+                     showline = TRUE,
+                     showticklabels = FALSE,
+                     linewidth = 1.2),
+        xaxis = list(showgrid = TRUE,
+                     showticklabels = TRUE)
+      ),
+    nrows = 2,
+    heights = c(0.2, 0.8),
+    widths = c(0.8, 0.2),
+    shareX = TRUE,
+    titleY = TRUE,
+    titleX = TRUE
+  )
+  return(plot_cont)
+}

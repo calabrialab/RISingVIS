@@ -278,7 +278,7 @@ RecServer <- function(id, workflow, matrices) {
         shinyjs::enable(id = id_list()$recalibration$inputs$rec_btn)
         shinyjs::enable(id = id_list()$recalibration$inputs$skip_btn)
       })
-      return(reactive({rec_data()}))
+      return(list(rec_data = reactive({rec_data()})))
     }
   )
 }

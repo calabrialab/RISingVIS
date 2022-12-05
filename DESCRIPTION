@@ -34,7 +34,7 @@ Config/testthat/edition: 3
 VignetteBuilder: knitr
 biocViews: BiomedicalInformatics, Sequencing, SingleCell
 Imports: 
-    ISAnalytics,
+    ISAnalytics (>= 1.8.1),
     bslib,
     shinyWidgets,
     shinyFiles,
