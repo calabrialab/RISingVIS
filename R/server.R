@@ -17,20 +17,20 @@ server <- function(input, output, session) {
     id_list()$recalibration$section_id,
     workflow, matrices = data_imp_returns$data
   )
-  ## Plots section ----
-  plots_returns <- PlotsServer(
-    id_list()$plot_section$section_id,
-    workflow, data = data_imp_returns$data,
-    metadata = data_imp_returns$metadata,
-    data_rec = rec_returns$rec_data,
-    indep_sample_id = data_imp_returns$ind_sample_id,
-    project_id = data_imp_returns$project
-    )
-  ## Saving section ----
-  saving_returns <- SavingServer(
-      id_list()$saving_section$section_id,
-      workflow,
-      filtered_data = plots_returns$data,
-      matrix_cols = plots_returns$col_names
-  )
+  # ## Plots section ----
+  # plots_returns <- PlotsServer(
+  #   id_list()$plot_section$section_id,
+  #   workflow, data = data_imp_returns$data,
+  #   metadata = data_imp_returns$metadata,
+  #   data_rec = rec_returns$rec_data,
+  #   indep_sample_id = data_imp_returns$ind_sample_id,
+  #   project_id = data_imp_returns$project
+  #   )
+  # ## Saving section ----
+  # saving_returns <- SavingServer(
+  #     id_list()$saving_section$section_id,
+  #     workflow,
+  #     filtered_data = plots_returns$data,
+  #     matrix_cols = plots_returns$col_names
+  # )
 }

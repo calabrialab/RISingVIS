@@ -1,7 +1,25 @@
-#-----------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 # Utility functions
-#-----------------------------------------------------------------------------#
-# This file contains some utility functions that are exported.
+#------------------------------------------------------------------------------#
+
+get_isa_tag <- function(tag_name) {
+  af_tags <- ISAnalytics::association_file_columns(include_types = TRUE)
+  mandatory_tags <- ISAnalytics::mandatory_IS_vars(include_types = TRUE)
+  annotation_tags <- ISAnalytics::annotation_IS_vars(include_types = TRUE)
+  iss_tags <- ISAnalytics::iss_stats_specs(include_types = TRUE)
+  all_tags <- list(af_tags, mandatory_tags, annotation_tags, iss_tags)
+  all_tags <- purrr::reduce(all_tags, dplyr::bind_rows)
+  return(
+    all_tags %>%
+      dplyr::filter(.data$tag == tag_name) %>%
+      dplyr::pull(.data$names)
+  )
+}
+
+load_cell_lines_db <- function() {
+
+}
+
 
 # known_CEM_IS
 #' Returns a table containing the known control integration sites.
@@ -15,8 +33,8 @@
 #' @return Table of integration sites
 #'
 #' @export
-#' 
-#' @examples 
+#'
+#' @examples
 #' is <- known_CEM_IS()
 #' is
 

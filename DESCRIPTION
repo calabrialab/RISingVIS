@@ -24,17 +24,22 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 Depends: 
     R (>= 4.2),
+    ISAnalytics (>= 1.8.1),
     shiny
 Suggests: 
     testthat (>= 3.0.0),
     knitr, 
     rmarkdown, 
     BiocStyle
+Enhances:
+    future,
+    doFuture,
+    foreach,
+    BiocParallel
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 biocViews: BiomedicalInformatics, Sequencing, SingleCell
 Imports: 
-    ISAnalytics (>= 1.8.1),
     bslib,
     shinyWidgets,
     shinyFiles,

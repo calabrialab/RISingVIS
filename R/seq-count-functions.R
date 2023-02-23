@@ -1,6 +1,8 @@
-#-----------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 # Sequence count functions
-#-----------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+
+
 
 # shared_control_known_IS_ratio
 #' Returns the ratio bewteen the SeqCount for shared known control IS
@@ -18,7 +20,7 @@
 #' @param subject_col The name of the subject column in af,
 #' default to "SubjectID"; if multiple columns identify the subject then
 #' this must be a vector containing those columns names
-#' @param field_sep The character that in control names separates the different 
+#' @param field_sep The character that in control names separates the different
 #' columns values, default to "_"
 #' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
@@ -41,7 +43,7 @@
 
 shared_control_known_IS_ratio <- function(af, matrix,
                                       subject_col = "SubjectID",
-                                      field_sep = "_", 
+                                      field_sep = "_",
                                       amp_col = "CompleteAmplificationID",
                                       value_col = "Value",
                                       ctrl = "CEM37") {
@@ -90,7 +92,7 @@ shared_control_known_IS_ratio <- function(af, matrix,
         warning("One of the control lines is not sharing IS with samples")
     }
     # Compute ratio
-    R <- compute_ratio(filter_control, is_vars, subject_col, 
+    R <- compute_ratio(filter_control, is_vars, subject_col,
                        value_col, ctrl, field_sep, type = "by sample")
     if (length(names(ctrl)) > 1) {
         Ratio <- R %>%
@@ -127,7 +129,7 @@ shared_control_known_IS_ratio <- function(af, matrix,
 #' @param subject_col The name of the subject column in af,
 #' default to "SubjectID"; if multiple columns identify the subject then
 #' this must be a vector containing those columns names
-#' @param field_sep The character that in control names separates the different 
+#' @param field_sep The character that in control names separates the different
 #' columns values, default to "_"
 #' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
@@ -240,7 +242,7 @@ shared_other_IS_ratio <- function(af, matrix,
 #' @param subject_col The name of the subject column in af,
 #' default to "SubjectID"; if multiple columns identify the subject then
 #' this must be a vector containing those columns names
-#' @param field_sep The character that in control names separates the different 
+#' @param field_sep The character that in control names separates the different
 #' columns values, default to "_"
 #' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
@@ -290,11 +292,11 @@ shared_IS_ratio <- function(af, matrix,
     is_vars <- get_is_vars()
     # Find shared integration sites belonging to controls
     filter_control <- find_shared_IS(aggreg_matrix, af, is_vars,
-                                     subject_col, amp_col, value_col, ctrl, 
+                                     subject_col, amp_col, value_col, ctrl,
                                      type = "control", field_sep)
     # Find shared integration sites belonging to samples
     filter_other <- find_shared_IS(aggreg_matrix, af, is_vars,
-                                   subject_col, amp_col, value_col, ctrl, 
+                                   subject_col, amp_col, value_col, ctrl,
                                    type = "other", field_sep)
     # Error if no IS is shared
     if (!is.list(ctrl)) {
@@ -316,8 +318,8 @@ shared_IS_ratio <- function(af, matrix,
         length(lengths_other)) {
         warning("There are no IS shared")
         Ratio <- no_IS_shared(ctrl, af, subject_col, field_sep)
-        Ratio <- Ratio %>% 
-            dplyr::rename_all(~stringr::str_replace_all(.x, 
+        Ratio <- Ratio %>%
+            dplyr::rename_all(~stringr::str_replace_all(.x,
                                                         "Count", "SeqCount"))
         return(Ratio)
     }
@@ -338,8 +340,8 @@ shared_IS_ratio <- function(af, matrix,
                                                  value_col, ctrl,
                                                  field_sep, type = "by sample")
         Ratios_known_control_IS$IS_Source <- "Controls"
-        Ratios_known_control_IS <- Ratios_known_control_IS %>% 
-            dplyr::rename_all(~stringr::str_replace_all(.x, 
+        Ratios_known_control_IS <- Ratios_known_control_IS %>%
+            dplyr::rename_all(~stringr::str_replace_all(.x,
                                                         "Count", "SeqCount"))
     } else {
         warning("There are no IS shared from controls to other samples")
@@ -351,8 +353,8 @@ shared_IS_ratio <- function(af, matrix,
                                          subject_col, value_col, ctrl,
                                          field_sep, type = "by sample")
         Ratios_other_IS$IS_Source <- "Samples"
-        Ratios_other_IS <- Ratios_other_IS %>% 
-            dplyr::rename_all(~stringr::str_replace_all(.x, 
+        Ratios_other_IS <- Ratios_other_IS %>%
+            dplyr::rename_all(~stringr::str_replace_all(.x,
                                                         "Count", "SeqCount"))
     } else {
         warning("There are no IS shared from the samples to controls")
@@ -405,7 +407,7 @@ shared_IS_ratio <- function(af, matrix,
 #' @param subject_col The name of the subject column in af,
 #' default to "SubjectID"; if multiple columns identify the subject then
 #' this must be a vector containing those columns names
-#' @param field_sep The character that in control names separates the different 
+#' @param field_sep The character that in control names separates the different
 #' columns values, default to "_"
 #' @param amp_col The name of the amplificate column in af and matrix,
 #' default to "CompleteAmplificationID"
@@ -482,8 +484,8 @@ shared_IS_ratio_byIS <- function(af, matrix,
         length(lengths_other)) {
         warning("There are no IS shared")
         Ratio <- no_IS_shared(ctrl, af, subject_col, field_sep)
-        Ratio <- Ratio %>% 
-            dplyr::rename_all(~stringr::str_replace_all(.x, 
+        Ratio <- Ratio %>%
+            dplyr::rename_all(~stringr::str_replace_all(.x,
                                                         "Count", "SeqCount"))
         return(Ratio)
     }
@@ -501,11 +503,11 @@ shared_IS_ratio_byIS <- function(af, matrix,
         length(lengths_ctrl)) {
         # Compute ratio for known control IS
         known_control_is_ratios <-
-            compute_ratio(filter_control, is_vars, subject_col, 
+            compute_ratio(filter_control, is_vars, subject_col,
                           value_col, ctrl, field_sep, type = "by IS")
         known_control_is_ratios$IS_Source <- "Controls"
-        known_control_is_ratios <- known_control_is_ratios %>% 
-            dplyr::rename_all(~stringr::str_replace_all(.x, 
+        known_control_is_ratios <- known_control_is_ratios %>%
+            dplyr::rename_all(~stringr::str_replace_all(.x,
                                                         "Count", "SeqCount"))
     } else {
         warning("There are no IS shared from controls to other samples")
@@ -515,11 +517,11 @@ shared_IS_ratio_byIS <- function(af, matrix,
         length(lengths_other)) {
         # Compute ratio for shared IS from samples
         other_is_ratios <-
-            compute_ratio(filter_other, is_vars, subject_col, 
+            compute_ratio(filter_other, is_vars, subject_col,
                           value_col, ctrl, field_sep, type = "by IS")
         other_is_ratios$IS_Source <- "Samples"
-        other_is_ratios <- other_is_ratios %>% 
-            dplyr::rename_all(~stringr::str_replace_all(.x, 
+        other_is_ratios <- other_is_ratios %>%
+            dplyr::rename_all(~stringr::str_replace_all(.x,
                                                         "Count", "SeqCount"))
     } else {
         warning("There are no IS shared from samples to controls")
@@ -539,7 +541,7 @@ shared_IS_ratio_byIS <- function(af, matrix,
                sum(sapply(lengths_other,
                           function(x) all(x == 0, na.rm = TRUE))) ==
                length(lengths_other)) {
-        
+
         return(known_control_is_ratios)
     } else if (sum(sapply(lengths_ctrl,
                           function(x) all(x == 0, na.rm = TRUE))) ==
