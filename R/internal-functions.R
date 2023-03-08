@@ -825,7 +825,6 @@
 # get_is_vars
 # Returns a list of the names of the columns retrieved by ISAnalytics function
 # mandatory_IS_vars() that contains only chr, locus and strand
-#' @importFrom magrittr `|>`
 #' @importFrom rlang .data
 
 get_is_vars <- function() {
@@ -930,9 +929,7 @@ ctrl_check <- function(af, subject_col, ctrl, field_sep) {
 # find_shared_IS
 # Returns a dataframe of shared IS
 # Type must be "control" or "other" depending on the interested IS source
-#' @importFrom magrittr `|>`
 #' @importFrom rlang .data
-
 find_shared_IS <- function(matrix, af, is_vars, subject_col, amp_col,
     value_col, ctrl, type, field_sep) {
     `%notin%` <- Negate(`%in%`)
@@ -1013,9 +1010,7 @@ find_shared_IS <- function(matrix, af, is_vars, subject_col, amp_col,
 
 # find_shared_known_IS
 # Returns a dataframe containing the shared known CEM IS
-#' @importFrom magrittr `|>`
 #' @importFrom rlang .data
-
 filter_shared_known_is <- function(matrix, af, is_vars, subject_col,
     amp_col, ctrl_line, known_is) {
     known_is$integration_locus <- as.character(known_is$integration_locus)
@@ -1058,9 +1053,7 @@ filter_shared_known_is <- function(matrix, af, is_vars, subject_col,
 
 # find_shared_other_IS
 # Returns a dataframe containing the shared IS from samples
-#' @importFrom magrittr `|>`
 #' @importFrom rlang .data
-
 filter_shared_other_is <- function(matrix, af, is_vars, subject_col,
     amp_col, value_col, ctrl_name, ctrl_line,
     field_sep, known_is) {
@@ -1220,7 +1213,6 @@ filter_shared_other_is <- function(matrix, af, is_vars, subject_col,
 # compute_n_rep
 # Computes the total number of replicates for each sample from
 # the association file
-
 compute_n_rep <- function(af, subject_col, field_sep, ctrl) {
     `%notin%` <- Negate(`%in%`)
     n_rep <- af |>
@@ -1264,7 +1256,6 @@ compute_n_rep <- function(af, subject_col, field_sep, ctrl) {
 
 # compute_rep_count
 # Computes the replicate count by sample for the given table of shared IS
-#' @importFrom magrittr `|>`
 #' @importFrom rlang .data
 compute_rep_count <- function(current_table, af, subject_col,
     amp_col, value_col, x) {
@@ -1323,9 +1314,7 @@ compute_rep_count <- function(current_table, af, subject_col,
 # compute_ratio
 # Returns a df with the ratio computed against each sample,
 # it can be done by sample or by IS
-#' @importFrom magrittr `|>`
 #' @importFrom rlang .data
-
 compute_ratio <- function(filter_shared_is, is_vars, subject_col,
     value_col, ctrl, field_sep, type, n_rep = NULL) {
     `%notin%` <- Negate(`%in%`)
@@ -1478,9 +1467,7 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
 
 # compute_counts
 # Returns a df with the replicates count computed for each sample
-#' @importFrom magrittr `|>`
 #' @importFrom rlang .data
-
 compute_counts <- function(filter_shared_is, subject_col,
     value_col, ctrl_names, field_sep) {
     counts <- filter_shared_is |>
@@ -1504,9 +1491,7 @@ compute_counts <- function(filter_shared_is, subject_col,
 
 # internal_compute_ratio
 # Returns a df with the computed ratio for each sample
-#' @importFrom magrittr `|>`
 #' @importFrom rlang .data
-
 internal_compute_ratio <- function(counts, subject_col, ctrl_line, n_rep) {
     ctrl_count <- as.integer(counts |>
         dplyr::filter(.data[["Sample"]] ==
@@ -1571,9 +1556,7 @@ internal_compute_ratio <- function(counts, subject_col, ctrl_line, n_rep) {
 
 # compute_counts_byIS
 # Returns a df with the replicates count computed for each IS
-#' @importFrom magrittr `|>`
 #' @importFrom rlang .data
-
 compute_counts_byIS <- function(filter_shared, is_vars, subject_col,
     value_col, ctrl_names, field_sep) {
     `%notin%` <- Negate(`%in%`)
@@ -1597,9 +1580,7 @@ compute_counts_byIS <- function(filter_shared, is_vars, subject_col,
 
 # internal_compute_ratio_byIS
 # Returns a df with the computed ratio for each IS
-#' @importFrom magrittr `|>`
 #' @importFrom rlang .data
-
 internal_compute_ratio_byIS <- function(counts, is_vars,
     subject_col, value_col,
     ctrl_line, n_rep) {
@@ -1685,9 +1666,7 @@ internal_compute_ratio_byIS <- function(counts, is_vars,
 
 # no_IS_shared()
 # Returns the output in the case of no integration sites shared among samples
-#' @importFrom magrittr `|>`
 #' @importFrom rlang .data
-
 no_IS_shared <- function(ctrl, af, subject_col, field_sep) {
     `%notin%` <- Negate(`%in%`)
     af <- af |> tidyr::unite("Sample",

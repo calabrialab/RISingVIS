@@ -1,5 +1,6 @@
-^RISingVIS\.Rproj$
+^.*\.Rproj$
 ^\.Rproj\.user$
-^\.github$
-^LICENSE\.md$
-^README\.Rmd$
+^data-raw$
+dev_history.R
+^dev$
+$run_dev.*

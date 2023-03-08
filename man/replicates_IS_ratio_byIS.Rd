@@ -10,6 +10,7 @@ replicates_IS_ratio_byIS(
   af,
   matrix,
   subject_col = "SubjectID",
+  field_sep = "_",
   amp_col = "CompleteAmplificationID",
   value_col = "Value",
   ctrl = "CEM37"
@@ -20,13 +21,17 @@ replicates_IS_ratio_byIS(
 
 \item{matrix}{The integration matrix}
 
-\item{subject_col}{The name of the subject column in af,
-default to "SubjectID"}
+\item{subject_col}{The name of the subject column in af, 
+default to "SubjectID"; if multiple columns identify the subject then
+this must be a vector containing those columns names}
 
-\item{amp_col}{The name of the amplificate column in af and matrix,
+\item{field_sep}{The character that in control names separates the different 
+columns values, default to "_"}
+
+\item{amp_col}{The name of the amplificate column in af and matrix, 
 default to "CompleteAmplificationID"}
 
-\item{value_col}{The name of the SeqCount column in matrix,
+\item{value_col}{The name of the SeqCount column in matrix, 
 default to "Value"}
 
 \item{ctrl}{The named list of control with known integration sites,

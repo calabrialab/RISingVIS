@@ -7,6 +7,9 @@
 #' @details
 #' The known IS table must contain at least mandatory IS vars, as per options
 #' set via `ISAnalytics::mandatory_IS_vars()`
+#' @param name TODO
+#' @param known_iss TODO
+#' @param initialize TODO
 ControlLine <- R6::R6Class(
   classname = "ControlLine",
   public = list(

@@ -7,10 +7,10 @@
 \format{
 A data frame with 9 rows and 4 variables:
 \describe{
-\item{ProjectID}{The ID of the project you are working on}
-\item{PoolID}{ID of the pool you are working on}
-\item{SubjectID}{ID of the subject}
-\item{CompleteAmplificationID}{ID of the current amplification}
+  \item{ProjectID}{The ID of the project you are working on}
+  \item{PoolID}{ID of the pool you are working on}
+  \item{SubjectID}{ID of the subject}
+  \item{CompleteAmplificationID}{ID of the current amplification}
 }
 }
 \usage{

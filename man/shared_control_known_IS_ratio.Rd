@@ -10,6 +10,7 @@ shared_control_known_IS_ratio(
   af,
   matrix,
   subject_col = "SubjectID",
+  field_sep = "_",
   amp_col = "CompleteAmplificationID",
   value_col = "Value",
   ctrl = "CEM37"
@@ -21,7 +22,11 @@ shared_control_known_IS_ratio(
 \item{matrix}{The integration matrix}
 
 \item{subject_col}{The name of the subject column in af,
-default to "SubjectID"}
+default to "SubjectID"; if multiple columns identify the subject then
+this must be a vector containing those columns names}
+
+\item{field_sep}{The character that in control names separates the different
+columns values, default to "_"}
 
 \item{amp_col}{The name of the amplificate column in af and matrix,
 default to "CompleteAmplificationID"}

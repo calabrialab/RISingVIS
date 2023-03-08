@@ -1,63 +1,25 @@
 Package: RISingVIS
-Title: Analyse and filter indexes switching events in raw integration sites
-Version: 0.99.0
-Date: 2022-05-30
+Title: An Amazing Shiny App
+Version: 0.0.0.9000
 Authors@R: 
-    c(
-  person(given = "Andrea",
-         family = "Calabria",
-         role = c("aut", "cre"),
-         email = "calabria.andrea@hsr.it"),
-  person(given = "Chiara",
-         family = "Pavia",
-         role = c("aut"),
-         email = "pavia.chiara@hsr.it"),
-  person(given = "Giulia",
-         family = "Pais",
-         role = c("aut"),
-         email = "giuliapais1@gmail.com"))
-Description: In the field of Gene therapy vector integration sites (IS) are used as molecular barcodes for clonal tracking in vivo. IS analysis is required to assess the safety and efficacy of the treatment, as well for tracking studies in which they are fundamental to make various calculations. These IS studies rely on high-throughput sequencing of DNA fragments and they can be affected by the phenomenon called Index Switching: a molecular “error” during the sequencing process that may cause mis-assignment of a fragment to the wrong sample and thus creating false positives. The R package RISingVIS is developed to (1) identify, (2) analyze, through the use of different functions that compute statistics to assess and quantify their presence, and (3) remove these aberrant events that can be misleading for further analysis. 
-License: CC BY 4.0
-Encoding: UTF-8
-LazyData: false
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
-Depends: 
-    R (>= 4.2),
-    ISAnalytics (>= 1.8.1),
-    shiny
-Suggests: 
-    testthat (>= 3.0.0),
-    knitr, 
-    rmarkdown, 
-    BiocStyle
-Enhances:
-    future,
-    doFuture,
-    foreach,
-    BiocParallel
-Config/testthat/edition: 3
-VignetteBuilder: knitr
-biocViews: BiomedicalInformatics, Sequencing, SingleCell
+    person(given = "firstname",
+           family = "lastname",
+           role = c("aut", "cre"),
+           email = "your@email.com")
+Description: What the package does (one paragraph).
+License: What license is it under?
 Imports: 
-    bslib,
-    shinyWidgets,
-    shinyFiles,
-    fs,
-    magrittr,
-    sass,
-    shinyjs,
-    dplyr,
-    htmlwidgets,
-    progressr,
-    purrr,
-    reactable,
-    rlang,
-    withr,
-    shinyvalidate,
-    dplyr,
-    purrr,
-    tidyr,
-    tibble, 
-    utils
+    attempt,
+    config (>= 0.3.1),
+    DT,
+    glue,
+    golem (>= 0.3.5),
+    htmltools,
+    shiny (>= 1.7.4)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Suggests: 
+    spelling
+Language: en-US
 StagedInstall: no

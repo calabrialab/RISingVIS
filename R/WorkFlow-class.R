@@ -18,6 +18,17 @@ WorkFlow <- R6::R6Class(
       private$.name <- name
       private$.date_created <- Sys.time()
     },
+    get_name = function() {
+      return(private$.name)
+    },
+    change_name = function(new_name, flag = NULL) {
+      old <- private$.name
+      private$.name = new_name
+      if (not_null(flag)) {
+        gargoyle::trigger(flag)
+      }
+      return(invisible(old))
+    },
     set_ISA_options = function(opt) {
       private$.isa_options <- opt
     },

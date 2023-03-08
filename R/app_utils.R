@@ -951,24 +951,24 @@ id_list <- function() {
 
 ## Converts data from tidy format to sparse format
 .tidy_to_sparse <- function(data, session) {
-    
+
     conv_data <- ISAnalytics::as_sparse_matrix(data)
-    
+
     return(conv_data)
 }
 
 ## Splits data by pool into different data frames
 .split_by_pool <- function(data, session) {
-    
+
     pool_col <- ISAnalytics::association_file_columns(TRUE) %>%
         dplyr::filter(.data$tag == "vispa_concatenate") %>%
         dplyr::pull(.data$names)
-    
+
     # Test
     # pool_col <- "PoolID"
-    
+
     split_data <- split(x = data, f = data[[pool_col]])
-    
+
     return(split_data)
 }
 

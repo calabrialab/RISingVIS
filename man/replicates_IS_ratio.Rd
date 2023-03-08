@@ -11,6 +11,7 @@ replicates_IS_ratio(
   af,
   matrix,
   subject_col = "SubjectID",
+  field_sep = "_",
   amp_col = "CompleteAmplificationID",
   value_col = "Value",
   ctrl = "CEM37"
@@ -21,13 +22,17 @@ replicates_IS_ratio(
 
 \item{matrix}{The integration matrix}
 
-\item{subject_col}{The name of the subject column in af,
-default to "SubjectID"}
+\item{subject_col}{The name of the subject column in af, 
+default to "SubjectID"; if multiple columns identify the subject then
+this must be a vector containing those columns names}
 
-\item{amp_col}{The name of the amplificate column in af and matrix,
+\item{field_sep}{The character that in control names separates the different 
+columns values, default to "_"}
+
+\item{amp_col}{The name of the amplificate column in af and matrix, 
 default to "CompleteAmplificationID"}
 
-\item{value_col}{The name of the SeqCount column in matrix,
+\item{value_col}{The name of the SeqCount column in matrix, 
 default to "Value"}
 
 \item{ctrl}{The named list of control with known integration sites,
@@ -37,8 +42,9 @@ default is "CEM37" with known IS as in known_CEM_IS()}
 Dataframe of values corresponding to the ratios
 }
 \description{
-This function counts the number of replicates in which each shared IS
-is found and sums them to obtain an overall count for each sample.
+This function counts the number of replicates in which at least one shared 
+IS per type is found for each sample. Ratio's numerator and denominator are
+proportioned by the total number of replicates for the considered sample. 
 This function focuses on two categories of shared IS: the ones that are
 known to belong to controls and the one that come from the other samples.
 Also it considers the count for single subjects and for the overall

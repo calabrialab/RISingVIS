@@ -7,12 +7,12 @@
 \format{
 A data frame with 140 rows and 5 variables:
 \describe{
-\item{chr}{The chromosome number}
-\item{integration_locus}{Number of the base at
-which the viral insertion occurred}
-\item{strand}{Strand of the integration}
-\item{CompleteAmplificationID}{ID of the current amplification}
-\item{Value}{Sequence count for the IS}
+  \item{chr}{The chromosome number}
+  \item{integration_locus}{Number of the base at
+ which the viral insertion occurred}
+  \item{strand}{Strand of the integration}
+  \item{CompleteAmplificationID}{ID of the current amplification}
+  \item{Value}{Sequence count for the IS}
 }
 }
 \usage{
