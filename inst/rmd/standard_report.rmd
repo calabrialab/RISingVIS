@@ -1,0 +1,236 @@
+---
+title: "RISingVIS workflow report"
+date: "`r Sys.Date()`"
+output: 
+  flexdashboard::flex_dashboard:
+    theme:
+      version: 5
+      bootswatch: minty
+      primary: "#ffc812"
+      secondary: "#d90889"
+      info: "#609fe6"
+      accent1: "#78cdd7"
+      accent2: "#a273ef"
+      accent3: "#a8a1df"
+      success: "#198754"
+      warning: "#ffc107"
+      danger: "#dc3545"
+    navbar:
+      - { title: "Website", href: "todo", align: right, icon: "fa-globe" }
+      - { title: "GitHub", href: "https://github.com/calabrialab/RISingVIS", align: right, icon: "fa-github" }
+    orientation: columns
+    vertical_layout: scroll
+    params:
+      workflow: null
+---
+```{r echo=FALSE}
+library(dplyr)
+library(reactable)
+library(htmltools)
+
+# Defines inputs filters dropdowns
+.filter_input <- function(id) {
+  function(values, name) {
+    tags$select(
+      # Set to undefined to clear the filter
+      onchange = sprintf(
+        paste0(
+          "Reactable.setFilter('", id, "', ",
+          "'%s', event.target.value || undefined)"
+        ),
+        name
+      ),
+      # "All" has an empty value to clear the filter, and is the default option
+      tags$option(value = "", "All"),
+      lapply(unique(values), tags$option),
+      "aria-label" = sprintf("Filter %s", name),
+      style = "width: 100%; height: 100%; border: 1px solid rgba(0,0,0,.1); border-radius: 3px; color: rgb(90, 90, 90); padding-left: 0.4em;"
+    )
+  }
+}
+
+# Defines strict column filtering
+.filter_strictly_equal <- JS(
+    "function(rows, columnId, filterValue) {
+        return rows.filter(function(row) {
+            return row.values[columnId] === filterValue;
+        });
+    }"
+)
+
+# Rendering function for formula columns
+formula_renderer <- function(value) {
+    if (is.null(value)) {
+        return(NULL)
+    } else {
+        return(deparse1(value))
+    }
+}
+```
+
+General info & ISAnalytics options
+=====================================  
+
+Column 1 {data-width=200}
+-------------------------------------
+```{r echo=FALSE, results='asis'}
+div(
+    class = "card text-bg-info me-2 mb-2",
+    div(
+        class = "card-header",
+        h5("Workflow details")
+    ),
+    div(
+        class = "card-body",
+        strong("Name: "),
+        params$workflow$get_name(),
+        br(),
+        strong("Creation date: "),
+        params$workflow$get_date()
+    )
+)
+```  
+
+### ISA options specs
+```{r echo=FALSE, results='asis'}
+configuration <- if (is.null(params$workflow$get_ISA_options()$json_source)) {
+    "Default"
+} else {
+    "Custom"
+}
+file_path <- if (configuration == "Custom") {
+    div(
+        strong("Options file: "),
+        params$workflow$get_ISA_options()$json_source
+    )
+} else {
+    NULL
+}
+div(
+    class = "card",
+    div(
+        class = "card-body",
+        strong("Configuration: "),
+        configuration,
+        br(),
+        file_path
+    )
+)
+```
+
+ISAoptions {.tabset .tabset-fade}
+-------------------------------------
+
+### Mandatory IS vars
+```{r}
+reactable(
+    elementId = "mandatory-is-tbl",
+    params$workflow$get_ISA_options()$options$mandatory_is_vars,
+    filterable = TRUE,
+    columns = list(
+        types = colDef(
+            filterInput = .filter_input("mandatory-is-tbl"),
+            filterMethod = .filter_strictly_equal
+        ),
+        flag = colDef(
+            filterInput = .filter_input("mandatory-is-tbl"),
+            filterMethod = .filter_strictly_equal
+        ),
+        transform = colDef(
+            cell = formula_renderer
+        )
+    )
+)
+```
+
+### Annotation IS vars
+```{r}
+reactable(
+    elementId = "annotation-is-tbl",
+    params$workflow$get_ISA_options()$options$genomic_annotation_vars,
+    filterable = TRUE,
+    columns = list(
+        types = colDef(
+            filterInput = .filter_input("annotation-is-tbl"),
+            filterMethod = .filter_strictly_equal
+        ),
+        flag = colDef(
+            filterInput = .filter_input("annotation-is-tbl"),
+            filterMethod = .filter_strictly_equal
+        ),
+        transform = colDef(
+            cell = formula_renderer
+        )
+    )
+)
+``` 
+
+### Association file specs
+```{r}
+reactable(
+    elementId = "association-tbl",
+    params$workflow$get_ISA_options()$options$af_specs,
+    filterable = TRUE,
+    columns = list(
+        types = colDef(
+            filterInput = .filter_input("association-tbl"),
+            filterMethod = .filter_strictly_equal
+        ),
+        flag = colDef(
+            filterInput = .filter_input("association-tbl"),
+            filterMethod = .filter_strictly_equal
+        ),
+        transform = colDef(
+            cell = formula_renderer
+        )
+    )
+)
+``` 
+
+### VISPA2 stats specs
+```{r}
+reactable(
+    elementId = "vispa2-stats-tbl",
+    params$workflow$get_ISA_options()$options$iss_stats_specs,
+    filterable = TRUE,
+    columns = list(
+        types = colDef(
+            filterInput = .filter_input("vispa2-stats-tbl"),
+            filterMethod = .filter_strictly_equal
+        ),
+        flag = colDef(
+            filterInput = .filter_input("vispa2-stats-tbl"),
+            filterMethod = .filter_strictly_equal
+        ),
+        transform = colDef(
+            cell = formula_renderer
+        )
+    )
+)
+```
+
+### Default matrix suffixes
+```{r}
+reactable(
+    elementId = "matrix-suffixes-tbl",
+    defaultColDef = colDef(
+        filterInput = .filter_input("matrix-suffixes-tbl"),
+        filterMethod = .filter_strictly_equal
+    ),
+    params$workflow$get_ISA_options()$options$matrix_file_suffix,
+    filterable = TRUE
+)
+```
+
+
+
+Data import
+=====================================
+
+
+Recalibration
+=====================================
+
+
+Plots
+=====================================

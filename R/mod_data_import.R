@@ -7,24 +7,31 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-mod_data_import_ui <- function(id){
+mod_data_import_ui <- function(id) {
   ns <- NS(id)
   tagList(
     div(
       id = id,
       div("Data import", class = "display-2"),
+      mod_data_import_isaopt_ui(
+        ns(ids()$data_import$isa_opt_section$section_id)
+      ),
+      mod_data_import_metadata_ui(
+        ns(ids()$data_import$metadata_section$section_id)
+      ),
       div(
         align = "center",
         style = "width: 80%;",
-        tagAppendAttributes(
-          actionButton(
-            inputId = ns(ids()$data_import$inputs$next_btn),
-            label = "NEXT"
-          ),
-          class = "btn btn-primary btn-lg",
-          style = paste(
-            "margin-top: 10px;"#,
-            #"display: none;"
+        shinyjs::disabled(
+          tagAppendAttributes(
+            actionButton(
+              inputId = ns(ids()$data_import$inputs$next_btn),
+              label = "NEXT"
+            ),
+            class = "btn btn-primary btn-lg",
+            style = paste(
+              "margin-top: 10px;"
+            )
           )
         )
       )
@@ -35,12 +42,18 @@ mod_data_import_ui <- function(id){
 #' data_import Server Functions
 #'
 #' @noRd
-mod_data_import_server <- function(id, workflow, wf_flag_name, side_nav){
-  moduleServer( id, function(input, output, session){
+mod_data_import_server <- function(id, workflow, wf_flag_name, side_nav) {
+  moduleServer(id, function(input, output, session) {
     ns <- session$ns
     observeEvent(input[[ids()$data_import$inputs$next_btn]], {
       side_nav()$go_to_next()
     })
+    mod_data_import_isaopt_server(
+      ids()$data_import$isa_opt_section$section_id, workflow
+    )
+    mod_data_import_metadata_server(
+      ids()$data_import$metadata_section$section_id, workflow
+    )
   })
 }
 

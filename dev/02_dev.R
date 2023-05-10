@@ -23,14 +23,25 @@ attachment::att_amend_desc()
 golem::add_module(name = "workflow_start", with_test = TRUE)
 golem::add_module(name = "side_bar", with_test = TRUE)
 golem::add_module(name = "data_import", with_test = TRUE)
+golem::add_module(name = "data_import_isaopt", with_test = TRUE)
+golem::add_module(name = "data_import_metadata", with_test = TRUE, utils = "helpers")
 golem::add_module(name = "recalibration", with_test = TRUE)
 golem::add_module(name = "plots", with_test = TRUE)
 golem::add_module(name = "save_results", with_test = TRUE)
+golem::add_module(
+    name = "control_lines_db", with_test = TRUE,
+    utils = "helpers"
+)
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
 golem::add_fct("helpers", with_test = TRUE)
 golem::add_utils("helpers", with_test = TRUE)
+
+golem::add_utils("helpers",
+    module = "data_import_isaopt",
+    with_test = TRUE
+)
 
 ## External resources
 ## Creates .js and .css files at inst/app/www
@@ -38,6 +49,8 @@ golem::add_js_file("script")
 golem::add_js_handler("handlers")
 golem::add_css_file("custom")
 golem::add_sass_file("custom")
+
+golem::add_js_file("popovers")
 
 ## Add internal datasets ----
 ## If you have data in your package

@@ -145,50 +145,23 @@ id_list <- function() {
       )
     ),
     saving_section = list(
-        section_id = "saving-section",
-        inputs = list(
-            dir_container = "dir_container",
-            dir_path = "dir_path",
-            data_form = "data_form",
-            by_pool = "by_pool",
-            file_form = "file_form",
-            save_btn = "save_btn"
-        ),
-        outputs = list(
-            dir_display = "dir_display"
-        )
+      section_id = "saving-section",
+      inputs = list(
+        dir_container = "dir_container",
+        dir_path = "dir_path",
+        data_form = "data_form",
+        by_pool = "by_pool",
+        file_form = "file_form",
+        save_btn = "save_btn"
+      ),
+      outputs = list(
+        dir_display = "dir_display"
+      )
     )
   )
 }
 
 ## For generating components ---------------------------------------------------
-.generate_status_banner <- function(type = c(
-                                      "success", "warning",
-                                      "danger", "info",
-                                      "primary", "secondary",
-                                      "light", "dark"
-                                    ),
-                                    content = NULL,
-                                    ...) {
-  type <- rlang::arg_match(type)
-  class <- switch(type,
-    "success" = "alert alert-success",
-    "warning" = "alert alert-warning",
-    "danger" = "alert alert-danger",
-    "info" = "alert alert-info",
-    "primary" = "alert alert-primary",
-    "secondary" = "alert alert-secondary",
-    "light" = "alert alert-light",
-    "dark" = "alert alert-dark"
-  )
-  banner <- div(
-    class = class,
-    !!!content,
-    ...
-  )
-  return(banner)
-}
-
 .generate_hm_card_content <- function(ns,
                                       type = c("overall", "control", "other")) {
   type <- rlang::arg_match(type)
@@ -216,8 +189,10 @@ id_list <- function() {
   div(
     shinyWidgets::radioGroupButtons(
       inputId = btn_id,
-      choices = c("Shared IS", "Shared IS seq count",
-                  "Shared IS replicates"),
+      choices = c(
+        "Shared IS", "Shared IS seq count",
+        "Shared IS replicates"
+      ),
       size = "sm",
       status = "secondary"
     ),
@@ -225,10 +200,13 @@ id_list <- function() {
       class = "card-subtitle mb-2 text-muted",
       textOutput(hm_desc_id)
     ),
-    shinycustomloader::withLoader(plotly::plotlyOutput(
-      hm_id
-    ), type = "html",
-    loader = "dnaspin")
+    shinycustomloader::withLoader(
+      plotly::plotlyOutput(
+        hm_id
+      ),
+      type = "html",
+      loader = "dnaspin"
+    )
   )
 }
 
@@ -238,9 +216,11 @@ id_list <- function() {
     sc_ratio_tbl_id <- ns(id_list()$plot_section$outputs$ratio_tbl_sc_control)
     rep_ratio_tbl_id <- ns(id_list()$plot_section$outputs$ratio_tbl_rep_control)
     sc_ratio_bp_id <- ns(
-      id_list()$plot_section$outputs$ratio_barplot_sc_control)
+      id_list()$plot_section$outputs$ratio_barplot_sc_control
+    )
     rep_ratio_bp_id <- ns(
-      id_list()$plot_section$outputs$ratio_barplot_rep_control)
+      id_list()$plot_section$outputs$ratio_barplot_rep_control
+    )
     contour_id <- ns(
       id_list()$plot_section$outputs$ratio_contour_controls
     )
@@ -249,9 +229,11 @@ id_list <- function() {
     sc_ratio_tbl_id <- ns(id_list()$plot_section$outputs$ratio_tbl_sc_samples)
     rep_ratio_tbl_id <- ns(id_list()$plot_section$outputs$ratio_tbl_rep_samples)
     sc_ratio_bp_id <- ns(
-      id_list()$plot_section$outputs$ratio_barplot_sc_samples)
+      id_list()$plot_section$outputs$ratio_barplot_sc_samples
+    )
     rep_ratio_bp_id <- ns(
-      id_list()$plot_section$outputs$ratio_barplot_rep_samples)
+      id_list()$plot_section$outputs$ratio_barplot_rep_samples
+    )
     contour_id <- ns(
       id_list()$plot_section$outputs$ratio_contour_samples
     )
@@ -273,9 +255,10 @@ id_list <- function() {
         style = "padding: 10px;",
         h5("Sequence count ratios per sample"),
         shinycustomloader::withLoader(
-        reactable::reactableOutput(sc_ratio_tbl_id),
-        type = "html",
-        loader = "dnaspin")
+          reactable::reactableOutput(sc_ratio_tbl_id),
+          type = "html",
+          loader = "dnaspin"
+        )
       ),
       div(
         style = "padding: 10px;",
@@ -283,7 +266,8 @@ id_list <- function() {
         shinycustomloader::withLoader(
           reactable::reactableOutput(rep_ratio_tbl_id),
           type = "html",
-          loader = "dnaspin")
+          loader = "dnaspin"
+        )
       )
     ),
     conditionalPanel(
@@ -294,7 +278,8 @@ id_list <- function() {
         shinycustomloader::withLoader(
           plotly::plotlyOutput(sc_ratio_bp_id),
           type = "html",
-          loader = "dnaspin")
+          loader = "dnaspin"
+        )
       ),
       div(
         style = "padding: 10px;",
@@ -302,18 +287,22 @@ id_list <- function() {
         shinycustomloader::withLoader(
           plotly::plotlyOutput(rep_ratio_bp_id),
           type = "html",
-          loader = "dnaspin")
+          loader = "dnaspin"
+        )
       )
     ),
     h4("Ratios details - per integration"),
     div(
       h5("Sequence count ratio vs. Replicate count ratio"),
-      p("The plot shows a 2D histogram contour plot with marginals for ",
-        "each IS"),
+      p(
+        "The plot shows a 2D histogram contour plot with marginals for ",
+        "each IS"
+      ),
       shinycustomloader::withLoader(
         plotly::plotlyOutput(contour_id),
         type = "html",
-        loader = "dnaspin")
+        loader = "dnaspin"
+      )
     )
   )
 }
@@ -351,8 +340,10 @@ id_list <- function() {
         style = "display: flex;",
         div(
           class = "card text-bg-secondary mb-3",
-          style = paste("width: 0; flex: 1 1 0; margin-top: 10px;",
-                        "margin-bottom: 10px; margin-right:15px;"),
+          style = paste(
+            "width: 0; flex: 1 1 0; margin-top: 10px;",
+            "margin-bottom: 10px; margin-right:15px;"
+          ),
           div(
             class = "card-header",
             "Overall sequence count ratio"
@@ -376,8 +367,10 @@ id_list <- function() {
         ),
         div(
           class = "card text-bg-secondary mb-3",
-          style = paste("width: 0; flex: 1 1 0; margin-top: 10px;",
-                        "margin-bottom: 10px;"),
+          style = paste(
+            "width: 0; flex: 1 1 0; margin-top: 10px;",
+            "margin-bottom: 10px;"
+          ),
           div(
             class = "card-header",
             "Overall replicate count ratio"
@@ -410,92 +403,9 @@ id_list <- function() {
 
 ## For server processing -------------------------------------------------------
 
-#### ISAnalytics options
-.global_required_af_tags <- function() {
-  c("project_id", "pool_id", "subject", "pcr_repl_id", "vispa_concatenate")
-}
 
-.load_isa_opts <- function(file_path) {
-  withr::local_options(list("ISAnalytics.verbose" = FALSE))
-  to_return <- tryCatch(
-    {
-      catched <- purrr::quietly(
-        ISAnalytics::import_ISA_settings
-      )(file_path)$warnings
-      if (!is.null(catched) && !purrr::is_empty(catched)) {
-        if (!all(.global_required_af_tags() %in%
-          ISAnalytics::association_file_columns(TRUE)$tag)) {
-          err_miss_tags <- paste0(
-            .global_required_af_tags()[
-              !.global_required_af_tags() %in%
-                ISAnalytics::association_file_columns(TRUE)$tag
-            ],
-            collapse = ", "
-          )
-          ISAnalytics::reset_dyn_vars_config()
-          rlang::abort(err_miss_tags,
-            class = "missing_req_tags_opts"
-          )
-        } else {
-          status_banner <- .generate_status_banner(
-            type = "warning",
-            content = list(
-              strong("Warning"),
-              div(catched)
-            )
-          )
-        }
-      } else {
-        status_banner <- .generate_status_banner(
-          type = "success",
-          content = list(
-            strong("Success"),
-            p("ISAnalytics configuration imported successfully")
-          )
-        )
-      }
-      list(status_banner = status_banner, flag = TRUE)
-    },
-    error = function(e) {
-      details <- if ("missing_req_tags_opts" %in% attributes(e)$class) {
-        div(
-          strong("Missing required tags in ISAnalytics options"),
-          p(
-            "The following tags are required but",
-            "missing from the association file specs:",
-            br(),
-            tags$code(e$message)
-          ),
-          p(
-            icon("xmark"),
-            "Can't proceed, please choose a different config file"
-          ),
-          p(
-            icon("circle-info"),
-            "ISAnalytics settings will be reverted to default"
-          )
-        )
-      } else {
-        div(e$message)
-      }
-      status_banner <- .generate_status_banner(
-        type = "danger",
-        content = list(
-          strong("Something went wrong"),
-          p(
-            "Details of the error are specified below. ",
-            "If you proceed without importing options,",
-            "defaults will be used"
-          ),
-          hr(),
-          details
-        )
-      )
-      list(status_banner = status_banner, flag = FALSE)
-    }
-  )
-  return(to_return)
-}
+
+
 
 ## Performs additional checks on metadata
 .meta_additional_checks <- function(imported_meta,
@@ -669,7 +579,8 @@ id_list <- function() {
     result$substatus <- 2
     alignment_tbl <- .render_fs_align_tbl(
       checks_res$fs_align,
-      nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_1))
+      nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_1)
+    )
     result$error <- div(
       strong("No pools found on disk"),
       br(),
@@ -729,15 +640,17 @@ id_list <- function() {
   result$af <- af
   if (!is.null(root)) {
     result$af <- result$af %>%
-      dplyr::semi_join(checks_res$fs_align %>%
-        dplyr::filter(!is.na(.data$Path_quant)),
-      by = c(proj_col, pool_col)
+      dplyr::semi_join(
+        checks_res$fs_align %>%
+          dplyr::filter(!is.na(.data$Path_quant)),
+        by = c(proj_col, pool_col)
       )
   }
   result$af <- result$af %>%
-    dplyr::semi_join(add_checks$control_cl %>%
-      dplyr::filter(.data$control_line_present == TRUE),
-    by = pool_col
+    dplyr::semi_join(
+      add_checks$control_cl %>%
+        dplyr::filter(.data$control_line_present == TRUE),
+      by = pool_col
     )
 
   result$info$pool_in <- length(unique(af[[pool_col]]))
@@ -754,32 +667,39 @@ id_list <- function() {
                                         nsp) {
   result <- list()
   separator <- switch(separator,
-                      "tab" = "\t",
-                      "," = ",",
-                      ";" = ";",
-                      "space" = " "
+    "tab" = "\t",
+    "," = ",",
+    ";" = ";",
+    "space" = " "
   )
   withr::local_options(list(
     ISAnalytics.reports = FALSE,
     ISAnalytics.verbose = FALSE
   ))
   checks <- rlang::new_environment()
-  import_ok <- tryCatch({
-    progressr::withProgressShiny({
-      matrices <- ISAnalytics::import_parallel_Vispa2Matrices(
-        metadata, quantification_type = "seqCount",
-        matrix_type = ifelse(matrix_annotated == TRUE, "annotated",
-                             "not_annotated"),
-        workers = workers, report_path = NULL, mode = "AUTO",
-        patterns = file_patterns, matching_opt = match_opt,
-        checks_env = checks, separator = separator
+  import_ok <- tryCatch(
+    {
+      progressr::withProgressShiny(
+        {
+          matrices <- ISAnalytics::import_parallel_Vispa2Matrices(
+            metadata,
+            quantification_type = "seqCount",
+            matrix_type = ifelse(matrix_annotated == TRUE, "annotated",
+              "not_annotated"
+            ),
+            workers = workers, report_path = NULL, mode = "AUTO",
+            patterns = file_patterns, matching_opt = match_opt,
+            checks_env = checks, separator = separator
+          )
+        },
+        message = "Importing data..."
       )
-    }, message = "Importing data...")
-    list(status = TRUE)
-  },
-  error = function(e) {
-    list(status = FALSE, error = e$message)
-  })
+      list(status = TRUE)
+    },
+    error = function(e) {
+      list(status = FALSE, error = e$message)
+    }
+  )
 
   if (import_ok$status == FALSE) {
     result$status <- 1
@@ -798,7 +718,7 @@ id_list <- function() {
       p("Issues identified when trying to import files, see below")
     )
   } else if (all(checks$files_found$Anomalies == FALSE) &&
-        all(checks$files_imp$Imported == TRUE)) {
+    all(checks$files_imp$Imported == TRUE)) {
     result$status <- 0
   } else {
     result$status <- 2
@@ -806,11 +726,13 @@ id_list <- function() {
 
   result$info$files_found_tbl <- .render_files_found_auto(
     checks$files_found,
-    nsp(id_list()$data_import$data_section$outputs$checks_tbl_1))
+    nsp(id_list()$data_import$data_section$outputs$checks_tbl_1)
+  )
 
   result$info$files_imported <- .render_files_imp_auto(
     checks$files_imp,
-    nsp(id_list()$data_import$data_section$outputs$checks_tbl_2))
+    nsp(id_list()$data_import$data_section$outputs$checks_tbl_2)
+  )
   result$matrices <- matrices
   return(result)
 }
@@ -823,10 +745,10 @@ id_list <- function() {
                                           nsp) {
   result <- list()
   separator <- switch(separator,
-                      "tab" = "\t",
-                      "," = ",",
-                      ";" = ";",
-                      "space" = " "
+    "tab" = "\t",
+    "," = ",",
+    ";" = ";",
+    "space" = " "
   )
   withr::local_options(list(
     ISAnalytics.reports = FALSE,
@@ -841,15 +763,20 @@ id_list <- function() {
       prog()
       return(matrix)
     }
-    import_ok <- tryCatch({
-      progressr::withProgressShiny({
-        matrices <- purrr::map(paths, import_with_isa)
-      }, message = "Importing data...")
-      list(status = TRUE)
-    },
-    error = function(e) {
-      list(status = FALSE, error = e$message)
-    })
+    import_ok <- tryCatch(
+      {
+        progressr::withProgressShiny(
+          {
+            matrices <- purrr::map(paths, import_with_isa)
+          },
+          message = "Importing data..."
+        )
+        list(status = TRUE)
+      },
+      error = function(e) {
+        list(status = FALSE, error = e$message)
+      }
+    )
   } else {
     import_tidy <- function(path) {
       col_types <- ISAnalytics:::.mandatory_IS_types("classic")
@@ -872,15 +799,20 @@ id_list <- function() {
       prog()
       return(df)
     }
-    import_ok <- tryCatch({
-      progressr::withProgressShiny({
-        matrices <- purrr::map(paths, import_tidy)
-      }, message = "Importing data...")
-      list(status = TRUE)
-    },
-    error = function(e) {
-      list(status = FALSE, error = e$message)
-    })
+    import_ok <- tryCatch(
+      {
+        progressr::withProgressShiny(
+          {
+            matrices <- purrr::map(paths, import_tidy)
+          },
+          message = "Importing data..."
+        )
+        list(status = TRUE)
+      },
+      error = function(e) {
+        list(status = FALSE, error = e$message)
+      }
+    )
   }
 
   if (import_ok$status == FALSE) {
@@ -897,8 +829,10 @@ id_list <- function() {
     result$status <- 1
     result$error <- div(
       strong("Error: no correspondance between data and metadata"),
-      p("Please check data and metadata files and ensure correspondance",
-        "between the two")
+      p(
+        "Please check data and metadata files and ensure correspondance",
+        "between the two"
+      )
     )
     return(result)
   }
@@ -907,7 +841,8 @@ id_list <- function() {
     result$info$missing_data <- .render_missing_data_tbl(
       final_matrices %>%
         dplyr::anti_join(
-          metadata, by = ISAnalytics::pcr_id_column()
+          metadata,
+          by = ISAnalytics::pcr_id_column()
         ),
       nsp(id_list()$data_import$data_section$outputs$checks_tbl_3)
     )
@@ -917,7 +852,8 @@ id_list <- function() {
   }
   result$info$n_imported <- length(matrices)
   result$info$distinct_replic <- length(unique(
-    final_matrices_filt[[ISAnalytics::pcr_id_column()]]))
+    final_matrices_filt[[ISAnalytics::pcr_id_column()]]
+  ))
   result$matrices <- final_matrices_filt
   return(result)
 }
@@ -926,50 +862,51 @@ id_list <- function() {
                          criteria, session) {
   silent_rec <- purrr::quietly(ISAnalytics::compute_near_integrations)
   rec_data <- NULL
-  rec_ok <- tryCatch({
-    progressr::withProgressShiny(
-      {
-        rec_data <- silent_rec(
-          x = data,
-          value_columns = "seqCount",
-          map_as_file = map,
-          file_path = map_path,
-          max_workers = workers,
-          is_identity_tags = is_tags,
-          keep_criteria = criteria
-        )
-      },
-      message = "Recalibrating",
-      session = session
-    )
-    list(status = TRUE)
-  }, error = function(e) {
-    list(status = FALSE, error = e$message)
-  })
+  rec_ok <- tryCatch(
+    {
+      progressr::withProgressShiny(
+        {
+          rec_data <- silent_rec(
+            x = data,
+            value_columns = "seqCount",
+            map_as_file = map,
+            file_path = map_path,
+            max_workers = workers,
+            is_identity_tags = is_tags,
+            keep_criteria = criteria
+          )
+        },
+        message = "Recalibrating",
+        session = session
+      )
+      list(status = TRUE)
+    },
+    error = function(e) {
+      list(status = FALSE, error = e$message)
+    }
+  )
   return(list(res = rec_data, info = rec_ok))
 }
 
 ## Converts data from tidy format to sparse format
 .tidy_to_sparse <- function(data, session) {
+  conv_data <- ISAnalytics::as_sparse_matrix(data)
 
-    conv_data <- ISAnalytics::as_sparse_matrix(data)
-
-    return(conv_data)
+  return(conv_data)
 }
 
 ## Splits data by pool into different data frames
 .split_by_pool <- function(data, session) {
+  pool_col <- ISAnalytics::association_file_columns(TRUE) %>%
+    dplyr::filter(.data$tag == "vispa_concatenate") %>%
+    dplyr::pull(.data$names)
 
-    pool_col <- ISAnalytics::association_file_columns(TRUE) %>%
-        dplyr::filter(.data$tag == "vispa_concatenate") %>%
-        dplyr::pull(.data$names)
+  # Test
+  # pool_col <- "PoolID"
 
-    # Test
-    # pool_col <- "PoolID"
+  split_data <- split(x = data, f = data[[pool_col]])
 
-    split_data <- split(x = data, f = data[[pool_col]])
-
-    return(split_data)
+  return(split_data)
 }
 
 ## Utils for tables styling ---
@@ -1214,8 +1151,10 @@ id_list <- function() {
     resizable = TRUE,
     columns = list(
       Imported = reactable::colDef(
-        style = .style_true_false(colname = "control_line_present",
-                                  invert = TRUE)
+        style = .style_true_false(
+          colname = "control_line_present",
+          invert = TRUE
+        )
       ),
       Number_of_samples = reactable::colDef(filterable = FALSE),
       Distinct_is = reactable::colDef(filterable = FALSE)
@@ -1260,7 +1199,8 @@ id_list <- function() {
           "File system alignment summary"
         ),
         reactable::reactableOutput(
-          nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_1))
+          nsp(id_list()$data_import$metadata_section$outputs$checks_tbl_1)
+        )
       )
     )
     iss_card <- if (info$iss_failed) {
@@ -1444,7 +1384,7 @@ id_list <- function() {
                                nsp) {
   if (mode == "AUTO") {
     files_found_card <- if (!is.null(info) &&
-                            "files_found_tbl" %in% names(info)) {
+      "files_found_tbl" %in% names(info)) {
       div(
         class = "card",
         style = "margin-bottom: 5px;",
@@ -1493,7 +1433,8 @@ id_list <- function() {
         h5(
           class = "card-title",
           ifelse(status == 0, "Files imported successfully",
-                 "Anomalies detected")
+            "Anomalies detected"
+          )
         ),
         files_found_card,
         files_imp_card
@@ -1534,9 +1475,11 @@ id_list <- function() {
           class = "card-title",
           "Warning: some data missing in final matrices"
         ),
-        p("This may be due to replicate information being present in",
+        p(
+          "This may be due to replicate information being present in",
           " matrices but not in the metadata file. Review carefully the ",
-          "missing replicates"),
+          "missing replicates"
+        ),
         div(
           class = "card-group",
           style = "margin-bottom: 5px;",
@@ -1641,7 +1584,8 @@ id_list <- function() {
         .cols = counts_cols,
         .fns = ~ sum(.x, na.rm = TRUE),
         .names = "{.col}"
-      ), .groups = "drop"
+      ),
+      .groups = "drop"
     ) %>%
     tidyr::unite(col = "id", !!!ind_sample_id)
 
@@ -1654,7 +1598,8 @@ id_list <- function() {
         .cols = counts_cols,
         .fns = ~ sum(.x, na.rm = TRUE),
         .names = "{.col}"
-      ), .groups = "drop"
+      ),
+      .groups = "drop"
     ) %>%
     tidyr::unite(col = "id", !!!ind_sample_id)
 
@@ -1676,7 +1621,8 @@ id_list <- function() {
         x = counts_sample$id[[i]],
         y = counts_sample$seqCount[[i]] + 5,
         text = format(counts_sample$seqCount[[i]],
-                      big.mark = ","),
+          big.mark = ","
+        ),
         yanchor = "bottom",
         showarrow = FALSE
       )
@@ -1686,49 +1632,58 @@ id_list <- function() {
           x = counts_sample$id[[i]],
           y = counts_sample$BARCODE_MUX[[i]] + 5,
           text = format(counts_sample$BARCODE_MUX[[i]],
-                        big.mark = ","),
+            big.mark = ","
+          ),
           yanchor = "bottom",
           showarrow = FALSE
         )
       }
     }
-    sc_filname <- .get_plot_filname(proj_name = proj_name,
-                                    pool_name = chosen_pool,
-                                    fixed_threshold = threshold,
-                                    plot_type = "totals-seqCount")
+    sc_filname <- .get_plot_filname(
+      proj_name = proj_name,
+      pool_name = chosen_pool,
+      fixed_threshold = threshold,
+      plot_type = "totals-seqCount"
+    )
     sc_plot <- plotly::plot_ly(
       data = counts_single,
       x = ~id,
       y = ~seqCount,
       color = as.formula(paste0("~", ISAnalytics::pcr_id_column())),
       colors = viridisLite::inferno(
-        length(unique(counts_single$id)), begin = 0.3)
+        length(unique(counts_single$id)),
+        begin = 0.3
+      )
     ) %>%
-      plotly::add_bars(color = ~id,
-                       showlegend = FALSE,
-                       marker = list(
-                         line = list(
-                           color = "rgb(0,0,0)",
-                           width = 1
-                         )
-                       ),
-                       customdata = counts_single %>%
-                         dplyr::pull(.data[[ISAnalytics::pcr_id_column()]]),
-                       hovertemplate = paste(
-                         "PCR replicate: %{customdata}",
-                         "<br>Seq count: %{y}"
-                       )) %>%
-      plotly::layout(barmode = "stack",
-                     annotations = annotations$seqCount,
-                     title = list(
-                       text = paste("Pool", chosen_pool, "total seq count")
-                     ),
-                     xaxis = list(
-                       title = "Independent sample"
-                     ),
-                     yaxis = list(
-                       title = "Total sequence count"
-                     )) %>%
+      plotly::add_bars(
+        color = ~id,
+        showlegend = FALSE,
+        marker = list(
+          line = list(
+            color = "rgb(0,0,0)",
+            width = 1
+          )
+        ),
+        customdata = counts_single %>%
+          dplyr::pull(.data[[ISAnalytics::pcr_id_column()]]),
+        hovertemplate = paste(
+          "PCR replicate: %{customdata}",
+          "<br>Seq count: %{y}"
+        )
+      ) %>%
+      plotly::layout(
+        barmode = "stack",
+        annotations = annotations$seqCount,
+        title = list(
+          text = paste("Pool", chosen_pool, "total seq count")
+        ),
+        xaxis = list(
+          title = "Independent sample"
+        ),
+        yaxis = list(
+          title = "Total sequence count"
+        )
+      ) %>%
       plotly::config(
         toImageButtonOptions = list(
           format = "png",
@@ -1737,10 +1692,12 @@ id_list <- function() {
         )
       )
 
-    bm_filname <- .get_plot_filname(proj_name = proj_name,
-                                    pool_name = chosen_pool,
-                                    fixed_threshold = threshold,
-                                    plot_type = "totals-rawReads")
+    bm_filname <- .get_plot_filname(
+      proj_name = proj_name,
+      pool_name = chosen_pool,
+      fixed_threshold = threshold,
+      plot_type = "totals-rawReads"
+    )
     bm_plot <- NULL
     if ("BARCODE_MUX" %in% colnames(counts_single)) {
       bm_plot <- plotly::plot_ly(
@@ -1749,33 +1706,39 @@ id_list <- function() {
         y = ~BARCODE_MUX,
         color = as.formula(paste0("~", ISAnalytics::pcr_id_column())),
         colors = viridisLite::inferno(
-          length(unique(counts_single$id)), begin = 0.3)
+          length(unique(counts_single$id)),
+          begin = 0.3
+        )
       ) %>%
-        plotly::add_bars(color = ~id,
-                         showlegend = FALSE,
-                         marker = list(
-                           line = list(
-                             color = "rgb(0,0,0)",
-                             width = 1
-                           )
-                         ),
-                         customdata = counts_single %>%
-                           dplyr::pull(.data[[ISAnalytics::pcr_id_column()]]),
-                         hovertemplate = paste(
-                           "PCR replicate: %{customdata}",
-                           "<br>Raw reads: %{y}"
-                         )) %>%
-        plotly::layout(barmode = "stack",
-                       annotations = annotations$barcodemux,
-                       title = list(
-                         text = paste("Pool", chosen_pool, "total raw reads")
-                       ),
-                       xaxis = list(
-                         title = "Independent sample"
-                       ),
-                       yaxis = list(
-                         title = "Total raw reads"
-                       )) %>%
+        plotly::add_bars(
+          color = ~id,
+          showlegend = FALSE,
+          marker = list(
+            line = list(
+              color = "rgb(0,0,0)",
+              width = 1
+            )
+          ),
+          customdata = counts_single %>%
+            dplyr::pull(.data[[ISAnalytics::pcr_id_column()]]),
+          hovertemplate = paste(
+            "PCR replicate: %{customdata}",
+            "<br>Raw reads: %{y}"
+          )
+        ) %>%
+        plotly::layout(
+          barmode = "stack",
+          annotations = annotations$barcodemux,
+          title = list(
+            text = paste("Pool", chosen_pool, "total raw reads")
+          ),
+          xaxis = list(
+            title = "Independent sample"
+          ),
+          yaxis = list(
+            title = "Total raw reads"
+          )
+        ) %>%
         plotly::config(
           toImageButtonOptions = list(
             format = "png",
@@ -1794,87 +1757,106 @@ id_list <- function() {
 .get_plot_filname <- function(proj_name, pool_name,
                               fixed_threshold, plot_type) {
   file_name <- paste(Sys.Date(), proj_name, pool_name,
-                     paste0("threshold-", fixed_threshold),
-                     plot_type,
-                     sep = "_")
+    paste0("threshold-", fixed_threshold),
+    plot_type,
+    sep = "_"
+  )
   return(file_name)
 }
 
 .get_sharing <- function(df, ind_sample_id, distinct_ind_samples) {
   sharing_overall <- ISAnalytics::is_sharing(
-      df,
-      group_key = ind_sample_id, minimal = FALSE,
-      include_self_comp = TRUE, n_comp = 2,
-      keep_genomic_coord = TRUE
-    )
+    df,
+    group_key = ind_sample_id, minimal = FALSE,
+    include_self_comp = TRUE, n_comp = 2,
+    keep_genomic_coord = TRUE
+  )
   counts_overall <- sharing_overall %>%
     dplyr::distinct(.data$g1, .data$count_g1) %>%
     dplyr::mutate(count_g2 = .data$count_g1)
   sharing_overall <- sharing_overall %>%
-    dplyr::mutate(g1 = factor(.data$g1, levels = distinct_ind_samples),
-                  g2 = factor(.data$g2, levels = distinct_ind_samples)) %>%
+    dplyr::mutate(
+      g1 = factor(.data$g1, levels = distinct_ind_samples),
+      g2 = factor(.data$g2, levels = distinct_ind_samples)
+    ) %>%
     tidyr::complete(.data$g1, .data$g2, fill = list(
       shared = 0
     )) %>%
     dplyr::select(-dplyr::all_of(c("count_g1", "count_g2"))) %>%
-    dplyr::left_join(counts_overall %>%
-                       dplyr::select(-dplyr::all_of("count_g2")),
-                     by = "g1") %>%
-    dplyr::left_join(counts_overall %>%
-                       dplyr::select(-dplyr::all_of("count_g1")),
-                     by = c("g2" = "g1"))
+    dplyr::left_join(
+      counts_overall %>%
+        dplyr::select(-dplyr::all_of("count_g2")),
+      by = "g1"
+    ) %>%
+    dplyr::left_join(
+      counts_overall %>%
+        dplyr::select(-dplyr::all_of("count_g1")),
+      by = c("g2" = "g1")
+    )
 
   sharing_control <- ISAnalytics::is_sharing(
-      df %>%
-        dplyr::semi_join(known_CEM_IS(),
-          by = ISAnalytics::mandatory_IS_vars()
-        ),
-      group_key = ind_sample_id, minimal = FALSE,
-      include_self_comp = TRUE, n_comp = 2,
-      keep_genomic_coord = TRUE
-    )
+    df %>%
+      dplyr::semi_join(known_CEM_IS(),
+        by = ISAnalytics::mandatory_IS_vars()
+      ),
+    group_key = ind_sample_id, minimal = FALSE,
+    include_self_comp = TRUE, n_comp = 2,
+    keep_genomic_coord = TRUE
+  )
   counts_control <- sharing_control %>%
     dplyr::distinct(.data$g1, .data$count_g1) %>%
     dplyr::mutate(count_g2 = .data$count_g1)
   sharing_control <- sharing_control %>%
-    dplyr::mutate(g1 = factor(.data$g1, levels = distinct_ind_samples),
-                  g2 = factor(.data$g2, levels = distinct_ind_samples)) %>%
+    dplyr::mutate(
+      g1 = factor(.data$g1, levels = distinct_ind_samples),
+      g2 = factor(.data$g2, levels = distinct_ind_samples)
+    ) %>%
     tidyr::complete(.data$g1, .data$g2, fill = list(
       shared = 0
     )) %>%
     dplyr::select(-dplyr::all_of(c("count_g1", "count_g2"))) %>%
-    dplyr::left_join(counts_control %>%
-                       dplyr::select(-dplyr::all_of("count_g2")),
-                     by = "g1") %>%
-    dplyr::left_join(counts_control %>%
-                       dplyr::select(-dplyr::all_of("count_g1")),
-                     by = c("g2" = "g1"))
+    dplyr::left_join(
+      counts_control %>%
+        dplyr::select(-dplyr::all_of("count_g2")),
+      by = "g1"
+    ) %>%
+    dplyr::left_join(
+      counts_control %>%
+        dplyr::select(-dplyr::all_of("count_g1")),
+      by = c("g2" = "g1")
+    )
 
   sharing_other <- ISAnalytics::is_sharing(
-      df %>%
-        dplyr::anti_join(known_CEM_IS(),
-          by = ISAnalytics::mandatory_IS_vars()
-        ),
-      group_key = ind_sample_id, minimal = FALSE,
-      include_self_comp = TRUE, n_comp = 2,
-      keep_genomic_coord = TRUE
-    )
+    df %>%
+      dplyr::anti_join(known_CEM_IS(),
+        by = ISAnalytics::mandatory_IS_vars()
+      ),
+    group_key = ind_sample_id, minimal = FALSE,
+    include_self_comp = TRUE, n_comp = 2,
+    keep_genomic_coord = TRUE
+  )
   counts_other <- sharing_other %>%
     dplyr::distinct(.data$g1, .data$count_g1) %>%
     dplyr::mutate(count_g2 = .data$count_g1)
   sharing_other <- sharing_other %>%
-    dplyr::mutate(g1 = factor(.data$g1, levels = distinct_ind_samples),
-                  g2 = factor(.data$g2, levels = distinct_ind_samples)) %>%
+    dplyr::mutate(
+      g1 = factor(.data$g1, levels = distinct_ind_samples),
+      g2 = factor(.data$g2, levels = distinct_ind_samples)
+    ) %>%
     tidyr::complete(.data$g1, .data$g2, fill = list(
       shared = 0
     )) %>%
     dplyr::select(-dplyr::all_of(c("count_g1", "count_g2"))) %>%
-    dplyr::left_join(counts_other %>%
-                       dplyr::select(-dplyr::all_of("count_g2")),
-                     by = "g1") %>%
-    dplyr::left_join(counts_other %>%
-                       dplyr::select(-dplyr::all_of("count_g1")),
-                     by = c("g2" = "g1"))
+    dplyr::left_join(
+      counts_other %>%
+        dplyr::select(-dplyr::all_of("count_g2")),
+      by = "g1"
+    ) %>%
+    dplyr::left_join(
+      counts_other %>%
+        dplyr::select(-dplyr::all_of("count_g1")),
+      by = c("g2" = "g1")
+    )
   return(list(
     overall = sharing_overall, control = sharing_control,
     other = sharing_other
@@ -1958,10 +1940,12 @@ id_list <- function() {
           accuracy = 0.01, scale = 100, suffix = "%"
         )(rlang::eval_tidy(value_sym)),
         "</br>Number of overall replicates tracked:", rep_union,
-        paste0("(", scales::label_number(
-          accuracy = 0.01, scale = 100, suffix = "%"
-        )(rep_union_perc), " on ", max_rep_g1 + max_rep_g2,
-        " total replicates)")
+        paste0(
+          "(", scales::label_number(
+            accuracy = 0.01, scale = 100, suffix = "%"
+          )(rep_union_perc), " on ", max_rep_g1 + max_rep_g2,
+          " total replicates)"
+        )
       )
     )
   }
@@ -1970,11 +1954,14 @@ id_list <- function() {
     hm <- hm %>%
       plotly::add_annotations(
         text = ~ ifelse(is.na(rlang::eval_tidy(value_sym)),
-                        "",
-                        scales::label_number(accuracy = 0.1,
-                                             scale_cut = scales::cut_short_scale())(
-                                               rlang::eval_tidy(value_sym)
-                                             )),
+          "",
+          scales::label_number(
+            accuracy = 0.1,
+            scale_cut = scales::cut_short_scale()
+          )(
+            rlang::eval_tidy(value_sym)
+          )
+        ),
         showarrow = FALSE
       ) %>%
       plotly::layout(
@@ -1988,11 +1975,14 @@ id_list <- function() {
     hm <- hm %>%
       plotly::add_annotations(
         text = ~ ifelse(is.na(rlang::eval_tidy(value_sym)),
-                        "",
-                        scales::label_number(accuracy = 0.1,
-                                             scale = 100, suffix = "%")(
-                                               rlang::eval_tidy(value_sym)
-                                             )),
+          "",
+          scales::label_number(
+            accuracy = 0.1,
+            scale = 100, suffix = "%"
+          )(
+            rlang::eval_tidy(value_sym)
+          )
+        ),
         showarrow = FALSE
       ) %>%
       plotly::layout(
@@ -2003,8 +1993,9 @@ id_list <- function() {
   }
   hm <- hm %>%
     plotly::add_annotations(
-      text = ~ifelse(is.na(rlang::eval_tidy(value_sym)), "",
-                     rlang::eval_tidy(value_sym)),
+      text = ~ ifelse(is.na(rlang::eval_tidy(value_sym)), "",
+        rlang::eval_tidy(value_sym)
+      ),
       showarrow = FALSE
     ) %>%
     plotly::layout(
@@ -2038,9 +2029,11 @@ id_list <- function() {
   process_row <- function(...) {
     row <- list(...)
     is_coord <- row$is_coord
-    cache <- rlang::env_get(env = rlang::env_parent(),
-                            nm = "cache_df",
-                            default = NULL)
+    cache <- rlang::env_get(
+      env = rlang::env_parent(),
+      nm = "cache_df",
+      default = NULL
+    )
     if (nrow(cache) > 0) {
       # Check 1
       comb_1_present <- cache %>%
@@ -2053,48 +2046,52 @@ id_list <- function() {
       comb_2_present <- cache %>%
         dplyr::filter(.data$g1 == row$g2 & .data$g2 == row$g1)
       if (nrow(comb_2_present) > 0) {
-        rlang::env_poke(env = rlang::env_parent(),
-                        nm = "cache_df",
-                        value = cache %>%
-                          tibble::add_row(
-                            g1 = row$g1,
-                            g2 = row$g2,
-                            sc_g1 = comb_2_present$sc_g2[1],
-                            sc_g2 = comb_2_present$sc_g1[1],
-                            sc_union = comb_2_present$sc_union[1],
-                            rep_g1 = comb_2_present$rep_g2[1],
-                            rep_g2 = comb_2_present$rep_g1[1],
-                            rep_union = comb_2_present$rep_union[1],
-                            max_rep_g1 = comb_2_present$max_rep_g2[1],
-                            max_rep_g2 = comb_2_present$max_rep_g1[1],
-                            rep_g1_perc = comb_2_present$rep_g2_perc[1],
-                            rep_g2_perc = comb_2_present$rep_g1_perc[1],
-                            rep_union_perc = comb_2_present$rep_union_perc[1]
-                          ))
+        rlang::env_poke(
+          env = rlang::env_parent(),
+          nm = "cache_df",
+          value = cache %>%
+            tibble::add_row(
+              g1 = row$g1,
+              g2 = row$g2,
+              sc_g1 = comb_2_present$sc_g2[1],
+              sc_g2 = comb_2_present$sc_g1[1],
+              sc_union = comb_2_present$sc_union[1],
+              rep_g1 = comb_2_present$rep_g2[1],
+              rep_g2 = comb_2_present$rep_g1[1],
+              rep_union = comb_2_present$rep_union[1],
+              max_rep_g1 = comb_2_present$max_rep_g2[1],
+              max_rep_g2 = comb_2_present$max_rep_g1[1],
+              rep_g1_perc = comb_2_present$rep_g2_perc[1],
+              rep_g2_perc = comb_2_present$rep_g1_perc[1],
+              rep_union_perc = comb_2_present$rep_union_perc[1]
+            )
+        )
         p()
         return()
       }
     }
     # If not in cache or cache null calculate
     if (is.null(is_coord)) {
-      rlang::env_poke(env = rlang::env_parent(),
-                      nm = "cache_df",
-                      value = cache %>%
-                        tibble::add_row(
-                          g1 = row$g1,
-                          g2 = row$g2,
-                          sc_g1 = NA_real_,
-                          sc_g2 = NA_real_,
-                          sc_union = NA_real_,
-                          rep_g1 = NA_real_,
-                          rep_g2 = NA_real_,
-                          rep_union = NA_real_,
-                          max_rep_g1 = NA_real_,
-                          max_rep_g2 = NA_real_,
-                          rep_g1_perc = NA_real_,
-                          rep_g2_perc = NA_real_,
-                          rep_union_perc = NA_real_
-                        ))
+      rlang::env_poke(
+        env = rlang::env_parent(),
+        nm = "cache_df",
+        value = cache %>%
+          tibble::add_row(
+            g1 = row$g1,
+            g2 = row$g2,
+            sc_g1 = NA_real_,
+            sc_g2 = NA_real_,
+            sc_union = NA_real_,
+            rep_g1 = NA_real_,
+            rep_g2 = NA_real_,
+            rep_union = NA_real_,
+            max_rep_g1 = NA_real_,
+            max_rep_g2 = NA_real_,
+            rep_g1_perc = NA_real_,
+            rep_g2_perc = NA_real_,
+            rep_union_perc = NA_real_
+          )
+      )
       p()
       return()
     }
@@ -2106,33 +2103,43 @@ id_list <- function() {
     is_from_ref <- ref_with_id %>%
       dplyr::filter(!!filter_exp)
     max_rep_g1 <- max((is_from_ref %>%
-                         dplyr::filter(.data$id == row$g1))$ReplicateNumber)
+      dplyr::filter(.data$id == row$g1))$ReplicateNumber)
     max_rep_g2 <- max((is_from_ref %>%
-                         dplyr::filter(.data$id == row$g2))$ReplicateNumber)
+      dplyr::filter(.data$id == row$g2))$ReplicateNumber)
     is_from_ref <- is_from_ref %>%
       dplyr::semi_join(is_coord, by = ISAnalytics::mandatory_IS_vars())
     if (row$g1 == row$g2) {
       seq_count_sum <- sum(is_from_ref$seqCount, na.rm = TRUE)
-      sc_sums <- list(sc_g1 = seq_count_sum, sc_g2 = seq_count_sum,
-                      sc_union = seq_count_sum)
+      sc_sums <- list(
+        sc_g1 = seq_count_sum, sc_g2 = seq_count_sum,
+        sc_union = seq_count_sum
+      )
       rep_count_1 <- length(unique(is_from_ref$ReplicateNumber))
-      rep_counts <- list(rep_g1 = rep_count_1,
-                         rep_g2 = rep_count_1,
-                         rep_union = rep_count_1,
-                         rep_g1_perc = rep_count_1 / max_rep_g1,
-                         rep_g2_perc = rep_count_1 / max_rep_g1,
-                         rep_union_perc = rep_count_1 / max_rep_g1)
+      rep_counts <- list(
+        rep_g1 = rep_count_1,
+        rep_g2 = rep_count_1,
+        rep_union = rep_count_1,
+        rep_g1_perc = rep_count_1 / max_rep_g1,
+        rep_g2_perc = rep_count_1 / max_rep_g1,
+        rep_union_perc = rep_count_1 / max_rep_g1
+      )
     } else {
-      seq_count_sum_1 <- sum(is_from_ref %>%
-                               dplyr::filter(.data$id == row$g1) %>%
-                               dplyr::pull(.data$seqCount),
-                             na.rm = TRUE)
-      seq_count_sum_2 <- sum(is_from_ref %>%
-                               dplyr::filter(.data$id == row$g2) %>%
-                               dplyr::pull(.data$seqCount),
-                             na.rm = TRUE)
-      sc_sums <- list(sc_g1 = seq_count_sum_1, sc_g2 = seq_count_sum_2,
-                      sc_union = seq_count_sum_1 + seq_count_sum_2)
+      seq_count_sum_1 <- sum(
+        is_from_ref %>%
+          dplyr::filter(.data$id == row$g1) %>%
+          dplyr::pull(.data$seqCount),
+        na.rm = TRUE
+      )
+      seq_count_sum_2 <- sum(
+        is_from_ref %>%
+          dplyr::filter(.data$id == row$g2) %>%
+          dplyr::pull(.data$seqCount),
+        na.rm = TRUE
+      )
+      sc_sums <- list(
+        sc_g1 = seq_count_sum_1, sc_g2 = seq_count_sum_2,
+        sc_union = seq_count_sum_1 + seq_count_sum_2
+      )
 
       rep_count_1 <- length(unique(
         is_from_ref %>%
@@ -2154,24 +2161,26 @@ id_list <- function() {
           (max_rep_g1 + max_rep_g2)
       )
     }
-    rlang::env_poke(env = rlang::env_parent(),
-                    nm = "cache_df",
-                    value = cache %>%
-                      tibble::add_row(
-                        g1 = row$g1,
-                        g2 = row$g2,
-                        sc_g1 = sc_sums$sc_g1,
-                        sc_g2 = sc_sums$sc_g2,
-                        sc_union = sc_sums$sc_union,
-                        rep_g1 = rep_counts$rep_g1,
-                        rep_g2 = rep_counts$rep_g2,
-                        rep_union = rep_counts$rep_union,
-                        max_rep_g1 = max_rep_g1,
-                        max_rep_g2 = max_rep_g2,
-                        rep_g1_perc = rep_counts$rep_g1_perc,
-                        rep_g2_perc = rep_counts$rep_g2_perc,
-                        rep_union_perc = rep_counts$rep_union_perc
-                      ))
+    rlang::env_poke(
+      env = rlang::env_parent(),
+      nm = "cache_df",
+      value = cache %>%
+        tibble::add_row(
+          g1 = row$g1,
+          g2 = row$g2,
+          sc_g1 = sc_sums$sc_g1,
+          sc_g2 = sc_sums$sc_g2,
+          sc_union = sc_sums$sc_union,
+          rep_g1 = rep_counts$rep_g1,
+          rep_g2 = rep_counts$rep_g2,
+          rep_union = rep_counts$rep_union,
+          max_rep_g1 = max_rep_g1,
+          max_rep_g2 = max_rep_g2,
+          rep_g1_perc = rep_counts$rep_g1_perc,
+          rep_g2_perc = rep_counts$rep_g2_perc,
+          rep_union_perc = rep_counts$rep_union_perc
+        )
+    )
     p()
     return()
   }
@@ -2187,7 +2196,6 @@ id_list <- function() {
                                       pool_col,
                                       input,
                                       uuids) {
-
   if (type == "overall") {
     sel_data <- is_shared$overall
     prog_msg <- "Calculating shared IS stats - overall"
@@ -2200,15 +2208,15 @@ id_list <- function() {
   }
 
   counts <- progressr::withProgressShiny(
-      .get_shared_is_counts(
-        sel_data,
-        ref = filtered_dataset,
-        sample_id = indep_sample_id,
-        pool_col = pool_col,
-        pool = chosen_pool
-      ),
-      message = prog_msg
-    )
+    .get_shared_is_counts(
+      sel_data,
+      ref = filtered_dataset,
+      sample_id = indep_sample_id,
+      pool_col = pool_col,
+      pool = chosen_pool
+    ),
+    message = prog_msg
+  )
 
   seq_hm <- .get_heatmap(
     counts,
@@ -2229,8 +2237,10 @@ id_list <- function() {
 
   seq_rep_heatmap <- list(sc = seq_hm, rep = rep_hm)
 
-  return(list(counts = counts,
-              sc_r_hmps = seq_rep_heatmap))
+  return(list(
+    counts = counts,
+    sc_r_hmps = seq_rep_heatmap
+  ))
 }
 
 .get_ratio_barplot <- function(ratio_df,
@@ -2239,12 +2249,12 @@ id_list <- function() {
   type <- rlang::arg_match(type)
   source <- rlang::arg_match(source)
   selection_df <- ratio_df %>%
-      dplyr::filter(.data$IS_Source == source) %>%
-      dplyr::mutate(Sample = forcats::fct_relevel(
-        factor(.data$Sample),
-        "All_Samples",
-        after = Inf
-      ))
+    dplyr::filter(.data$IS_Source == source) %>%
+    dplyr::mutate(Sample = forcats::fct_relevel(
+      factor(.data$Sample),
+      "All_Samples",
+      after = Inf
+    ))
   if (nrow(selection_df) == 0) {
     return(NULL)
   }
@@ -2259,7 +2269,9 @@ id_list <- function() {
     y = ~Ratio_CEM37,
     color = ~Sample,
     colors = viridisLite::inferno(
-      length(unique(selection_df$Sample)), begin = 0.3)
+      length(unique(selection_df$Sample)),
+      begin = 0.3
+    )
   )
 
   if (type == "sc") {
@@ -2269,7 +2281,7 @@ id_list <- function() {
         hoverinfo = "text",
         text = ~ paste(
           "</br>Sample:", Sample,
-          "</br>Ratio:",  scales::label_number(
+          "</br>Ratio:", scales::label_number(
             big.mark = ",", accuracy = 0.01
           )(Ratio_CEM37),
           "</br>Sample seqCount:", `SeqCount(Sample-vs-CEM37)`,
@@ -2310,8 +2322,10 @@ id_list <- function() {
 ## Creates table for the sequence count ratios
 .render_ratio_tbl <- function(data, tbl_id) {
   data <- data %>%
-    dplyr::mutate(Sample = as.factor(.data$Sample),
-                  IS_Source = as.factor(.data$IS_Source))
+    dplyr::mutate(
+      Sample = as.factor(.data$Sample),
+      IS_Source = as.factor(.data$IS_Source)
+    )
   reactable::reactable(
     data,
     defaultPageSize = 5,
@@ -2334,44 +2348,54 @@ id_list <- function() {
                                source = c("Controls", "Samples")) {
   source <- rlang::arg_match(source)
   selection_df <- ratio_df %>%
-    dplyr::filter(.data$IS_Source == source,
-                  .data$Sample != "All_Samples",
-                  !is.na(.data$sc_rep_ratio))
+    dplyr::filter(
+      .data$IS_Source == source,
+      .data$Sample != "All_Samples",
+      !is.na(.data$sc_rep_ratio)
+    )
   if (nrow(selection_df) == 0) {
     return(NULL)
   }
   is_details <- selection_df %>%
-    tidyr::nest(data = !dplyr::all_of(c(ISAnalytics::mandatory_IS_vars(),
-                                       "Ratio_CEM37_sc", "Ratio_CEM37_rep"))
-                ) %>%
-    dplyr::mutate(Samples = purrr::map_chr(.data$data,
-                                           ~ paste0(unique(.x$Sample),
-                                                    collapse = ", "))) %>%
+    tidyr::nest(data = !dplyr::all_of(c(
+      ISAnalytics::mandatory_IS_vars(),
+      "Ratio_CEM37_sc", "Ratio_CEM37_rep"
+    ))) %>%
+    dplyr::mutate(Samples = purrr::map_chr(
+      .data$data,
+      ~ paste0(unique(.x$Sample),
+        collapse = ", "
+      )
+    )) %>%
     dplyr::select(-.data$data)
 
   plot_cont <- plotly::subplot(
     # x-axis histogram
     plotly::plot_ly(selection_df,
-            x = ~ Ratio_CEM37_sc,
-            type = 'histogram',
-            color = I("grey40"),
-            name = "SC ratios histogram",
-            showlegend = FALSE),
+      x = ~Ratio_CEM37_sc,
+      type = "histogram",
+      color = I("grey40"),
+      name = "SC ratios histogram",
+      showlegend = FALSE
+    ),
     plotly::plotly_empty(type = "scatter", mode = "markers"),
     # 2d contour + scatter
     plotly::plot_ly(
       selection_df,
-      x = ~ Ratio_CEM37_sc,
-      y = ~ Ratio_CEM37_rep,
-      type = 'histogram2dcontour',
-      colors = viridisLite::inferno(256, begin = 0.15)) %>%
-      plotly::layout(xaxis = list(title = "Sequence count ratio"),
-             yaxis = list(title = "Replicate count ratio")) %>%
+      x = ~Ratio_CEM37_sc,
+      y = ~Ratio_CEM37_rep,
+      type = "histogram2dcontour",
+      colors = viridisLite::inferno(256, begin = 0.15)
+    ) %>%
+      plotly::layout(
+        xaxis = list(title = "Sequence count ratio"),
+        yaxis = list(title = "Replicate count ratio")
+      ) %>%
       plotly::add_trace(
         inherit = FALSE,
         data = is_details,
-        x = ~ Ratio_CEM37_sc,
-        y = ~ Ratio_CEM37_rep,
+        x = ~Ratio_CEM37_sc,
+        y = ~Ratio_CEM37_rep,
         type = "scatter",
         mode = "markers",
         opacity = 0.7,
@@ -2383,28 +2407,34 @@ id_list <- function() {
         text = ~ paste(
           "</br>Sequence count ratio:", Ratio_CEM37_sc,
           "</br>Rep count ratio:", Ratio_CEM37_rep,
-          "</br>IS coordinates:", paste0("(", chr, ", ",
-                                         integration_locus, ", ",
-                                         strand, ")"),
+          "</br>IS coordinates:", paste0(
+            "(", chr, ", ",
+            integration_locus, ", ",
+            strand, ")"
+          ),
           "</br>Samples:", Samples
         ),
         showlegend = FALSE
       ),
     # y-axis histogram
     plotly::plot_ly(selection_df,
-            y = ~ Ratio_CEM37_rep,
-            type = 'histogram',
-            color = I("grey40"),
-            name = "REP ratios histogram",
-            showlegend = FALSE
+      y = ~Ratio_CEM37_rep,
+      type = "histogram",
+      color = I("grey40"),
+      name = "REP ratios histogram",
+      showlegend = FALSE
     ) %>%
       plotly::layout(
-        yaxis = list(title = "",
-                     showline = TRUE,
-                     showticklabels = FALSE,
-                     linewidth = 1.2),
-        xaxis = list(showgrid = TRUE,
-                     showticklabels = TRUE)
+        yaxis = list(
+          title = "",
+          showline = TRUE,
+          showticklabels = FALSE,
+          linewidth = 1.2
+        ),
+        xaxis = list(
+          showgrid = TRUE,
+          showticklabels = TRUE
+        )
       ),
     nrows = 2,
     heights = c(0.2, 0.8),

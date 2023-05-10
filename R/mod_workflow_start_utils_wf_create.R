@@ -7,12 +7,15 @@
 #'
 #' @noRd
 .create_wf_observer <- function(input, session, wf_object, wf_name_flag) {
-  modal <- .create_modal_wf_new(session$ns, input, wf_object,
-                                wf_name_flag)
+  modal <- .create_modal_wf_new(
+    session$ns, input, wf_object,
+    wf_name_flag
+  )
   observeEvent(
     input[[
       ids()$workflow_start$inputs$new_wf_btn
-    ]], {
+    ]],
+    {
       # Create a modal prompt for name
       showModal(modal)
     }
@@ -34,15 +37,18 @@
   cancel_btn <- modalButton("Cancel")
   cancel_btn$attribs$class <- "btn btn-gray"
   modal_in <- modalDialog(
-    textInput(inputId = ns(ids()$workflow_start$inputs$wf_name_input),
-              label = "Workflow name",
-              value = "Workflow-1"),
+    textInput(
+      inputId = ns(ids()$workflow_start$inputs$wf_name_input),
+      label = "Workflow name",
+      value = "Workflow-1"
+    ),
     title = "Enter a name for the new workflow",
     footer = tagList(
       cancel_btn,
       actionButton(
         inputId = ns(ids()$workflow_start$inputs$wf_create_modal_btn),
-        label = "Confirm")
+        label = "Confirm"
+      )
     )
   )
 
@@ -56,8 +62,10 @@
     outval(new_wf)
     gargoyle::trigger(wf_name_flag)
     removeModal()
-    .page_scroll_next(ids()$workflow_start$section_id,
-                      "pages-container")
+    .page_scroll_next(
+      ids()$workflow_start$section_id,
+      "pages-container"
+    )
   })
   return(modal_in)
 }
@@ -76,7 +84,6 @@
   output[[
     ids()$workflow_start$outputs$wf_name_out
   ]] <- renderText({
-
     gargoyle::watch(flag)
     req(wf())
     wf()$get_name()

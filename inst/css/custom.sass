@@ -1,15 +1,94 @@
 /* General */
+$grey-btn-bg: #dee2e6
+$grey-btn-border: #6c757d
+
+$accents: ("accent1": #78cdd7, "accent2": #a273ef, "accent3": #a8a1df)
+
+@mixin text-bg-accent-variant($background)
+  background-color: $background !important
+  color: color-contrast($background)
+
+@each $name, $color in $accents
+  .text-bg-#{$name}
+    @include text-bg-accent-variant($color)
+
 .vh-minus-navbar
   height: calc(100vh - 96px)
 
 .btn-gray
-  $grey-btn-bg: #dee2e6
   @include button-variant($background: $grey-btn-bg, $border: $grey-btn-bg)
 
 .btn-gray-outline
-  $grey-btn-border: #6c757d
   @include button-variant($background: transparent, $border: $grey-btn-border)
   border-width: 1px
+
+.btn-icon-only
+  @include button-variant($background: transparent, $border: transparent)
+  color: $body-color !important
+
+.add-cl-btn
+  border-top-left-radius: 0px !important
+  border-bottom-left-radius: 0px !important
+  height: min-content
+  align-self: center
+
+.input-row-container
+  display: flex
+  flex-direction: row
+  width: 100%
+  align-items: flex-start
+  flex-wrap: wrap
+
+.shiny-file-input-progress
+  display: none
+
+.btn-file
+  background-color: $grey-btn-bg !important
+  border-color: darken($grey-btn-bg, 10%) !important
+  border-top-right-radius: 0px !important
+  border-bottom-right-radius: 0px !important
+  color: $body-color
+
+  &:hover
+    background-color: darken($grey-btn-bg, 10%) !important
+    border-color: darken($grey-btn-border, 20%) !important
+    color: $body-color !important
+
+.title_with_popover
+  display: flex
+  flex-direction: row
+  align-items: baseline
+
+  i
+    margin-left: 0.5em
+
+    &:hover
+      color: lighten($body-color, 10%)
+
+.folder-input-container
+  display: flex
+  flex-direction: row
+
+.dir_path_display
+  background-color: $input-bg
+  color: $input-color
+  box-shadow: $input-box-shadow
+  border-color: $input-border-color
+  border-width: $input-border-width
+  border-radius: $input-border-radius
+  border-top-left-radius: 0px !important
+  border-bottom-left-radius: 0px !important
+  border-style: solid
+  width: 100%
+
+.dir-choose-btn
+  border-top-right-radius: 0px !important
+  border-bottom-right-radius: 0px !important
+
+/* Control lines db */
+.known-iss-mini
+  .rt-tr-selected
+    background-color: $light !important
 
 /* Workflow init section */
 .workflow_init_container
@@ -56,7 +135,6 @@ $arc-skipped-color: darken($danger, 10%)
   overflow: hidden
   white-space: nowrap
 
-
 .mini-node-main
   fill: $node-inactive-color
 
@@ -99,7 +177,6 @@ $arc-skipped-color: darken($danger, 10%)
   stroke: $arc-skipped-color !important
   stroke-miterlimit: 10
 
-
 .svg-container
   width: 100%
   display: flex
@@ -112,5 +189,9 @@ $arc-skipped-color: darken($danger, 10%)
 
 @include media-breakpoint-up(xxl)
   .svg-content-mini
-      width: 35%
+    width: 35%
 
+  /* Data import - metadata */
+#data-import-section-metadata-subsection-control-cell-line-select ~ .selectize-control > .selectize-input
+  border-top-right-radius: 0px !important
+  border-bottom-right-radius: 0px !important

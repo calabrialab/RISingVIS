@@ -6,7 +6,7 @@
 #'
 #' @noRd
 #'
-#' @importFrom shiny NS tagList
+#' @importFrom shiny NS tagList div tags textOutput
 mod_side_bar_ui <- function(id){
   ns <- NS(id)
   tagList(

@@ -34,12 +34,16 @@ app_ui <- function(request) {
               div(
                 ### Content ----
                 class = "col-10",
-                mod_data_import_ui(ids()$data_import$section_id),
-                mod_recalibration_ui(ids()$recalibration$section_id)
+                # mod_data_import_ui(ids()$data_import$section_id),
+                # mod_recalibration_ui(ids()$recalibration$section_id)
               )
             )
           )
         )
+      ),
+      bslib::nav(
+        "Control cell lines",
+        mod_control_lines_db_ui(ids()$control_lines_db$section_id)
       ),
       bslib::nav("FAQs")
     )
@@ -68,6 +72,7 @@ golem_add_external_resources <- function() {
     ),
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
-    shinyjs::useShinyjs()
+    shinyjs::useShinyjs(),
+    shinyWidgets::useSweetAlert()
   )
 }

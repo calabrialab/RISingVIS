@@ -27,19 +27,6 @@
     }
 }
 
-# Function to handle errors in case of non-blocking behavior
-# desired: value of the desired behavior
-# obtained: true value obtained after evaluation
-# handler: a function that gets called if desired != obtained
-# ...: further args (named) to supply to handler
-.error_handler <- function(desired, obtained, handler, ...) {
-    if (desired != obtained) {
-        args <- rlang::list2(...)
-        res <- rlang::exec(handler, !!!args)
-        return(invisible(res))
-    }
-}
-
 # Assembles a unique list of control lines based on input
 # control_lines can contain both strings - for default control lines, and
 # objects of type ControlLine
@@ -86,78 +73,78 @@
 # Error message displayed for suggestion packages that are not installed
 # but required by the called function
 .missing_pkg_error <- function(pkg, lib = "CRAN") {
-  if (!is.null(names(pkg))) {
-    pkgs_str <- paste0('"', names(pkg), '"', collapse = ", ")
-    from_cran <- pkg[pkg == "CRAN"]
-    from_cran <- if (length(from_cran) > 0) {
-      paste0(
-        "`install.packages(",
-        paste0('"', names(from_cran), '"', collapse = ","),
-        ")`"
-      )
+    if (!is.null(names(pkg))) {
+        pkgs_str <- paste0('"', names(pkg), '"', collapse = ", ")
+        from_cran <- pkg[pkg == "CRAN"]
+        from_cran <- if (length(from_cran) > 0) {
+            paste0(
+                "`install.packages(",
+                paste0('"', names(from_cran), '"', collapse = ","),
+                ")`"
+            )
+        } else {
+            NULL
+        }
+
+        from_bioc <- pkg[pkg == "BIOC"]
+        from_bioc <- if (length(from_bioc) > 0) {
+            paste0(
+                "`BiocManager::install(",
+                paste0('"', names(from_bioc), '"', collapse = ","),
+                ")`"
+            )
+        } else {
+            NULL
+        }
+        inst_sugg <- paste0("To install: ", from_cran, ", ", from_bioc)
     } else {
-      NULL
+        pkgs_str <- paste0('"', pkg, '"', collapse = ", ")
+        inst_sugg <- if (lib == "CRAN") {
+            paste0("To install: `install.packages(", pkgs_str, ")`")
+        } else if (lib == "BIOC") {
+            paste0("To install: `BiocManager::install(", pkgs_str, ")`")
+        }
     }
 
-    from_bioc <- pkg[pkg == "BIOC"]
-    from_bioc <- if (length(from_bioc) > 0) {
-      paste0(
-        "`BiocManager::install(",
-        paste0('"', names(from_bioc), '"', collapse = ","),
-        ")`"
-      )
-    } else {
-      NULL
-    }
-    inst_sugg <- paste0("To install: ", from_cran, ", ", from_bioc)
-  } else {
-    pkgs_str <- paste0('"', pkg, '"', collapse = ", ")
-    inst_sugg <- if (lib == "CRAN") {
-      paste0("To install: `install.packages(", pkgs_str, ")`")
-    } else if (lib == "BIOC") {
-      paste0("To install: `BiocManager::install(", pkgs_str, ")`")
-    }
-  }
-
-  c("Missing package(s)",
-    x = paste0(
-      "Package(s) ", pkgs_str,
-      " are required for this functionality."
-    ),
-    i = inst_sugg
-  )
+    c("Missing package(s)",
+        x = paste0(
+            "Package(s) ", pkgs_str,
+            " are required for this functionality."
+        ),
+        i = inst_sugg
+    )
 }
 
 
 # Checks if packages for parallel processing are installed
 .check_parallel_packages <- function() {
-  if (getOption("RISingVIS.parallel_processing", default = TRUE) == TRUE) {
-    required_parallel_pkgs <- list(
-      BiocParallel = "BIOC",
-      doFuture = "CRAN",
-      future = "CRAN",
-      foreach = "CRAN"
-    )
-    pkgs_present <- purrr::map_lgl(
-      names(required_parallel_pkgs),
-      ~ requireNamespace(.x, quietly = TRUE)
-    )
-    if (any(pkgs_present == FALSE)) {
-      missing_pkgs <- required_parallel_pkgs[!pkgs_present]
-      options(RISingVIS.parallel_processing = FALSE)
-      info_msg <- c(.missing_pkg_error(missing_pkgs),
-                    i = paste(
-                      "Packages for parallel computation are not available,",
-                      "switching to default sequential computation",
-                      "(certain operations might be slower).",
-                      "To re-activate the functionality, install the",
-                      "packages and set",
-                      "`options(RISingVIS.parallel_processing = TRUE)`"
-                    )
-      )
-      rlang::inform(info_msg)
+    if (getOption("RISingVIS.parallel_processing", default = TRUE) == TRUE) {
+        required_parallel_pkgs <- list(
+            BiocParallel = "BIOC",
+            doFuture = "CRAN",
+            future = "CRAN",
+            foreach = "CRAN"
+        )
+        pkgs_present <- purrr::map_lgl(
+            names(required_parallel_pkgs),
+            ~ requireNamespace(.x, quietly = TRUE)
+        )
+        if (any(pkgs_present == FALSE)) {
+            missing_pkgs <- required_parallel_pkgs[!pkgs_present]
+            options(RISingVIS.parallel_processing = FALSE)
+            info_msg <- c(.missing_pkg_error(missing_pkgs),
+                i = paste(
+                    "Packages for parallel computation are not available,",
+                    "switching to default sequential computation",
+                    "(certain operations might be slower).",
+                    "To re-activate the functionality, install the",
+                    "packages and set",
+                    "`options(RISingVIS.parallel_processing = TRUE)`"
+                )
+            )
+            rlang::inform(info_msg)
+        }
     }
-  }
 }
 
 
@@ -176,94 +163,97 @@
                              stop_on_error,
                              max_workers,
                              progrs = NULL) {
-  # Set up progressor if package available
-  prog <- if (rlang::is_installed("progressr") & is.null(progrs)) {
-    progressr::progressor(steps = length(data_list))
-  } else {
-    progrs
-  }
-  .check_parallel_packages()
-  if (length(data_list) == 1) {
-    max_workers <- 1
-  } else {
-    if (getOption("RISingVIS.parallel_processing", default = TRUE) == TRUE) {
-      # Manage workers
-      bioc_workers <- if (.Platform$OS.type == "windows") {
-        BiocParallel::snowWorkers()
-      } else {
-        BiocParallel::multicoreWorkers()
-      }
-      if (is.null(max_workers)) {
-        max_workers <- min(length(data_list), bioc_workers)
-      } else {
-        max_workers <- min(length(data_list), max_workers)
-      }
+    # Set up progressor if package available
+    prog <- if (rlang::is_installed("progressr") & is.null(progrs)) {
+        progressr::progressor(steps = length(data_list))
+    } else {
+        progrs
     }
-  }
+    .check_parallel_packages()
+    if (length(data_list) == 1) {
+        max_workers <- 1
+    } else {
+        if (getOption("RISingVIS.parallel_processing", default = TRUE) == TRUE) {
+            # Manage workers
+            bioc_workers <- if (.Platform$OS.type == "windows") {
+                BiocParallel::snowWorkers()
+            } else {
+                BiocParallel::multicoreWorkers()
+            }
+            if (is.null(max_workers)) {
+                max_workers <- min(length(data_list), bioc_workers)
+            } else {
+                max_workers <- min(length(data_list), max_workers)
+            }
+        }
+    }
 
-  if (getOption("RISingVIS.parallel_processing", default = TRUE) == TRUE &
-      (!is.null(max_workers) && max_workers > 1)) {
-    # Set up parallel workers
-    old_be <- doFuture::registerDoFuture()
-    old_plan <- future::plan(future::multisession, workers = max_workers)
-    on.exit(
-      {
-        future::plan(old_plan)
-        foreach::setDoPar(
-          fun = old_be$fun,
-          data = old_be$data, info = old_be$info
+    if (getOption("RISingVIS.parallel_processing", default = TRUE) == TRUE &
+        (!is.null(max_workers) && max_workers > 1)) {
+        # Set up parallel workers
+        old_be <- doFuture::registerDoFuture()
+        old_plan <- future::plan(future::multisession, workers = max_workers)
+        on.exit(
+            {
+                future::plan(old_plan)
+                foreach::setDoPar(
+                    fun = old_be$fun,
+                    data = old_be$data, info = old_be$info
+                )
+            },
+            add = TRUE
         )
-      },
-      add = TRUE
-    )
-    p <- BiocParallel::DoparParam()
-    if (!stop_on_error) {
-      fun_to_apply <- purrr::safely(fun_to_apply)
+        p <- BiocParallel::DoparParam()
+        if (!stop_on_error) {
+            fun_to_apply <- purrr::safely(fun_to_apply)
+        }
+
+        # Execute
+        arg_list <- append(fun_args, list(
+            X = data_list,
+            FUN = fun_to_apply,
+            BPPARAM = p,
+            progress = prog
+        ))
+        results <- rlang::exec(
+            BiocParallel::bplapply,
+            !!!arg_list
+        )
+        if (!stop_on_error) {
+            return(list(
+                res = purrr::map(results, ~ .x$result),
+                mode = "par", err = purrr::map(results, ~ .x$error)
+            ))
+        }
+        return(list(res = results, mode = "par"))
     }
 
-    # Execute
-    arg_list <- append(fun_args, list(
-      X = data_list,
-      FUN = fun_to_apply,
-      BPPARAM = p,
-      progress = prog
-    ))
-    results <- rlang::exec(
-      BiocParallel::bplapply,
-      !!!arg_list
+    # Sequential
+    arg_list <- append(
+        list(
+            .x = data_list,
+            .f = fun_to_apply,
+            progress = prog
+        ),
+        fun_args
     )
-    if (!stop_on_error) {
-      return(list(res = purrr::map(results, ~ .x$result),
-                  mode = "par", err = purrr::map(results, ~ .x$error)))
+    if (stop_on_error == TRUE) {
+        results <- rlang::exec(purrr::map, !!!arg_list)
+        return(list(res = results, mode = "seq"))
+    } else {
+        results <- rlang::exec(purrr::safely(purrr::map), !!!arg_list)
+        errs <- results$error
+        results <- results$result
+        return(list(res = results, mode = "seq", err = errs))
     }
-    return(list(res = results, mode = "par"))
-  }
-
-  # Sequential
-  arg_list <- append(
-    list(
-      .x = data_list,
-      .f = fun_to_apply,
-      progress = prog
-    ),
-    fun_args
-  )
-  if (stop_on_error == TRUE) {
-    results <- rlang::exec(purrr::map, !!!arg_list)
-    return(list(res = results, mode = "seq"))
-  } else {
-    results <- rlang::exec(purrr::safely(purrr::map), !!!arg_list)
-    errs <- results$error
-    results <- results$result
-    return(list(res = results, mode = "seq", err = errs))
-  }
 }
 
 
 # Internals for sharing --------------------------------------------------------
 
 # Checks that needed arguments are not empty
-.check_sharing_param_values <- function(key,
+.check_sharing_param_values <- function(
+    key,
     pool_col,
     seqCount_col,
     replicate_col,
@@ -271,8 +261,10 @@
     check_pool) {
     err_msg <- function(arg) {
         c("Argument is empty",
-            x = paste("Argument", paste0("'", arg, "'"),
-                      "is empty but is required")
+            x = paste(
+                "Argument", paste0("'", arg, "'"),
+                "is empty but is required"
+            )
         )
     }
     if (purrr::is_empty(key) || key == "") {
@@ -348,17 +340,20 @@
 # Returns a lookup table for a given dataframe of ISs and a given key
 # NOTE: replicate_col is meant to be CompleteAmplification id or the equivalent
 # pcr_id_col tag (not replicate number)
-.obtain_lookup_tbl <- function(df, key,
+.obtain_lookup_tbl <- function(
+    df, key,
     seqCount_col,
     replicate_col,
     barcode_mux_col) {
-    replicate_totals <-  df |>
-      tidyr::unite(col = "group_id", dplyr::all_of(key), remove = FALSE) |>
-      dplyr::group_by(dplyr::across(dplyr::all_of(
-        c("group_id")
-      ))) |>
-      dplyr::summarise(tot_rep = dplyr::n_distinct(.data[[replicate_col]]),
-                       .groups = "drop")
+    replicate_totals <- df |>
+        tidyr::unite(col = "group_id", dplyr::all_of(key), remove = FALSE) |>
+        dplyr::group_by(dplyr::across(dplyr::all_of(
+            c("group_id")
+        ))) |>
+        dplyr::summarise(
+            tot_rep = dplyr::n_distinct(.data[[replicate_col]]),
+            .groups = "drop"
+        )
     lookup <- df |>
         tidyr::unite(col = "group_id", dplyr::all_of(key), remove = FALSE) |>
         dplyr::group_by(dplyr::across(dplyr::all_of(
@@ -382,10 +377,10 @@
             )
     }
     lookup <- lookup |>
-      dplyr::left_join(replicate_totals, by = "group_id") |>
-      dplyr::mutate(
-        rep_count = .data$abs_rep_count / .data$tot_rep
-      )
+        dplyr::left_join(replicate_totals, by = "group_id") |>
+        dplyr::mutate(
+            rep_count = .data$abs_rep_count / .data$tot_rep
+        )
     return(lookup)
 }
 
@@ -449,12 +444,14 @@
         }
         g_number <- as.numeric(stringr::str_remove(name, "g"))
         tot_rep <- (lookups[[g_number]] |>
-          dplyr::filter(.data$group_id == content))$tot_rep[1]
+            dplyr::filter(.data$group_id == content))$tot_rep[1]
         selection <- lookups[[g_number]] |>
             dplyr::filter(.data$group_id == content) |>
             dplyr::select(-.data$group_id, -.data$tot_rep) |>
-            dplyr::rename_with(.cols = !ISAnalytics::mandatory_IS_vars(),
-                               .fn = ~ paste0(.x, "_", name))
+            dplyr::rename_with(
+                .cols = !ISAnalytics::mandatory_IS_vars(),
+                .fn = ~ paste0(.x, "_", name)
+            )
         return(list(selection, tot_rep))
     }
     data_selection <- purrr::map2(row, names(row), process_row)
@@ -471,13 +468,13 @@
     names(counts_g) <- paste0("count_", names(counts_g))
     new_row <- append(new_row, counts_g)
     union_selections <- purrr::reduce(
-      data_selection,
-      ~ .x[[1]] |>
-        dplyr::select(dplyr::all_of(ISAnalytics::mandatory_IS_vars())) |>
-        dplyr::union(
-          .y[[1]] |>
-            dplyr::select(dplyr::all_of(ISAnalytics::mandatory_IS_vars()))
-        )
+        data_selection,
+        ~ .x[[1]] |>
+            dplyr::select(dplyr::all_of(ISAnalytics::mandatory_IS_vars())) |>
+            dplyr::union(
+                .y[[1]] |>
+                    dplyr::select(dplyr::all_of(ISAnalytics::mandatory_IS_vars()))
+            )
     )
     new_row[["count_union"]] <- nrow(union_selections)
     tot_reps_g <- purrr::map_int(data_selection, ~ .x[[2]])
@@ -485,7 +482,7 @@
     new_row <- append(new_row, tot_reps_g)
     new_row[["is_details"]] <- list(in_common)
     new_row <- tibble::tibble_row(
-      !!!new_row
+        !!!new_row
     )
     return(new_row)
 }
@@ -496,134 +493,143 @@
 ## - ... : row passed as a list
 ## - g_names: names of the groups (g1, g2...)
 .sh_row_permut <- function(..., g_names) {
-  og_row <- list(...)
-  ids <- unlist(og_row[g_names])
-  # If row of all equal elements no need for permutations
-  if (length(unique(ids)) == 1) {
-    og_row[["is_details"]] <- list(og_row[["is_details"]])
-    return(tibble::as_tibble(og_row))
-  }
-  # If elements are different
-  shared_is <- og_row$shared
-  count_union <- og_row$count_union
-  is_details <- og_row$is_details
-
-  perm <- gtools::permutations(
-    n = length(g_names),
-    r = length(g_names),
-    v = g_names,
-    set = TRUE,
-    repeats.allowed = FALSE
-  )
-  colnames(perm) <- g_names
-  perm <- tibble::as_tibble(perm)
-  cols_to_substitute <- names(og_row)[!names(og_row) %in% c("shared",
-                                                            "count_union",
-                                                            "is_details",
-                                                            g_names)]
-  rearrange <- function(...) {
-    row <- list(...)
-    obtain_mapping <- function(col) {
-      ref_group <- stringr::str_extract(col, "g[1-9]+")
-      general_col <- stringr::str_remove(col, "g[0-9]+")
-      return(paste0(general_col, row[[ref_group]]))
+    og_row <- list(...)
+    ids <- unlist(og_row[g_names])
+    # If row of all equal elements no need for permutations
+    if (length(unique(ids)) == 1) {
+        og_row[["is_details"]] <- list(og_row[["is_details"]])
+        return(tibble::as_tibble(og_row))
     }
-    cols_mappings <- purrr::map(cols_to_substitute, obtain_mapping) |>
-      purrr::set_names(cols_to_substitute)
-    tibble::as_tibble_row(cols_mappings)
-  }
-  perm <- perm |>
-    dplyr::mutate(
-      !!!purrr::pmap_df(perm, rearrange)
-    )
+    # If elements are different
+    shared_is <- og_row$shared
+    count_union <- og_row$count_union
+    is_details <- og_row$is_details
 
-  perm[["shared"]] <- shared_is
-  perm[["count_union"]] <- count_union
-  # Remap is details
-  details_cols <- colnames(is_details)
-  rearrange_df <- function(...) {
-    row <- list(...)
-    obtain_mapping <-  function(col) {
-      ref_group <- stringr::str_extract(col, "g[1-9]+")
-      if (is.na(ref_group)) {
-        return(rep(col, nrow(is_details)))
-      }
-      general_col <- stringr::str_remove(col, "g[0-9]+")
-      return(rep(paste0(general_col, row[[ref_group]]), nrow(is_details)))
+    perm <- gtools::permutations(
+        n = length(g_names),
+        r = length(g_names),
+        v = g_names,
+        set = TRUE,
+        repeats.allowed = FALSE
+    )
+    colnames(perm) <- g_names
+    perm <- tibble::as_tibble(perm)
+    cols_to_substitute <- names(og_row)[!names(og_row) %in% c(
+        "shared",
+        "count_union",
+        "is_details",
+        g_names
+    )]
+    rearrange <- function(...) {
+        row <- list(...)
+        obtain_mapping <- function(col) {
+            ref_group <- stringr::str_extract(col, "g[1-9]+")
+            general_col <- stringr::str_remove(col, "g[0-9]+")
+            return(paste0(general_col, row[[ref_group]]))
+        }
+        cols_mappings <- purrr::map(cols_to_substitute, obtain_mapping) |>
+            purrr::set_names(cols_to_substitute)
+        tibble::as_tibble_row(cols_mappings)
     }
-    cols_mappings <- purrr::map(details_cols, obtain_mapping) |>
-      purrr::set_names(details_cols)
-    tibble::as_tibble(cols_mappings)
-  }
-  new_is_details <- purrr::pmap(perm, rearrange_df)
-  # Substitute placeholders
-  cols_to_substitute <- c(cols_to_substitute, g_names)
-  perm <- perm |>
-    dplyr::mutate(
-      dplyr::across(
-        .cols = dplyr::all_of(cols_to_substitute),
-        .fns = ~ unlist(purrr::map(.x, ~ og_row[[.x]])),
-        .names = "{.col}"
-      )
-    )
-
-  df_mapper <- function(col, index) {
-    is_details[[col]][index]
-  }
-  new_is_details <- purrr::map(
-    new_is_details,
-    ~ .x |>
-      dplyr::mutate(
-        dplyr::across(
-          .cols = dplyr::everything(),
-          .fns = ~ unlist(purrr::imap(.x, df_mapper)),
-          .names = "{.col}"
+    perm <- perm |>
+        dplyr::mutate(
+            !!!purrr::pmap_df(perm, rearrange)
         )
-      )
-  )
-  perm[["is_details"]] <- new_is_details
-  return(perm |> dplyr::select(
-    dplyr::all_of(names(og_row))
-  ))
+
+    perm[["shared"]] <- shared_is
+    perm[["count_union"]] <- count_union
+    # Remap is details
+    details_cols <- colnames(is_details)
+    rearrange_df <- function(...) {
+        row <- list(...)
+        obtain_mapping <- function(col) {
+            ref_group <- stringr::str_extract(col, "g[1-9]+")
+            if (is.na(ref_group)) {
+                return(rep(col, nrow(is_details)))
+            }
+            general_col <- stringr::str_remove(col, "g[0-9]+")
+            return(rep(paste0(general_col, row[[ref_group]]), nrow(is_details)))
+        }
+        cols_mappings <- purrr::map(details_cols, obtain_mapping) |>
+            purrr::set_names(details_cols)
+        tibble::as_tibble(cols_mappings)
+    }
+    new_is_details <- purrr::pmap(perm, rearrange_df)
+    # Substitute placeholders
+    cols_to_substitute <- c(cols_to_substitute, g_names)
+    perm <- perm |>
+        dplyr::mutate(
+            dplyr::across(
+                .cols = dplyr::all_of(cols_to_substitute),
+                .fns = ~ unlist(purrr::map(.x, ~ og_row[[.x]])),
+                .names = "{.col}"
+            )
+        )
+
+    df_mapper <- function(col, index) {
+        is_details[[col]][index]
+    }
+    new_is_details <- purrr::map(
+        new_is_details,
+        ~ .x |>
+            dplyr::mutate(
+                dplyr::across(
+                    .cols = dplyr::everything(),
+                    .fns = ~ unlist(purrr::imap(.x, df_mapper)),
+                    .names = "{.col}"
+                )
+            )
+    )
+    perm[["is_details"]] <- new_is_details
+    return(perm |> dplyr::select(
+        dplyr::all_of(names(og_row))
+    ))
 }
 
 # For each IS in the sharing table determines if it comes from controls or
 # not where applicable
 .find_is_source <- function(df, control_lines, lookups) {
-  # Get all known control ISs
-  knowns <- control_lines |>
-    purrr::map(~ .x$known_iss)
-  knowns <- purrr::map2(knowns, names(knowns),
-                        ~ .x |>
-                          dplyr::mutate(
-                            IS_source = paste0("control|", .y)
-                          )) |>
-    purrr::reduce(~ dplyr::bind_rows(.x, .y) |> dplyr:: distinct())
+    # Get all known control ISs
+    knowns <- control_lines |>
+        purrr::map(~ .x$known_iss)
+    knowns <- purrr::map2(
+        knowns, names(knowns),
+        ~ .x |>
+            dplyr::mutate(
+                IS_source = paste0("control|", .y)
+            )
+    ) |>
+        purrr::reduce(~ dplyr::bind_rows(.x, .y) |> dplyr::distinct())
 
-  non_control_is <- purrr::reduce(lookups, dplyr::union) |>
-    dplyr::anti_join(knowns, by = ISAnalytics::mandatory_IS_vars()) |>
-    dplyr::mutate(IS_source = dplyr::if_else(
-      condition = !.data$group_id %in% names(control_lines),
-      true = "sample",
-      false = NA_character_
-    )) |>
-    dplyr::filter(!is.na(.data$IS_source)) |>
-    dplyr::distinct(
-      dplyr::across(
-        dplyr::all_of(c(ISAnalytics::mandatory_IS_vars(),
-                                    "IS_source"))
-        ))
+    non_control_is <- purrr::reduce(lookups, dplyr::union) |>
+        dplyr::anti_join(knowns, by = ISAnalytics::mandatory_IS_vars()) |>
+        dplyr::mutate(IS_source = dplyr::if_else(
+            condition = !.data$group_id %in% names(control_lines),
+            true = "sample",
+            false = NA_character_
+        )) |>
+        dplyr::filter(!is.na(.data$IS_source)) |>
+        dplyr::distinct(
+            dplyr::across(
+                dplyr::all_of(c(
+                    ISAnalytics::mandatory_IS_vars(),
+                    "IS_source"
+                ))
+            )
+        )
 
-  cols_to_keep <- colnames(df)[colnames(df) != "is_details"]
-  processed_df <- df |>
-    tidyr::unnest(cols = "is_details") |>
-    dplyr::left_join(knowns |>
-                       dplyr::bind_rows(non_control_is),
-                     by = ISAnalytics::mandatory_IS_vars()) |>
-    tidyr::replace_na(list(IS_source = "unknown")) |>
-    tidyr::nest(.by = cols_to_keep, .key = "is_details")
+    cols_to_keep <- colnames(df)[colnames(df) != "is_details"]
+    processed_df <- df |>
+        tidyr::unnest(cols = "is_details") |>
+        dplyr::left_join(
+            knowns |>
+                dplyr::bind_rows(non_control_is),
+            by = ISAnalytics::mandatory_IS_vars()
+        ) |>
+        tidyr::replace_na(list(IS_source = "unknown")) |>
+        tidyr::nest(.by = cols_to_keep, .key = "is_details")
 
-  return(processed_df)
+    return(processed_df)
 }
 
 # The function computes user defined stats on sc, raw reads and rep
@@ -632,122 +638,126 @@
 # *_fns: named lists of purrr style lambdas to apply respectively to
 # sc, raw reads and replicates
 .compute_shared_stats <- function(df, sc_fns, raw_reads_fns, rep_fns) {
-  df_with_stats <- df |>
-    dplyr::mutate(
-      dplyr::across(
-        .cols = dplyr::matches("^count_(g[1-9]+|union)"),
-        .fns = ~ shared / .x,
-        .names = "on_{.col}"
-      ), .before = "is_details"
-    ) |>
-    dplyr::rename_with(
-      .cols = dplyr::starts_with("on_count"),
-      .fn = ~ stringr::str_remove(.x, "_count")
-    )
-  if (!is.null(sc_fns)) {
-    sc_fns <- purrr::map(
-      sc_fns, ~ rlang::as_function(.x, env = rlang::current_env())
-    )
-    df_with_stats <- df_with_stats |>
-      dplyr::mutate(
-        stats = purrr::map(
-          .data$is_details,
-          ~ dplyr::summarise(
-            .x,
+    df_with_stats <- df |>
+        dplyr::mutate(
             dplyr::across(
-              .cols = dplyr::all_of(dplyr::starts_with("seq_count")),
-              .fns = sc_fns,
-              .names = "{.col}_{.fn}"
-            )
-          )
+                .cols = dplyr::matches("^count_(g[1-9]+|union)"),
+                .fns = ~ shared / .x,
+                .names = "on_{.col}"
+            ),
+            .before = "is_details"
+        ) |>
+        dplyr::rename_with(
+            .cols = dplyr::starts_with("on_count"),
+            .fn = ~ stringr::str_remove(.x, "_count")
         )
-      ) |>
-      tidyr::unnest(cols = "stats")
-  }
-  if (!is.null(raw_reads_fns)) {
-    raw_reads_fns <- purrr::map(
-      raw_reads_fns, ~ rlang::as_function(.x, env = rlang::current_env())
-    )
-    df_with_stats <- df_with_stats |>
-      dplyr::mutate(
-        stats = purrr::map(
-          .data$is_details,
-          ~ dplyr::summarise(
-            .x,
-            dplyr::across(
-              .cols = dplyr::all_of(dplyr::starts_with("raw_reads")),
-              .fns = raw_reads_fns,
-              .names = "{.col}_{.fn}"
-            )
-          )
+    if (!is.null(sc_fns)) {
+        sc_fns <- purrr::map(
+            sc_fns, ~ rlang::as_function(.x, env = rlang::current_env())
         )
-      ) |>
-      tidyr::unnest(cols = "stats")
-  }
-  if (!is.null(rep_fns)) {
-    rep_fns <- purrr::map(
-      rep_fns, ~ rlang::as_function(.x, env = rlang::current_env())
-    )
-    df_with_stats <- df_with_stats |>
-      dplyr::mutate(
-        stats = purrr::map(
-          .data$is_details,
-          ~ dplyr::summarise(
-            .x,
-            dplyr::across(
-              .cols = dplyr::all_of(dplyr::starts_with("rep_count")),
-              .fns = rep_fns,
-              .names = "{.col}_{.fn}"
-            )
-          )
+        df_with_stats <- df_with_stats |>
+            dplyr::mutate(
+                stats = purrr::map(
+                    .data$is_details,
+                    ~ dplyr::summarise(
+                        .x,
+                        dplyr::across(
+                            .cols = dplyr::all_of(dplyr::starts_with("seq_count")),
+                            .fns = sc_fns,
+                            .names = "{.col}_{.fn}"
+                        )
+                    )
+                )
+            ) |>
+            tidyr::unnest(cols = "stats")
+    }
+    if (!is.null(raw_reads_fns)) {
+        raw_reads_fns <- purrr::map(
+            raw_reads_fns, ~ rlang::as_function(.x, env = rlang::current_env())
         )
-      ) |>
-      tidyr::unnest(cols = "stats")
-  }
-  return(df_with_stats)
+        df_with_stats <- df_with_stats |>
+            dplyr::mutate(
+                stats = purrr::map(
+                    .data$is_details,
+                    ~ dplyr::summarise(
+                        .x,
+                        dplyr::across(
+                            .cols = dplyr::all_of(dplyr::starts_with("raw_reads")),
+                            .fns = raw_reads_fns,
+                            .names = "{.col}_{.fn}"
+                        )
+                    )
+                )
+            ) |>
+            tidyr::unnest(cols = "stats")
+    }
+    if (!is.null(rep_fns)) {
+        rep_fns <- purrr::map(
+            rep_fns, ~ rlang::as_function(.x, env = rlang::current_env())
+        )
+        df_with_stats <- df_with_stats |>
+            dplyr::mutate(
+                stats = purrr::map(
+                    .data$is_details,
+                    ~ dplyr::summarise(
+                        .x,
+                        dplyr::across(
+                            .cols = dplyr::all_of(dplyr::starts_with("rep_count")),
+                            .fns = rep_fns,
+                            .names = "{.col}_{.fn}"
+                        )
+                    )
+                )
+            ) |>
+            tidyr::unnest(cols = "stats")
+    }
+    return(df_with_stats)
 }
 
 
 .chuck_shared_by_source <- function(df,
                                     control_lines) {
-
-  filter_adjust <- function(..., control = NULL) {
-    row <- rlang::list2(...)
-    source <- if (!is.null(control)) {
-      paste0("control|", control)
-    } else {
-      "sample"
+    filter_adjust <- function(..., control = NULL) {
+        row <- rlang::list2(...)
+        source <- if (!is.null(control)) {
+            paste0("control|", control)
+        } else {
+            "sample"
+        }
+        filtered_is <- row$is_details |>
+            dplyr::filter(.data$IS_source == source)
+        new_row <- tibble::tibble_row(
+            !!!row[names(row) != "is_details"],
+            is_details = list(filtered_is)
+        )
+        new_row$shared <- nrow(filtered_is)
+        return(new_row)
     }
-    filtered_is <- row$is_details |>
-      dplyr::filter(.data$IS_source == source)
-    new_row <- tibble::tibble_row(
-      !!!row[names(row) != "is_details"],
-      is_details = list(filtered_is)
-    )
-    new_row$shared <- nrow(filtered_is)
-    return(new_row)
-  }
 
-  # ISs coming from controls
-  controls_sharing <- purrr::map(names(control_lines), ~ {
-    cl_name <- .x
-    purrr::pmap_df(df, filter_adjust, control = cl_name)
-  }) |>
-    purrr::set_names(names(control_lines))
+    # ISs coming from controls
+    controls_sharing <- purrr::map(names(control_lines), ~ {
+        cl_name <- .x
+        purrr::pmap_df(df, filter_adjust, control = cl_name)
+    }) |>
+        purrr::set_names(names(control_lines))
 
-  # ISs coming from samples
-  samples_sharing <- purrr::pmap_df(df, filter_adjust)
+    # ISs coming from samples
+    samples_sharing <- purrr::pmap_df(df, filter_adjust)
 
-  # Unknown ISs (only in controls)
-  unknown_is <- df |>
-    tidyr::unnest(cols = "is_details") |>
-    dplyr::filter(.data$IS_source == "unknown") |>
-    tidyr::nest(.by = colnames(df)[colnames(df) != "is_details"],
-                .key = "is_details") |>
-    dplyr::mutate(shared = purrr::map_int(.data$is_details, nrow))
+    # Unknown ISs (only in controls)
+    unknown_is <- df |>
+        tidyr::unnest(cols = "is_details") |>
+        dplyr::filter(.data$IS_source == "unknown") |>
+        tidyr::nest(
+            .by = colnames(df)[colnames(df) != "is_details"],
+            .key = "is_details"
+        ) |>
+        dplyr::mutate(shared = purrr::map_int(.data$is_details, nrow))
 
-  return(list(controls = controls_sharing, samples = samples_sharing,
-              unknowns = unknown_is))
+    return(list(
+        controls = controls_sharing, samples = samples_sharing,
+        unknowns = unknown_is
+    ))
 }
 
 # Calculates sharing relative to a single pool or df
@@ -762,56 +772,71 @@
                                minimal,
                                control_lines,
                                progress) {
-  # 1 - Get lookup tables
-  lookups <- purrr::map(dfs,
-                        ~ .obtain_lookup_tbl(
-                          .x, key = key, seqCount_col = seqCount_col,
-                          replicate_col = replicate_col,
-                          barcode_mux_col = barcode_mux_col
-                        ))
-  if (!is.null(progress)) {
-    progress()
-  }
-  # 2 - Get label combinations
-  label_combos <- .get_label_combinations(lookups = lookups,
-                                          self_comb = self_comb)
-  if (!is.null(progress)) {
-    progress()
-  }
-  # 3 - Get common iss
-  if (length(lookups) == 1) {
-    lookups[[2]] <- lookups[[1]]
-  }
-  common_tbl <- purrr::pmap_df(label_combos, .find_in_common,
-                              lookups = lookups)
-  if (!is.null(progress)) {
-    progress()
-  }
-  # 4 - Assign source
-  gn <- colnames(common_tbl)[stringr::str_detect(
-    colnames(common_tbl), pattern = "^g[1-9]+$")]
-  common_tbl <- .find_is_source(common_tbl, control_lines = control_lines,
-                                lookups = lookups)
-  if (!is.null(progress)) {
-    progress()
-  }
+    # 1 - Get lookup tables
+    lookups <- purrr::map(
+        dfs,
+        ~ .obtain_lookup_tbl(
+            .x,
+            key = key, seqCount_col = seqCount_col,
+            replicate_col = replicate_col,
+            barcode_mux_col = barcode_mux_col
+        )
+    )
+    if (!is.null(progress)) {
+        progress()
+    }
+    # 2 - Get label combinations
+    label_combos <- .get_label_combinations(
+        lookups = lookups,
+        self_comb = self_comb
+    )
+    if (!is.null(progress)) {
+        progress()
+    }
+    # 3 - Get common iss
+    if (length(lookups) == 1) {
+        lookups[[2]] <- lookups[[1]]
+    }
+    common_tbl <- purrr::pmap_df(label_combos, .find_in_common,
+        lookups = lookups
+    )
+    if (!is.null(progress)) {
+        progress()
+    }
+    # 4 - Assign source
+    gn <- colnames(common_tbl)[stringr::str_detect(
+        colnames(common_tbl),
+        pattern = "^g[1-9]+$"
+    )]
+    common_tbl <- .find_is_source(common_tbl,
+        control_lines = control_lines,
+        lookups = lookups
+    )
+    if (!is.null(progress)) {
+        progress()
+    }
 
-  # 5 - eventually permute
-  if (!minimal) {
-    common_tbl <- purrr::pmap_df(common_tbl, .f = .sh_row_permut,
-                                 g_names = gn)
-  }
-  if (!is.null(progress)) {
-    progress()
-  }
-  # 6 - divide
-  shared_by_source <- .chuck_shared_by_source(common_tbl,
-                                              control_lines = control_lines)
-  if (!is.null(progress)) {
-    progress()
-  }
-  return(list(overall = common_tbl,
-              by_source = shared_by_source))
+    # 5 - eventually permute
+    if (!minimal) {
+        common_tbl <- purrr::pmap_df(common_tbl,
+            .f = .sh_row_permut,
+            g_names = gn
+        )
+    }
+    if (!is.null(progress)) {
+        progress()
+    }
+    # 6 - divide
+    shared_by_source <- .chuck_shared_by_source(common_tbl,
+        control_lines = control_lines
+    )
+    if (!is.null(progress)) {
+        progress()
+    }
+    return(list(
+        overall = common_tbl,
+        by_source = shared_by_source
+    ))
 }
 
 
@@ -930,7 +955,8 @@ ctrl_check <- function(af, subject_col, ctrl, field_sep) {
 # Returns a dataframe of shared IS
 # Type must be "control" or "other" depending on the interested IS source
 #' @importFrom rlang .data
-find_shared_IS <- function(matrix, af, is_vars, subject_col, amp_col,
+find_shared_IS <- function(
+    matrix, af, is_vars, subject_col, amp_col,
     value_col, ctrl, type, field_sep) {
     `%notin%` <- Negate(`%in%`)
     if (type %notin% c("control", "other")) {
@@ -1011,7 +1037,8 @@ find_shared_IS <- function(matrix, af, is_vars, subject_col, amp_col,
 # find_shared_known_IS
 # Returns a dataframe containing the shared known CEM IS
 #' @importFrom rlang .data
-filter_shared_known_is <- function(matrix, af, is_vars, subject_col,
+filter_shared_known_is <- function(
+    matrix, af, is_vars, subject_col,
     amp_col, ctrl_line, known_is) {
     known_is$integration_locus <- as.character(known_is$integration_locus)
     dplyr::bind_rows(apply(known_is, 1, function(x) {
@@ -1054,7 +1081,8 @@ filter_shared_known_is <- function(matrix, af, is_vars, subject_col,
 # find_shared_other_IS
 # Returns a dataframe containing the shared IS from samples
 #' @importFrom rlang .data
-filter_shared_other_is <- function(matrix, af, is_vars, subject_col,
+filter_shared_other_is <- function(
+    matrix, af, is_vars, subject_col,
     amp_col, value_col, ctrl_name, ctrl_line,
     field_sep, known_is) {
     known_is$integration_locus <-
@@ -1257,7 +1285,8 @@ compute_n_rep <- function(af, subject_col, field_sep, ctrl) {
 # compute_rep_count
 # Computes the replicate count by sample for the given table of shared IS
 #' @importFrom rlang .data
-compute_rep_count <- function(current_table, af, subject_col,
+compute_rep_count <- function(
+    current_table, af, subject_col,
     amp_col, value_col, x) {
     if (dim(current_table)[1] == 0) {
         return(tibble::tibble())
@@ -1315,7 +1344,8 @@ compute_rep_count <- function(current_table, af, subject_col,
 # Returns a df with the ratio computed against each sample,
 # it can be done by sample or by IS
 #' @importFrom rlang .data
-compute_ratio <- function(filter_shared_is, is_vars, subject_col,
+compute_ratio <- function(
+    filter_shared_is, is_vars, subject_col,
     value_col, ctrl, field_sep, type, n_rep = NULL) {
     `%notin%` <- Negate(`%in%`)
     if (type %notin% c("by sample", "by IS")) {
@@ -1468,7 +1498,8 @@ compute_ratio <- function(filter_shared_is, is_vars, subject_col,
 # compute_counts
 # Returns a df with the replicates count computed for each sample
 #' @importFrom rlang .data
-compute_counts <- function(filter_shared_is, subject_col,
+compute_counts <- function(
+    filter_shared_is, subject_col,
     value_col, ctrl_names, field_sep) {
     counts <- filter_shared_is |>
         dplyr::group_by(dplyr::across(dplyr::all_of(subject_col))) |>
@@ -1557,7 +1588,8 @@ internal_compute_ratio <- function(counts, subject_col, ctrl_line, n_rep) {
 # compute_counts_byIS
 # Returns a df with the replicates count computed for each IS
 #' @importFrom rlang .data
-compute_counts_byIS <- function(filter_shared, is_vars, subject_col,
+compute_counts_byIS <- function(
+    filter_shared, is_vars, subject_col,
     value_col, ctrl_names, field_sep) {
     `%notin%` <- Negate(`%in%`)
     filter_shared <- filter_shared |> tidyr::unite("Sample",
@@ -1581,7 +1613,8 @@ compute_counts_byIS <- function(filter_shared, is_vars, subject_col,
 # internal_compute_ratio_byIS
 # Returns a df with the computed ratio for each IS
 #' @importFrom rlang .data
-internal_compute_ratio_byIS <- function(counts, is_vars,
+internal_compute_ratio_byIS <- function(
+    counts, is_vars,
     subject_col, value_col,
     ctrl_line, n_rep) {
     shared_counts <- counts |>
