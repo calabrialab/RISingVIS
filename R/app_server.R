@@ -9,6 +9,12 @@ app_server <- function(input, output, session) {
   # gargoyle flags init -------------------------------------------------------
   gargoyle::init("workflow-name")
   # Server-side modules -------------------------------------------------------
+  ## Control lines db ---------------------------------------------------------
+  cldb <- getOption("RISingVIS.cell_line_db", default = ControlLinesDb$new())
+  mod_control_lines_db_server(
+    ids()$control_lines_db$section_id,
+    cldb = cldb
+  )
   ## Workflow -----------------------------------------------------------------
   workflow <- reactiveVal(NULL)
   .wf_name_renderer(workflow, "workflow-name", output)
@@ -21,18 +27,12 @@ app_server <- function(input, output, session) {
     ids()$side_bar$section_id, workflow,
     "workflow-name", side_nav
   )
-  # mod_data_import_server(
-  #   ids()$data_import$section_id, workflow,
-  #   "workflow-name", side_nav
-  # )
+  mod_data_import_server(
+    ids()$data_import$section_id, workflow,
+    "workflow-name", side_nav, cldb
+  )
   # mod_recalibration_server(
   #   ids()$recalibration$section_id, workflow,
   #   "workflow-name", side_nav
   # )
-  ## Control lines db ---------------------------------------------------------
-  cldb <- getOption("RISingVIS.cell_line_db", default = ControlLinesDb$new())
-  mod_control_lines_db_server(
-    ids()$control_lines_db$section_id,
-    cldb = cldb
-  )
 }

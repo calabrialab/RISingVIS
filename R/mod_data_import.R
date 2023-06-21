@@ -19,6 +19,12 @@ mod_data_import_ui <- function(id) {
       mod_data_import_metadata_ui(
         ns(ids()$data_import$metadata_section$section_id)
       ),
+      # shinyjs::disabled(
+      mod_data_import_data_ui(
+        ns(ids()$data_import$data_section$section_id)
+      )
+      # )
+      ,
       div(
         align = "center",
         style = "width: 80%;",
@@ -42,7 +48,7 @@ mod_data_import_ui <- function(id) {
 #' data_import Server Functions
 #'
 #' @noRd
-mod_data_import_server <- function(id, workflow, wf_flag_name, side_nav) {
+mod_data_import_server <- function(id, workflow, wf_flag_name, side_nav, cldb) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     observeEvent(input[[ids()$data_import$inputs$next_btn]], {
@@ -52,7 +58,11 @@ mod_data_import_server <- function(id, workflow, wf_flag_name, side_nav) {
       ids()$data_import$isa_opt_section$section_id, workflow
     )
     mod_data_import_metadata_server(
-      ids()$data_import$metadata_section$section_id, workflow
+      ids()$data_import$metadata_section$section_id, workflow,
+      cldb
+    )
+    mod_data_import_data_server(
+      ids()$data_import$data_section$section_id, workflow
     )
   })
 }

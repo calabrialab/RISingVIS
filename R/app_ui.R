@@ -34,7 +34,7 @@ app_ui <- function(request) {
               div(
                 ### Content ----
                 class = "col-10",
-                # mod_data_import_ui(ids()$data_import$section_id),
+                mod_data_import_ui(ids()$data_import$section_id),
                 # mod_recalibration_ui(ids()$recalibration$section_id)
               )
             )

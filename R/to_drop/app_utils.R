@@ -950,38 +950,6 @@ id_list <- function() {
   return(render_miss)
 }
 
-.style_true_false <- function(invert = FALSE, colname) {
-  success_color <- bslib::bs_get_variables(
-    app_theme(),
-    "success"
-  )
-  danger_color <- bslib::bs_get_variables(
-    app_theme(),
-    "danger"
-  )
-  if (invert) {
-    return(htmlwidgets::JS(sprintf("
-         function(rowInfo) {
-         if (rowInfo.values['%s'] == true) {
-          color = '%s';
-         } else {
-          color = '%s';
-         }
-          return {color: color, fontWeight: 'bold', textTransform: 'uppercase'}
-         }
-         ", colname, danger_color, success_color)))
-  }
-  return(htmlwidgets::JS(sprintf("
-         function(rowInfo) {
-         if (rowInfo.values['%s'] == true) {
-          color = '%s';
-         } else {
-          color = '%s';
-         }
-          return {color: color, fontWeight: 'bold', textTransform: 'uppercase'}
-         }
-         ", colname, success_color, danger_color)))
-}
 
 ## Creates table for the metadata fs alignment summary
 .render_fs_align_tbl <- function(data, tbl_id) {

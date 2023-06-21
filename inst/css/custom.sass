@@ -26,12 +26,6 @@ $accents: ("accent1": #78cdd7, "accent2": #a273ef, "accent3": #a8a1df)
   @include button-variant($background: transparent, $border: transparent)
   color: $body-color !important
 
-.add-cl-btn
-  border-top-left-radius: 0px !important
-  border-bottom-left-radius: 0px !important
-  height: min-content
-  align-self: center
-
 .input-row-container
   display: flex
   flex-direction: row
@@ -54,6 +48,14 @@ $accents: ("accent1": #78cdd7, "accent2": #a273ef, "accent3": #a8a1df)
     border-color: darken($grey-btn-border, 20%) !important
     color: $body-color !important
 
+.btn-file-alt
+  @include button-variant($background: $form-file-button-bg,
+  $hover-background: $form-file-button-hover-bg, $border: $input-border-color)
+
+  border-top-right-radius: 0px !important
+  border-bottom-right-radius: 0px !important
+  border-right-width: 0px !important
+
 .title_with_popover
   display: flex
   flex-direction: row
@@ -69,7 +71,7 @@ $accents: ("accent1": #78cdd7, "accent2": #a273ef, "accent3": #a8a1df)
   display: flex
   flex-direction: row
 
-.dir_path_display
+.dir-path-display
   background-color: $input-bg
   color: $input-color
   box-shadow: $input-box-shadow
@@ -80,10 +82,26 @@ $accents: ("accent1": #78cdd7, "accent2": #a273ef, "accent3": #a8a1df)
   border-bottom-left-radius: 0px !important
   border-style: solid
   width: 100%
+  display: flex
+  align-items: center
 
 .dir-choose-btn
   border-top-right-radius: 0px !important
   border-bottom-right-radius: 0px !important
+
+.custom-input-invalid
+  .btn-file-alt
+    border-color: $danger
+
+  .dir-path-display
+    border-top-color: $danger
+    border-bottom-color: $danger
+    border-right-color: $danger
+
+.material-switch
+  display: flex
+  flex-direction: row
+  align-items: center
 
 /* Control lines db */
 .known-iss-mini
@@ -191,7 +209,22 @@ $arc-skipped-color: darken($danger, 10%)
   .svg-content-mini
     width: 35%
 
-  /* Data import - metadata */
-#data-import-section-metadata-subsection-control-cell-line-select ~ .selectize-control > .selectize-input
-  border-top-right-radius: 0px !important
-  border-bottom-right-radius: 0px !important
+/* Data import - metadata */
+.dropdown-toggle.btn-light
+  background-color: $form-select-bg
+  color: $form-select-color
+  border-color: $form-select-border-color
+  border-width: $form-select-border-width
+  border-radius: $form-select-border-radius
+
+.bs-actionsbox
+  overflow: hidden
+
+  .btn-light
+    background-color: $form-file-button-bg !important
+    border-width: 0px !important
+    color: color-contrast($form-file-button-bg) !important
+
+    &:hover
+      background-color: $form-file-button-hover-bg !important
+      color: color-contrast($form-file-button-hover-bg) !important

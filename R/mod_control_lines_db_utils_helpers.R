@@ -1115,6 +1115,7 @@
             )
             if (edit_successful) {
                 gargoyle::trigger("cl-tbl-refresh")
+                gargoyle::trigger("cl-db-change")
                 removeModal()
             }
         }
@@ -1241,6 +1242,7 @@
             )
             if (add_successful) {
                 gargoyle::trigger("cl-tbl-refresh")
+                gargoyle::trigger("cl-db-change")
                 removeModal()
             }
         }
@@ -1327,6 +1329,7 @@
         if (isTRUE(input[[delete_cl_confirm_btn_id]])) {
             cldb$remove_cell_line(input[[delete_modal_name_id]])
             gargoyle::trigger("cl-tbl-refresh")
+            gargoyle::trigger("cl-db-change")
             shinyWidgets::sendSweetAlert(
                 session = session,
                 title = "Success",

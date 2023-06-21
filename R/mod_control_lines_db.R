@@ -12,10 +12,51 @@ mod_control_lines_db_ui <- function(id) {
   div(
     id = id,
     div("Control cell lines", class = "display-4"),
+    hr(),
     div(
       class = "text-muted",
       "A database of all available control lines. Use this interface to",
-      "add, delete or edit lines."
+      "add, delete or edit lines.",
+      br(),
+      tags$details(
+        tags$summary(
+          class = "h6",
+          "What is a control cell line?"
+        ),
+        "Control cell lines are cell lines with known",
+        "integration sites. They are used by RISingVIS",
+        "to check for the presence of contamination among samples."
+      ),
+      tags$details(
+        tags$summary(
+          class = "h6",
+          "How to add a new line?"
+        ),
+        "Click the 'New line' button below. A new window will open where",
+        "you can insert the required info.", br(),
+        "Please note that names must",
+        "be unique and",
+        "that RISingVIS matches the names of the lines against the independent",
+        "sample identifier (ISid). For example, if your ISid is composed",
+        "by the",
+        "metadata fields `SubjectID` and `Tissue` you should name your line",
+        "accordingly, by separating the two fields values with an underscore",
+        "(e.g. CEM_BM).", br(),
+        "The known integration sites table can't be empty and should not",
+        "contain duplicates. Please note that",
+        "in the processing phase, the names of the columns will be matched",
+        "with the chosen ISAnalytics mandatory IS vars options."
+      ),
+      tags$details(
+        tags$summary(
+          class = "h6",
+          "How to edit or delete a line?"
+        ),
+        "Click on the line you want to edit or delete in the table below.",
+        "To edit the cell line click the 'Edit' button and a new window",
+        "will open. There you can modifiy the info of the line. To delete",
+        "the line click the 'Delete' button."
+      )
     ),
     hr(),
     div(
@@ -41,7 +82,10 @@ mod_control_lines_db_server <- function(id, cldb) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # gargoyle flags init -----------------------------------------------------
+    ## Used to refresh the reactable
     gargoyle::init("cl-tbl-refresh")
+    ## Used to signal other components of the UI that the db has changed
+    gargoyle::init("cl-db-change")
     # Data displayed in the table ---------------------------------------------
     cl_tbl_data <- reactive({
       gargoyle::watch("cl-tbl-refresh")

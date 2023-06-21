@@ -222,9 +222,83 @@ reactable(
 )
 ```
 
+Metadata
+=====================================
+```{r echo=FALSE}
+meta_checks <- params$workflow$render_report(type = "metadata",
+                                             mode = "report")
+```
 
 
-Data import
+Details {data-width=300}
+-------------------------------------
+```{r echo=FALSE, results='asis'}
+meta_checks$side_panel
+```
+
+Tables
+-------------------------------------
+```{r echo=FALSE, results='asis'}
+div(
+  class = "container",
+  div(
+    class = "row",
+    div(
+      class = "col",
+      bslib::value_box(
+        title = "Distinct pools",
+        value = h1(meta_checks$value_boxes$distinct_pools),
+        theme_color = "info",
+        showcase = icon("boxes-stacked", class = "fs-1"),
+        showcase_layout = bslib::showcase_top_right()
+      )
+    ),
+    div(
+      class = "col",
+      bslib::value_box(
+        title = "Distinct ind. samples",
+        value = h1(meta_checks$value_boxes$distinct_samples),
+        theme_color = "info",
+        showcase = icon("vial", class = "fs-1"),
+        showcase_layout = bslib::showcase_top_right()
+      )
+    )
+  ),
+  div(
+    class = "row",
+    div(
+      class = "col",
+      div(
+        class = "tabset tabset-fade nav-tabs-custom",
+        style = "margin-right: 0px;",
+        tags$ul(
+          class = "nav nav-tabs",
+          role = "tablist",
+          meta_checks$tables$stats$link,
+          meta_checks$tables$align$link,
+          meta_checks$tables$iss_stats$link,
+          meta_checks$tables$iss_stats_miss$link,
+          meta_checks$tables$lines_summary$link,
+          meta_checks$tables$lines_selection$link
+        ),
+        div(
+          class = "tab-content ps-3 pe-3 pt-1 pb-1",
+          meta_checks$tables$stats$content,
+          meta_checks$tables$align$content,
+          meta_checks$tables$iss_stats$content,
+          meta_checks$tables$iss_stats_miss$content,
+          meta_checks$tables$lines_summary$content,
+          meta_checks$tables$lines_selection$content
+        )
+      )
+    )
+  )
+)
+```
+
+
+
+Data
 =====================================
 
 

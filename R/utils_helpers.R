@@ -62,6 +62,10 @@ ids <- function() {
       metadata_section = list(
         section_id = "metadata-subsection",
         inputs = list(
+          tab_1_btn = "tab-1-btn",
+          tab_1_content = "tab-1-content",
+          tab_2_btn = "tab-2-btn",
+          tab_2_content = "tab-2-content",
           file_input = "metadata-file",
           root_container = "root-container",
           root_dir = "root-dir-btn",
@@ -70,54 +74,61 @@ ids <- function() {
           dates_format = "dates-format-select",
           sample_id = "sample-id-select",
           control_line = "control-cell-line-select",
-          add_cell_line = "add-cell-line-btn",
           cl_name = "add-cl-name",
           cl_file = "add-cl-file",
-          confirm_cl_modal_btn = "confirm-cl-modal-btn",
-          dismiss_cl_modal_btn = "dismiss-cl-modal-btn",
           empty_root_alert = "empty-root-alert",
           import_btn = "import-btn",
-          import_spinner = "import-btn-spinner",
           details_btn = "details-btn",
           details_collapse = "details-collapse",
-          save_report = "save-report-check"
+          save_report = "save-report-check",
+          modal_cl_issues_stategy = "modal-cl-issues-strategy",
+          modal_cl_issues_radio_data = "modal-cl-issues-radio-data",
+          modal_cl_issues_radio_cl = "modal-cl-issues-radio-cl",
+          modal_cl_issues_confirm_btn = "modal-cl-issues-confirm-btn",
+          modal_cl_issues_dismiss_btn = "modal-cl-issues-dismiss-btn"
         ),
         outputs = list(
           root_display = "root-display",
-          import_status = "import-status",
-          status_container = "status-container",
-          details_content = "details-content",
-          checks_tbl_1 = "fs-align-tbl",
-          checks_tbl_2 = "iss-summary-tbl",
-          checks_tbl_3 = "iss-missing-tbl",
-          checks_tbl_4 = "control-cl-tbl"
+          file_input_display = "metadata-file-display",
+          modal_cl_issues_tbl = "modal-cl-issues-tbl",
+          modal_cl_issues_strategy_desc = "modal-cl-issues-strategy-desc",
+          modal_cl_issues_selection_tbl = "modal-cl-issues-selection-tbl",
+          modal_cl_issues_manual_panel = "modal-cl-issues-manual-panel",
+          meta_report = "meta-report"
         )
       ),
       data_section = list(
         section_id = "data-subsection",
         inputs = list(
+          tab_1_btn_id = "tab-1-btn",
+          tab_1_content = "tab-1-content",
+          tab_2_btn = "tab-2-btn",
+          tab_2_content = "tab-2-content",
           import_mode = "import-mode-switch",
           annotation = "matrix-annot-check",
           separator = "sep-select",
           workers = "max-workers",
-          adv_op_btn = "adv-op-btn",
-          adv_op_collapse = "adv-op-collapse",
-          file_patterns = "patterns-select",
-          matching_op = "match-op-select",
-          tidy_switch = "tidy-switch",
-          files = "data-files",
-          import_btn = "import-btn",
-          spinner_btn = "spinner-btn",
-          details_btn = "details-btn",
-          details_collapse = "details-collapse"
+          quant_picker = "quant-picker"
+          # adv_op_btn = "adv-op-btn",
+          # adv_op_collapse = "adv-op-collapse",
+          # file_patterns = "patterns-select",
+          # matching_op = "match-op-select",
+          # tidy_switch = "tidy-switch",
+          # files = "data-files",
+          # import_btn = "import-btn",
+          # spinner_btn = "spinner-btn",
+          # details_btn = "details-btn",
+          # details_collapse = "details-collapse"
         ),
         outputs = list(
-          import_status_cont = "import-status-container",
-          import_status = "import-status",
-          details_content = "details-content",
-          checks_tbl_1 = "files-found-tbl",
-          checks_tbl_2 = "files-imp-tbl",
-          checks_tbl_3 = "missing-data-tbl"
+          data_report = "data-report",
+          manual_ui_panel = "manual-ui-panel"
+          # import_status_cont = "import-status-container",
+          # import_status = "import-status",
+          # details_content = "details-content",
+          # checks_tbl_1 = "files-found-tbl",
+          # checks_tbl_2 = "files-imp-tbl",
+          # checks_tbl_3 = "missing-data-tbl"
         )
       )
     ),
@@ -431,4 +442,80 @@ ids <- function() {
     }
   }
   return(import_result$result)
+}
+
+# Utilities for styling reactables --------------------------------------------
+
+#' Utility for custom rendering a boolean column in a reactable
+#' @param invert FALSE by default, when true inverts the visualization
+#' (TRUE values rendered as danger, FALSE values rendered as success)
+#' @param as_icon FALSE by default, when true renders the values as icons
+#' (TRUE with a check and FALSE with a cross)
+#' @return a JS function
+#' @noRd
+.render_boolean_col <- function(invert = FALSE, as_icon = FALSE) {
+  if (as_icon) {
+    cross_icon <- "fa-solid fa-xmark"
+    check_icon <- "fa-solid fa-check"
+    js_fun <- "
+      function(cellInfo) {
+        if (cellInfo.value === null) {
+          return '<span></span>'
+        }
+        if (cellInfo.value === true) {
+          return '<i class=\"%s %s\"></i>'
+        } else {
+          return '<i class=\"%s %s\"></i>'
+        }
+      }
+    "
+    js_fun <- if (invert) {
+      reactable::JS(
+        sprintf(
+          js_fun, cross_icon, "text-danger",
+          check_icon, "text-success"
+        )
+      )
+    } else {
+      reactable::JS(
+        sprintf(
+          js_fun, check_icon, "text-success",
+          cross_icon, "text-danger"
+        )
+      )
+    }
+    return(js_fun)
+  }
+  js_fun <- "
+    function(cellInfo) {
+      if (cellInfo.value === null) {
+        '<span></span>'
+      }
+      var value = cellInfo.value? 'TRUE': 'FALSE';
+      if (cellInfo.value === true) {
+        return `<span class=\"%s\"><strong>${value}</strong></span>`
+      } else {
+        return `<span class=\"%s\"><strong>${value}</strong></span>`
+      }
+    }
+  "
+  js_fun <- if (invert) {
+    reactable::JS(sprintf(js_fun, "text-danger", "text-success"))
+  } else {
+    reactable::JS(sprintf(js_fun, "text-success", "text-danger"))
+  }
+  return(js_fun)
+}
+
+.render_na_as_cross <- function() {
+  js_fun <- "
+    function(cellInfo) {
+      if (cellInfo.value === null || cellInfo.value === undefined) {
+        return '<i class=\"fa-solid fa-xmark text-danger\"></i>'
+      } else {
+        return `<p>${cellInfo.value}</p>`
+      }
+    }
+  "
+  return(reactable::JS(js_fun))
 }
